@@ -2,11 +2,12 @@
 var JwtStrategy = require('passport-jwt').Strategy,
 	ExtractJwt = require('passport-jwt').ExtractJwt;
 const pgsqlPool = require("../database/pool.js").pgsqlPool
+require('dotenv').config();
 
 module.exports = (passport) => {  
 	passport.use(new JwtStrategy({
 		jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-		secretOrKey : 'test_key'
+		secretOrKey : process.env.JWT_SECRET_KEY
 	}, function(jwtPayload, done) {
 			pgsqlPool.connect(function(err,conn) {
 				console.log("sql:",jwtPayload);

@@ -1,3 +1,9 @@
+const jwt = require('jsonwebtoken');
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+require('dotenv').config();
+
+
+
 exports.isLoggedIn = (req, res, next) => {
    // console.log("(middlewares.js) isLoggedIn:req.isAuthenticated():".req.isAuthenticated());
 	//console.log("(isLoggedIn middlewares.js)req.session.sUser:", req.session.sUser);
@@ -31,3 +37,23 @@ exports.isLoggedPass = (req, res, next) => {
     next();
 
 };
+
+
+
+
+exports.verifyToken = (req, res, next) => {
+    try {
+        const clientToken = req.cookies.user;
+        const decoded = jwt.verify(clientToken, JWT_SECRET_KEY);
+        if (decoded) {
+            res.locals.userId = decoded.user_id;
+            next();
+        } else {
+            res.status(401).json({ error: 'unauthorized' });
+        }
+    } catch (err) {
+        res.status(401).json({ error: 'token expired' });
+    }
+};
+    
+    

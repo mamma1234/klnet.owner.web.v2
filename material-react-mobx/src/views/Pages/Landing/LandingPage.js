@@ -30,36 +30,47 @@ import DialogContent from '@material-ui/core/DialogContent';
 import LoginPage from 'views/Pages/Login/LoginPage.js';
 import SignPage from 'views/Pages/Member/RegisterPage.js';
 import axios from 'axios';
+
+import { observer, inject } from 'mobx-react'; // 6.x
+
 const useStyles = makeStyles(landingPageStyle);
 
-export default function LandingPage() {
+
+
+// export default function LandingPage() {
+const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore }) => { 
 
   const [open,setOpen] = React.useState(false);
   const [modalGb,setModalGb] = React.useState("login");
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [userData,setUserData] =React.useState([]);
 
+  console.log("userStore", userStore);
+  console.log("userStore", userStore.me);
+  userStore.setMe("change name");
+
+
   React.useEffect(() => {
 	  // 사용자 인증 
 	  if(isAuthenticated != true) {
-		  if(localStorage.getItem('plismplus')) {
-			  axios.get("/auth/user",{headers:{'Authorization':'Bearer '+localStorage.getItem('plismplus')}})
-			  	//.then(res => console.log("return:",res.data))
-			    .then(res => 
-			    	{if(res.data) {
-			    	  setIsAuthenticated(true);
-			    	  setUserData(res.data);
-			    	} else {
-			    		setIsAuthenticated(false);
-			    		setUserData([]);
-			    	}}
-			    )
-			    .catch(err => {
-					setIsAuthenticated(false);
-			    });
-		  } else {
-			  setIsAuthenticated(false);
-		  }
+		  // if(localStorage.getItem('plismplus')) {
+			//   axios.get("/auth/user",{headers:{'Authorization':'Bearer '+localStorage.getItem('plismplus')}})
+			//   	//.then(res => console.log("return:",res.data))
+			//     .then(res => 
+			//     	{if(res.data) {
+			//     	  setIsAuthenticated(true);
+			//     	  setUserData(res.data);
+			//     	} else {
+			//     		setIsAuthenticated(false);
+			//     		setUserData([]);
+			//     	}}
+			//     )
+			//     .catch(err => {
+			// 		setIsAuthenticated(false);
+			//     });
+		  // } else {
+			//   setIsAuthenticated(false);
+		  // }
 	  }
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
@@ -200,3 +211,7 @@ export default function LandingPage() {
     </div>
   );
 }
+))
+
+
+export default LandingPage;

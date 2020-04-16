@@ -62,6 +62,8 @@ import Collapse from '@material-ui/core/Collapse';
 import Grid from '@material-ui/core/Grid';
 import Moment from 'moment'
 
+import { observer, inject} from 'mobx-react'; // 6.x
+
 const styles = {
   cardCategoryWhite: {
     "&,& a,& a:hover,& a:focus": {
@@ -108,7 +110,12 @@ const styles = {
 const useStyles = makeStyles(styles);
 let numCnt =1;
 
-export default function TrackingList(props) {
+// export default function TrackingList(props) {
+const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, props }) => { 
+
+console.log("tracking service ......");
+console.log("userStore", userStore.me);
+
 
   const setEndDate = new Date();
   //const [carrierCode,setCarrierCode] = useState("");
@@ -492,3 +499,6 @@ useEffect(() => {
     </GridContainer>
   );
 }
+))
+
+export default TrackingList;

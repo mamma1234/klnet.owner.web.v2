@@ -4,8 +4,8 @@ const passport = require('passport');
 // const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { isLoggedIn, isNotLoggedIn, isLoggedPass } = require('./middlewares');
- 
-const router = express.Router();
+ const router = express.Router();
+require('dotenv').config();
 
 console.log("1.router path:",router.patch);
 
@@ -32,7 +32,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
         return next(error);
     }            
 });
- 
+/*
 router.get('/user', isLoggedPass, (req, res, next) => {
     console.log("(auth.js) req.isAuthenticated():", req.isAuthenticated());
     passport.authenticate('jwt',{session: false},(authError, user, info) => {
@@ -64,6 +64,7 @@ router.get('/user', isLoggedPass, (req, res, next) => {
         });
     })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 });
+*/
 
 
 // router.post('/login', isNotLoggedIn, (req, res, next) => {
@@ -85,7 +86,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
         }
 
         return req.login(user,(loginError) => {
-            //console.log("user", user);
+            console.log("user=====", user);
 
             if(loginError) {
                 console.error("loginError", loginError);
@@ -98,10 +99,10 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
             //return res.redirect('http://localhost:3000');
             console.log("log:",user.userno);
             //토큰 발행
-            const token = jwt.sign(user.userno, 'test_key');
+            const token = jwt.sign(user.userno, process.env.JWT_SECRET_KEY);
             //토큰 저장
-            console.log("token db save");
-            pgSql.setUserToken(user.userno, token);
+            console.log("token db save: ", token);
+            //pgSql.setUserToken(user.userno, token);
             //console.log("token value:"+token);
             //res.cookie("connect.sid",token, { maxAge: 900000 });
             return res.json({user:user, token:token});

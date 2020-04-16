@@ -18,6 +18,17 @@ module.exports = (passport) => {
                 const inputpassword = crypto.pbkdf2Sync(password, 'salt', 100000, 64, 'sha512').toString('hex');
             try {
 
+				// test용 pdk ship
+				sUser.provider = 'local';
+				//sUser.userid = "test1@klnet.co.kr";
+				sUser.userno = "M000002";
+				sUser.username = "니꼬동",
+				sUser.displayName = 'web',
+				sUser.email = "test1@klnet.co.kr";
+				sUser.token_local = "";
+				req.session.sUser = sUser;
+				done(null, sUser);
+
             	//console.log(userid, password);
 
                // console.log(".Input Password:"+crypto.pbkdf2Sync(password, 'salt', 100000, 64, 'sha512').toString('hex'));
