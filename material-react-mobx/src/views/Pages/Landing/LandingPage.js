@@ -56,7 +56,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   }
 
   React.useEffect(() => {
-    
+    // To.박준영 과장 소셜 로그인후 call back 을 LandingPage.js가 아니라 전용 페이지에서 수행했으면 좋겠네. 로그인 최초 접근 하는 페이지?? 혹은 redirect blank 페이지??
     console.log('마운트 될 때만 실행됩니다.');
     console.log("cookies", cookies);    
 
