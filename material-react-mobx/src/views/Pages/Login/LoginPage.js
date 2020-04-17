@@ -79,7 +79,10 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
           // props.goBack();
 		    })
 		    .catch(err => {
-		        console.log(err);
+            console.log(err);
+            if (err.response.data.error) {
+              alert(err.response.data.error);
+            }
 		    })
 	   } else {
 		   if(email == "") {
@@ -148,7 +151,7 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
               <Button
                 style={{backgroundColor:'white', borderRadius:'10px',borderStyle:'solid',borderColor:'#ffe812',color:'#6f6e6e',placeContent:'initial',margin:'3px',height:'48px',paddingLeft:'2px'}}
                 href="https://kauth.kakao.com/oauth/authorize?client_id=0b6d98316119442e856dd2ad7497df14&redirect_uri=http://localhost:5000/auth/kakao/callback&response_type=code&state=12345"
-                //target="_blank"
+                // target="_blank"
                 fullWidth
               >&nbsp;&nbsp;<img src={KakaoIcon} alt="īī��SNS" width="40" height="40"></img>&nbsp;&nbsp;Kakao Login
               </Button>

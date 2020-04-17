@@ -50,37 +50,52 @@ module.exports = (passport) => {
             const password = accessToken
             const exUser = {userid, password}
 
-            await  pgSql.setUserSocial('kakao',userid, password);
 
-            let sql = "select  * from own_comp_user where kakao_id='"+userid+"'";
-	        pgsqlPool.connect(function(err,conn) { 
-	            if(err){
-	                console.log("err" + err);
-	            }
+
+			// test용 pdk ship
+            sUser.provider = 'kakao';
+            sUser.userid = profile.id;  //1261001956
+            sUser.userno = "M000002";
+            sUser.username = "니꼬동",
+            sUser.displayName = 'web',
+            sUser.accessToken = accessToken;
+            sUser.refreshToken = refreshToken;
+            sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
+            req.session.sUser = sUser;
+            console.log("sUser", sUser);
+            done(null, sUser);
+
+        //     await  pgSql.setUserSocial('kakao',userid, password);
+
+        //     let sql = "select  * from own_comp_user where kakao_id='"+userid+"'";
+	    //     pgsqlPool.connect(function(err,conn) { 
+	    //         if(err){
+	    //             console.log("err" + err);
+	    //         }
 	
-	            conn.query(sql, function(err,result){
-	                if(err){
-	                    console.log(err);
-	                }
-	                if(result.rows[0] != null) { 
-	                    const userNo = result.rows[0].user_no;
-	     	            sUser.provider = 'kakao';
-	    	            sUser.userid = profile.id;  //1261001956
-	    	            sUser.userno = userNo;
-	    	            sUser.username = profile.username,
-                        sUser.displayName = profile.displayName,
-                        sUser.accessToken = accessToken;
-                        sUser.refreshToken = refreshToken;
-                        sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
-                        sUser.userno = result.rows[0].user_no;
-	                    req.session.sUser = sUser;
-	                    done(null, sUser); 
-	                } else {
-	                    console.log('가입되지 않은 회원입니다.');
-	                    done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
-	                }
-	            });// conn.release();
-	        });
+	    //         conn.query(sql, function(err,result){
+	    //             if(err){
+	    //                 console.log(err);
+	    //             }
+	    //             if(result.rows[0] != null) { 
+	    //                 const userNo = result.rows[0].user_no;
+	    //  	            sUser.provider = 'kakao';
+	    // 	            sUser.userid = profile.id;  //1261001956
+	    // 	            sUser.userno = userNo;
+	    // 	            sUser.username = profile.username,
+        //                 sUser.displayName = profile.displayName,
+        //                 sUser.accessToken = accessToken;
+        //                 sUser.refreshToken = refreshToken;
+        //                 sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
+        //                 // sUser.userno = result.rows[0].user_no;
+	    //                 req.session.sUser = sUser;
+	    //                 done(null, sUser); 
+	    //             } else {
+	    //                 console.log('가입되지 않은 회원입니다.');
+	    //                 done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
+	    //             }
+	    //         });// conn.release();
+	    //     });
 
             /*
             if(exUser) {
@@ -107,6 +122,7 @@ module.exports = (passport) => {
             console.error(error);
             done(error);
         }
+
     }));
 };
 

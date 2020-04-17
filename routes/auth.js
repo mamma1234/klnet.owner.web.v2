@@ -47,8 +47,8 @@ router.get('/user', isLoggedPass, (req, res, next) => {
             req.session = null;
             // req.flash('loginError', info.message);
             // return res.redirect('/');
-            return res.status(401).json(info);
-            
+            // return res.status(401).json(info);
+            return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
         }
 
         return req.login(user,(loginError) => {
@@ -59,8 +59,10 @@ router.get('/user', isLoggedPass, (req, res, next) => {
                 return next(loginError);
             }
 
-            res.status(200).json(user);
-            return;
+            // res.status(200).json(user);
+            // return;
+
+            return res.json({user:user});
         });
     })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 });
@@ -80,7 +82,8 @@ router.post('/login', isLoggedPass, (req, res, next) => {
             console.log("!user", user);
             // req.flash('loginError', info.message);
             // return res.redirect('/');
-            return res.status(200).json(info);
+            // return res.status(200).json(info);
+            return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
             
         }
 
@@ -126,14 +129,22 @@ router.get('/kakao/callback', isLoggedPass, (req, res, next) => {
             console.error("authError", authError);
             return next(authError);
         }
+        // if(!user){
+        //     console.log("!user", user);
+        //     // req.flash('loginError', info.message);
+        //     return res.redirect('http://localhost:3000/login');
+
+        //     // res.status(200).json(info);
+        //     // return;
+        // }
         if(!user){
             console.log("!user", user);
             // req.flash('loginError', info.message);
-            return res.redirect('http://localhost:3000/login');
-
-            // res.status(200).json(info);
-            // return;
-        }
+            // return res.redirect('/');
+            // return res.status(200).json(info);
+            return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
+            
+        }        
         return req.login(user, (loginError) => {
             console.log("user", user);
             if(loginError) {
@@ -146,12 +157,15 @@ router.get('/kakao/callback', isLoggedPass, (req, res, next) => {
             // return;
 
 
-            const token = jwt.sign(user.userid, process.env.JWT_SECRET_KEY);
-            pgSql.setUserToken(user, token);
+            // const token = jwt.sign(user.userid, process.env.JWT_SECRET_KEY);
+            const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
+            // pgSql.setUserToken(user, token);
             
             console.log("token value:"+token);
             res.cookie("connect.sid",token);
-            return res.json({user:user, token:token});
+            // res.cookie("connect.user",user);
+            res.cookie("connect.userno",user.userno);
+            return res.redirect('http://localhost:3000/landing?provider=kakao');
         });
     })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 });
@@ -561,7 +575,8 @@ router.get('/logout',  function (req, res) {
   const re = /(\S+)\s+(\S+)/;
   const matches = authorization.match(re);
   const clientToken = matches[2];
-  jwt.destroy(clientToken);
+//   jwt.destroy(clientToken);
+//   db.update token clear
 
   req.session = null;
   req.logout();

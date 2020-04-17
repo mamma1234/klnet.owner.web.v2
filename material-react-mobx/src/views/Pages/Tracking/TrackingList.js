@@ -114,8 +114,8 @@ let numCnt =1;
 const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
 console.log("tracking service ......");
-console.log("userStore.user.username", userStore.user.username);
-console.log("userStore.token", userStore.token);
+// console.log("userStore.user.username", userStore.user.username);
+// console.log("userStore.token", userStore.token);
 
   const setEndDate = new Date();
   //const [carrierCode,setCarrierCode] = useState("");

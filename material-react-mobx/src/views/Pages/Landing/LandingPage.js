@@ -24,7 +24,7 @@ import ProductSection from "./Sections/ProductSection.js";
 import SectionProduct from "./Sections/SectionProduct.js";
 import SectionTeam from "./Sections/SectionTeam.js";
 import SectionWork from "./Sections/SectionWork.js";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import LoginPage from 'views/Pages/Login/LoginPage.js';
@@ -32,6 +32,7 @@ import SignPage from 'views/Pages/Member/RegisterPage.js';
 import axios from 'axios';
 
 import { observer, inject } from 'mobx-react'; // 6.x
+import { useCookies  } from 'react-cookie';
 
 const useStyles = makeStyles(landingPageStyle);
 
@@ -49,10 +50,50 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   // console.log("userStore", userStore.me);
   // userStore.setMe("change name");
 
+  const [cookies, setCookie] = useCookies(['name']);
+  function onChange(newName) {
+    setCookie('name', newName, { path: '/' });
+  }
 
   React.useEffect(() => {
+    
+    console.log('마운트 될 때만 실행됩니다.');
+    console.log("cookies", cookies);    
+
+    if (cookies['connect.sid'] && cookies['connect.userno']) {
+
+      console.log("connect.sid", cookies['connect.sid']);
+      console.log("connect.userno", cookies['connect.userno']);
+      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+cookies['connect.sid']}})
+        //.then(res => console.log("return:",res.data))
+        .then(res => 
+          {if(res.data) {
+
+            console.log("res.data.user", res.data.user);
+            userStore.setUser(res.data.user);
+            userStore.setToken(cookies['connect.sid']);
+
+            setIsAuthenticated(true);
+            setUserData(res.data);
+          } else {
+            setIsAuthenticated(false);
+            setUserData([]);
+          }}
+        )
+        .catch(err => {
+        setIsAuthenticated(false);
+      });    
+
+    }  
+
+  }, []);
+
+  React.useEffect(() => {
+    console.log("effect");
 	  // 사용자 인증 
 	  if(isAuthenticated != true) {
+
+
 		  // if(localStorage.getItem('plismplus')) {
 			//   axios.get("/auth/user",{headers:{'Authorization':'Bearer '+localStorage.getItem('plismplus')}})
 			//   	//.then(res => console.log("return:",res.data))
@@ -92,7 +133,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   }
   
   const handleLoginClose =(value) =>{
-	  
+	  console.log("value ", value);
 	  setUserData(value);
 	  setOpen(false);
 	  setIsAuthenticated(true);

@@ -20,14 +20,14 @@ module.exports = (passport) => {
 
 				// test용 pdk ship
 				// sUser.provider = 'local';
-				//sUser.userid = "test1@klnet.co.kr";
+				// sUser.userid = "test1@klnet.co.kr";
 				// sUser.userno = "M000002";
 				// sUser.username = "니꼬동",
 				// sUser.displayName = 'web',
 				// sUser.email = "test1@klnet.co.kr";
 				// sUser.token_local = "";
 				// req.session.sUser = sUser;
-				// done(null, sUser);
+				// done(null, null);
 
             	//console.log(userid, password);
 
@@ -54,7 +54,8 @@ module.exports = (passport) => {
 		                        if(result.rows[0] != null) {
 	
 		                            const userName = result.rows[0].user_name;
-		                            const userNo = result.rows[0].user_no;
+									const userNo = result.rows[0].user_no;
+									const userEmail = result.rows[0].user_email;
 		                           
 		                            const exUser = {userid, password}
 	
@@ -67,7 +68,7 @@ module.exports = (passport) => {
 		    	                            sUser.userno = userNo;
 		    	                            sUser.username = userName,
 		    	                            sUser.displayName = 'web',
-		    	                            sUser.email = userid;
+		    	                            sUser.email = userEmail;
 		                                	req.session.sUser = sUser;
 		                                	console.log(">>>>>4");
 		                                	conn.release();
