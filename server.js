@@ -23,7 +23,7 @@ const dao = require('./database/');
 const apiService = require('./apiService/openApi');
 
 // const bcrypt = require('bcrypt');
-const { isLoggedIn, isNotLoggedIn } = require('./routes/middlewares');
+const { isLoggedIn, isNotLoggedIn, isVerifyToken } = require('./routes/middlewares');
 
 const app = express();
 // sequelize.sync();
@@ -114,31 +114,31 @@ app.route(/^((?!\/auth\/|\/login).)*$/s).all(function(req, res, next) {
 })
 */
 
+app.use('/', pageRouter); // 2020.04.17 pdk ship Login 필요 없는 페이지 정의 혹은 Login 전 접근해야 하는 페이지 정의
 
-
-app.route(/^((?!\/auth\/|\/api\/).)*$/s).all(isLoggedIn,function(req, res, next) {    
+app.route(/^((?!\/auth\/|\/api\/).)*$/s).all(isVerifyToken,function(req, res, next) {    
 	var path = req.params[0];
   console.log("(server.js) path:",path);
 
- if ( req.session.sUser.userno ) { 
-    console.dir( req.session.sUser );
-    console.log('로그인 정보 남아 있음.');
-    console.log(req.originalUrl);
-    next();
- } else {
+  if ( req.session.sUser.userno ) { 
+//     console.dir( req.session.sUser );
+//     console.log('로그인 정보 남아 있음.');
+//     console.log(req.originalUrl);
+     next();
+  } else {
     
-    var fullUrl = req.protocol + '://' + req.headers.host + req.originalUrl;
-   // console.log( fullUrl );
-    console.log('로그인 정보 없음 예외 처리');
-    //console.log(req.headers.host);
-    req.logout();
-    //res.clearCookie('connect.sid');
-    return res.status(403).send('로그인 필요');
- }
+//     var fullUrl = req.protocol + '://' + req.headers.host + req.originalUrl;
+//    // console.log( fullUrl );
+//     console.log('로그인 정보 없음 예외 처리');
+//     //console.log(req.headers.host);
+//     req.logout();
+//     //res.clearCookie('connect.sid');
+     return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
+  }
 });
 
 app.use('/auth', authRouter);
-app.use('/', pageRouter);
+
 
 app.use(bodyParser.json()); //요청의 본문을 해석해주는 미들웨어 1
 app.use(bodyParser.urlencoded({ extended: true })); //요청의 본문을 해석해주는 미들웨어 2

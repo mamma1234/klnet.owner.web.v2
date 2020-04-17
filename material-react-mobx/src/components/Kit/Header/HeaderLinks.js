@@ -44,9 +44,13 @@ import CustomDropdown from "components/CustomDropdown/CustomKitDropdown.js";
 
 import styles from "assets/jss/material-kit-pro-react/components/headerLinksStyle.js";
 
+import { observer, inject} from 'mobx-react'; // 6.x
+
 const useStyles = makeStyles(styles);
 
-export default function HeaderLinks(props) {
+
+// export default function HeaderLinks(props) {
+const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {   
 //console.log("header prop:",props);
 	const { dropdownHoverColor ,isAuthenticated, userData} = props;
 
@@ -94,7 +98,7 @@ export default function HeaderLinks(props) {
    
   const logout = () => {
     //console.log(">>>logout button click");
-	    axios.get("/auth/logout")
+	    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
 	    .then(res => {
 	        if (res.data.message){
 	        	alert(res.data.message);
@@ -192,6 +196,9 @@ export default function HeaderLinks(props) {
     </List>
   );
 }
+))
+
+export default HeaderLinks;
 
 HeaderLinks.defaultProps = {
   hoverColor: "primary"
@@ -208,3 +215,4 @@ HeaderLinks.propTypes = {
     "rose"
   ])
 };
+

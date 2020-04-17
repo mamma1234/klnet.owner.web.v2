@@ -19,15 +19,15 @@ module.exports = (passport) => {
             try {
 
 				// test용 pdk ship
-				sUser.provider = 'local';
+				// sUser.provider = 'local';
 				//sUser.userid = "test1@klnet.co.kr";
-				sUser.userno = "M000002";
-				sUser.username = "니꼬동",
-				sUser.displayName = 'web',
-				sUser.email = "test1@klnet.co.kr";
-				sUser.token_local = "";
-				req.session.sUser = sUser;
-				done(null, sUser);
+				// sUser.userno = "M000002";
+				// sUser.username = "니꼬동",
+				// sUser.displayName = 'web',
+				// sUser.email = "test1@klnet.co.kr";
+				// sUser.token_local = "";
+				// req.session.sUser = sUser;
+				// done(null, sUser);
 
             	//console.log(userid, password);
 

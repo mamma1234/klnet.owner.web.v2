@@ -111,11 +111,11 @@ const useStyles = makeStyles(styles);
 let numCnt =1;
 
 // export default function TrackingList(props) {
-const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, props }) => { 
+const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
 console.log("tracking service ......");
-console.log("userStore", userStore.me);
-
+console.log("userStore.user.username", userStore.user.username);
+console.log("userStore.token", userStore.token);
 
   const setEndDate = new Date();
   //const [carrierCode,setCarrierCode] = useState("");
@@ -216,13 +216,23 @@ useEffect(() => {
 	  
 	  //search
 	  numCnt=1;
-	  axios.post("/loc/getTrackingList",{
+
+
+	//   headers:{'Authorization':'Bearer '+ userStore.token}
+
+		//   if(localStorage.getItem('plismplus')) {
+		// 	  axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
+		// 	  	//.then(res => console.log("return:",res.data))
+
+		//   }
+
+	  axios.post("/loc/getTrackingList", {
 		  ietype:ietype,
 		  dategb:dategb,
 		  from:Moment(fromDate).format('YYYYMMDD'),
 		  to:Moment(toDate).format('YYYYMMDD'),
 		  blbk:searchKey,
-		  num:numCnt})
+		  num:numCnt}, {headers:{'Authorization':'Bearer '+ userStore.token}})
 		.then(setTrackingList([]))
 	    .then(res => setTrackingList(res.data))
 	    .catch(err => {
@@ -236,7 +246,8 @@ useEffect(() => {
 			}
 			
 	        //window.location.href = "/Landing";
-	    });
+		});
+
 	  //alert("Tracking Info Search onSubmit");
   }
 

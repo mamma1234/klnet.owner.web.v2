@@ -45,9 +45,9 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [userData,setUserData] =React.useState([]);
 
-  console.log("userStore", userStore);
-  console.log("userStore", userStore.me);
-  userStore.setMe("change name");
+  // console.log("userStore", userStore);
+  // console.log("userStore", userStore.me);
+  // userStore.setMe("change name");
 
 
   React.useEffect(() => {

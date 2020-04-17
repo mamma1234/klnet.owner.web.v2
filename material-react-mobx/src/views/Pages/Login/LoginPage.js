@@ -31,10 +31,13 @@ import CardFooter from "components/Card/CardFooter.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/loginPageStyle.js";
 import axios from 'axios';
 
+import { observer, inject } from 'mobx-react'; // 6.x
+
 const useStyles = makeStyles(styles);
 
 
-export default function LoginPage(props) {
+// export default function LoginPage(props) {
+const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
   setTimeout(function() {
     setCardAnimation("");
@@ -58,8 +61,14 @@ export default function LoginPage(props) {
 		        			localStorage.removeItem('plismplus');
 		        		}
 		        		localStorage.setItem('plismplus',res.data.token);
-		        		console.log(":"+res.data.user);
-		        		props.onClose(res.data.user);
+
+                userStore.setUser(res.data.user);
+                userStore.setToken(res.data.token);
+
+                console.log(":"+res.data.user);
+                props.onClose(res.data.user);
+                
+
 		        	}		        		
 		        	 //props.history.push("/");  //alert(res.data.userid + " �α��� ����");
 		        }
@@ -169,3 +178,6 @@ export default function LoginPage(props) {
     </div>
   );
 }
+))
+
+export default LoginPage;
