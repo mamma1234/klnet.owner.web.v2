@@ -111,7 +111,7 @@ const useStyles = makeStyles(styles);
 let numCnt =1;
 
 //export default function TrackingList(props) {
-const TrackingList = inject('userStore', 'trackStore', 'countStore')(observer(({ userStore, trackStore, countStore, ...props }) => { 	
+const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 	
 
   const setStartDate = new Date();
   const setEndDate = new Date();
@@ -162,15 +162,6 @@ const TrackingList = inject('userStore', 'trackStore', 'countStore')(observer(({
 	    }
 };
   
-
-useEffect(() => {
-	
-	console.log('Tracking effect');
-	console.log('userStore',userStore);
-	countStore.inc();
-	console.log('CountStore',countStore.count);
-	
-});
 
 useEffect(() => {
 	    console.log('effect');
@@ -230,7 +221,7 @@ useEffect(() => {
 		  from:Moment(fromDate).format('YYYYMMDD'),
 		  to:Moment(toDate).format('YYYYMMDD'),
 		  blbk:searchKey,
-		  num:numCnt},{headers:{'Authorization':'Bearer '+userStore.token}}
+		  num:numCnt},{headers:{'Authorization':'Bearer '+6.token}}
 		  )
 		.then(setTrackingList([]))
 	    .then(res => setTrackingList(res.data))

@@ -39,7 +39,7 @@ const useStyles = makeStyles(landingPageStyle);
 
 
 // export default function LandingPage() {
-const LandingPage = inject('userStore', 'trackStore', 'countStore')(observer(({ userStore, trackStore, countStore }) => { 
+const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore }) => { 
 
   const [open,setOpen] = React.useState(false);
   const [modalGb,setModalGb] = React.useState("login");
@@ -88,9 +88,7 @@ const LandingPage = inject('userStore', 'trackStore', 'countStore')(observer(({ 
   }, []);
 
   React.useEffect(() => {
-    console.log("Landing effect");
-    console.log("CountStore.count:",countStore.count);
-
+    console.log("effect");
 	  // 사용자 인증 
 	  if(isAuthenticated != true) {
 

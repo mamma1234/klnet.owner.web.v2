@@ -117,17 +117,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
 
   return (
     <List className={classes.list + " " + classes.mlAuto}>
-    {isAuthenticated && userData.usertype=="A"?"관리자":isAuthenticated?userData.username:null} {isAuthenticated?" 님 환영합니다.":null}
-    {isAuthenticated && userData.usertype=="A"?
-	    <ListItem className={classes.listItem}>
-		    <Link to="/admin" 
-		   	 className={classes.dropdownLink}
-		    	//onClick={props.onLoginOpen}
-		    >
-		         <Fingerprint className={classes.dropdownIcons} /> 관리자 메뉴
-		  </Link>
-		  </ListItem>
-		  :null}
+    {isAuthenticated?userData.username+"님 환영합니다.":null}
       <ListItem className={classes.listItem}>
         <CustomDropdown
           noLiPadding
@@ -178,9 +168,6 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           ]}
         />
       </ListItem>
-  
-
-        
       {isAuthenticated==false?<div>
 	  <ListItem className={classes.listItem}>
 	     <Link to="#" 

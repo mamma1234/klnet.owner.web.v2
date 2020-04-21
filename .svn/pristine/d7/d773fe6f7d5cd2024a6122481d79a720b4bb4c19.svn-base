@@ -31,13 +31,8 @@ import { Provider } from 'mobx-react';
 
 import userStore from './store/userStore';
 import trackStore from './store/trackStore';
-import countStore from './store/staticStore';
-// import { AsyncLocalStorage } from "async_hooks";
 
-const stores = { userStore, trackStore, countStore };
-// onst hydrate = create({storage:AsyncLocalStorage})
-
-
+const stores = { userStore, trackStore };
 
 const hist = createBrowserHistory();
 

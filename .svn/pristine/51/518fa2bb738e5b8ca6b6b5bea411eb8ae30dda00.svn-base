@@ -1,10 +1,8 @@
 import { observable, action } from 'mobx';
-import { create, persist } from 'mobx-persist';
 class UserStore {
   @observable me;
   @observable user;
-  @persist @observable token;
-  @persist value;
+  @observable token;
   constructor() {
     // this.me = null;
     this.me = "mobx test";
@@ -20,12 +18,7 @@ class UserStore {
   @action setToken = (token) => {
     this.token = token;
   }
-  @action setValue = (value) => {
-    this.value = value;
-  }
 }
-
 const userStore = new UserStore();
-
 export default userStore;
 export { UserStore };

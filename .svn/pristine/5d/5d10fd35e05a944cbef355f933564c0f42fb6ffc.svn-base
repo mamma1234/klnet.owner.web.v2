@@ -61,7 +61,7 @@ import Collapse from '@material-ui/core/Collapse';
 //import TestForm from "components/Form/Common/Search.js";
 import Grid from '@material-ui/core/Grid';
 import Moment from 'moment'
-//import { useCookies  } from 'react-cookie';
+
 import { observer, inject} from 'mobx-react'; // 6.x
 
 const styles = {
@@ -110,10 +110,13 @@ const styles = {
 const useStyles = makeStyles(styles);
 let numCnt =1;
 
-//export default function TrackingList(props) {
-const TrackingList = inject('userStore', 'trackStore', 'countStore')(observer(({ userStore, trackStore, countStore, ...props }) => { 	
+// export default function TrackingList(props) {
+const TrackingList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
-  const setStartDate = new Date();
+console.log("tracking service ......");
+// console.log("userStore.user.username", userStore.user.username);
+// console.log("userStore.token", userStore.token);
+
   const setEndDate = new Date();
   //const [carrierCode,setCarrierCode] = useState("");
   const [dategb,setDategb] = useState("ETA");
@@ -129,18 +132,17 @@ const TrackingList = inject('userStore', 'trackStore', 'countStore')(observer(({
   const [selectData,setSelectData] = useState([]);
   const [portData,setPortData] = useState([]);
   const [trackingList,setTrackingList] = useState([]);
-  const [fromDate,setFromDate] = useState(setStartDate.setDate(setStartDate.getDate()-3));
-  const [toDate,setToDate] = useState(setEndDate.setDate(setEndDate.getDate()+3));
+  const [fromDate,setFromDate] = useState(new Date());
+  const [toDate,setToDate] = useState(setEndDate.setDate(setEndDate.getDate()+6));
   const [anchorE1, setAnchorE1] = useState(null);
   const [anchorE2, setAnchorE2] = useState(null);
   const [anchorE3, setAnchorE3] = useState(null);
   //const [anchorE4, setAnchorE4] = useState(null);
   const [fixedClasses, setFixedClasses] = React.useState("dropdown");
   //const [viewVlaue, setViewVlaue] = React.useState("list");
-  //const [openJoin,setOpenJoin] = useState(false);
+  const [openJoin,setOpenJoin] = useState(false);
   const [optionData,setOptionData] = useState([]);
   
-  //const [cookies, setCookie] = useCookies(['name']);
   let portCode = [];
   
 
@@ -162,37 +164,27 @@ const TrackingList = inject('userStore', 'trackStore', 'countStore')(observer(({
 	    }
 };
   
-
-useEffect(() => {
-	
-	console.log('Tracking effect');
-	console.log('userStore',userStore);
-	countStore.inc();
-	console.log('CountStore',countStore.count);
-	
-});
-
 useEffect(() => {
 	    console.log('effect');
 
     	//axios.get("/com/getPortCodeInfo")
 	    //.then(res => setPortData(res.data));
     	
-	   /* function handleTouchMove(event) {
+	    function handleTouchMove(event) {
 	    	if(openJoin) {
 	    		event.preventDefault();
 	    	}
-	    }*/
+	    }
 	    
-	   /* window.addEventListener("touchmove",handleTouchMove, {
+	    window.addEventListener("touchmove",handleTouchMove, {
 	    	passive: false
-	    });*/
+	    });
 
 	    return () => {
 	      console.log('cleanup');
-	     // window.removeEventListener("touchmove",handleTouchMove);
+	      window.removeEventListener("touchmove",handleTouchMove);
 	    };
-}, []);
+}, [openJoin]);
   
   
   const onPortSearchValue = (e) => {
@@ -221,60 +213,63 @@ useEffect(() => {
   }
   
   const onSubmit = () => {
-	  if(userStore.token) {
+	  
 	  //search
 	  numCnt=1;
-	  axios.post("/loc/getTrackingList",{
+
+
+	//   headers:{'Authorization':'Bearer '+ userStore.token}
+
+		//   if(localStorage.getItem('plismplus')) {
+		// 	  axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
+		// 	  	//.then(res => console.log("return:",res.data))
+
+		//   }
+
+	  axios.post("/loc/getTrackingList", {
 		  ietype:ietype,
 		  dategb:dategb,
 		  from:Moment(fromDate).format('YYYYMMDD'),
 		  to:Moment(toDate).format('YYYYMMDD'),
 		  blbk:searchKey,
-		  num:numCnt},{headers:{'Authorization':'Bearer '+userStore.token}}
-		  )
+		  num:numCnt}, {headers:{'Authorization':'Bearer '+ userStore.token}})
 		.then(setTrackingList([]))
 	    .then(res => setTrackingList(res.data))
 	    .catch(err => {
 	       //console.log(err.response.status);
-	        if(err.response.status == "403"||err.response.status == "401") {
-				//setOpenJoin(true);
-	        	props.openLogin();
+	        if(err.response.status == "403") {
+				setOpenJoin(true);
+				console.log("여기11111");
 				//history.push("/authpage/login");
 				//props.history.push("/authpage/login");
 				//return (<Link to="/authpage/login" />)
 			}
 			
 	        //window.location.href = "/Landing";
-	    });
+		});
+
 	  //alert("Tracking Info Search onSubmit");
-	  } else {
-		  props.openLogin();
-	  }
   }
 
    const handleAddRow = () => {
 
-	  if(userStore.token) {
     //page ++
-	    numCnt=numCnt+1;
-	    
-	    axios.post("/loc/getTrackingList",{
-	    	  ietype:ietype,
-			  dategb:dategb,
-			  from:Moment(fromDate).format('YYYYMMDD'),
-			  to:Moment(toDate).format('YYYYMMDD'),
-			  blbk:searchKey,
-			  num:numCnt},{headers:{'Authorization':'Bearer '+userStore.token}})
-	    .then(res => setTrackingList([...trackingList,...res.data]))
-	          .catch(err => {
-	            if(err.response.status == "403" || err.response.status == "401") {
-		        	//setOpenJoin(true);
-		        	props.openLogin();
-		        }
-	            });
-	  } else {
-		  props.openLogin();
-	  }     
+    numCnt=numCnt+1;
+
+    axios.post("/loc/getTrackingList",{
+    	  ietype:ietype,
+		  dategb:dategb,
+		  from:Moment(fromDate).format('YYYYMMDD'),
+		  to:Moment(toDate).format('YYYYMMDD'),
+		  blbk:searchKey,
+		  num:numCnt})
+    .then(res => setTrackingList([...trackingList,...res.data]))
+          .catch(err => {
+            if(err.response.status == "403" || err.response.status == "401") {
+	        	setOpenJoin(true);
+	        }
+            });
+            
   };
   
   const handleClose = () => {
@@ -305,14 +300,14 @@ useEffect(() => {
 		  setLabelName("BL No.");
 	  } else if(e.target.value=="E") {
 		  setLabelName("BK No.");
+	  } else {
 		  setLabelName("BL & BK No.");
 	  }
 	  
   }
   const handleLogin = () => {
-	  //setOpenJoin(false);
-	  props.loginClose();
-	  //props.history.push("/svc/tracking");
+	  setOpenJoin(false);
+	  props.history.push("/svc/tracking");
   }
   const classes = useStyles();
   
@@ -329,18 +324,18 @@ useEffect(() => {
           	<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
           		<Grid item xs={12} sm={12}>
 		     	<Grid container spacing={1}>
-	     		<Grid item xs={12} sm={9}>
+	     		<Grid item xs={12} sm={10}>
 	      			<Grid container spacing={1}>
 	      			<Grid item xs={12} sm={12}>
 	    			<Grid container spacing={1}>
 	    				<Grid item xs={12} sm={2} md={2} >
 	    					<FormControl fullWidth>
-						        <InputLabel id = "ie_type" >IMPORT&EXPORT</InputLabel>
+						        <InputLabel id = "ie_type" >IMP&EXP</InputLabel>
 						        <Select
 						          native
 						          id = "IE_TYPE_SELECT"
 						          value={ietype}
-						          label="IMPORT&EXPORT"
+						          label="IMP&EXP"
 						           onChange={handleIEGubun}
 						        >
 						        <option value="A">ALL</option>
@@ -349,24 +344,19 @@ useEffect(() => {
 						        </Select>
 						   </FormControl>
 	    				</Grid>
-	    				<Grid item xs={12} sm={3} md={3}>
+	    				<Grid item xs={12} sm={3} >
 	    					<TextField id="blbk" label={labelName} onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
 	    						fullWidth />
 	    				</Grid>
 	    				<Grid item xs={12} sm={2} md={2} >
-    					<FormControl fullWidth>
-						        <InputLabel id = "ie_type" >Date</InputLabel>
-						        <Select
-						          native
-						          id = "start_end"
-						          value={dategb}
-						          label="Date"
-						           onChange={event => setDategb(event.target.value)}
-						        >
-						        <option value="A">ETA&ATA</option>
-						        <option value="D">ETD&ATD</option>
-						        </Select>
-						   </FormControl>
+    					<CustomSelect
+    						id="dateGb"
+							labelText = "구분"
+    						setValue = {dategb}
+    						option = {["ETA","ETD","ATA","ATD"]}
+    						inputProps={{onChange:event => setDategb(event.target.value)}}
+    						formControlProps={{fullWidth: true}}
+    					/>
     				</Grid>
 	    				<Grid item xs={12} sm={6} md={5}>
 	    					<Grid container spacing={1}>
@@ -444,21 +434,22 @@ useEffect(() => {
 						
 		        		</Grid>
 	        		</Grid> 
-	        	<Grid item xs={12} sm={1} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end'}}>
-	        		<Tooltip title="BL Upload">
-	        			<Button color="info" //onClick={() => setAnchorE1(true)}  
-	        			component={Link} to="/svc/uploadbl"
-	        			fullWidth style={{paddingTop:'11px'}}><Assignment />BL</Button>
-	        		</Tooltip>
-				</Grid>
 				<Grid item xs={12} sm={2} md={2} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end'}}>
 					<Button color="info" onClick = {onSubmit}  fullWidth>Search</Button>							
 				</Grid>
 			</Grid>
 		  </Grid> 
 		  <Grid container spacing={1}>
-		      	<Grid item xs={12} style={{textAlignLast:'center',height:'30px',paddingTop:'5px'}}>
+		      	<Grid item xs={12} sm={11} style={{textAlignLast:'center',height:'30px',paddingTop:'5px'}}>
 		      		{expanded?<ExpandLess onClick = {handleExpandClick} style={{color:'#00acc1'}}/>:<ExpandMore onClick = {handleExpandClick} style={{color:'#00acc1'}}/>}
+		      	</Grid>
+		      	<Grid item xs={12} sm={1} style={{textAlignLast:'right',height:'30px',paddingTop:'0px',marginBottom:'1px'}}>
+		      		<Tooltip title="BL Upload">
+		      		<a onClick={() => setAnchorE1(true)} >
+			      		<Assignment style={{color:'#00acc1',width:'20px',height:'20px'}} />
+			      		<font style={{fontVariant:'all-small-caps',color:'black'}}>BL</font>
+					</a>
+					</Tooltip>
 		      	</Grid>
 		  </Grid>
 {/*          <FixedPlugin
@@ -495,13 +486,13 @@ useEffect(() => {
 		  </Popover>
           </CardBody>
         </Card>
-		{/* <Dialog
+		 <Dialog
 			open={openJoin}
 			onClose={()=>setOpenJoin(false)}
      	 >
 		  <DialogContent style={{maxWidth:'400px',minWidth:'400px'}}>
 			  <LoginPage onClose={handleLogin}/></DialogContent> 
-      </Dialog>*/}
+      </Dialog>
 	   </GridItem>
       <GridItem xs={12}>
 		    <Card style={{marginTop:'5px',marginBottom:'5px'}}>

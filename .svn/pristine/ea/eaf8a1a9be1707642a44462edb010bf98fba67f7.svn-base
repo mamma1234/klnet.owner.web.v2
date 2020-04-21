@@ -106,10 +106,8 @@ router.post('/login', isLoggedPass, (req, res, next) => {
             console.log("token db save: ", token);
             pgSql.setUserToken(user, token);
             //console.log("token value:"+token);
-            res.cookie("connect.sid",token);
-            res.cookie("connect.userno",user.userno);
+            //res.cookie("connect.sid",token, { maxAge: 900000 });
             return res.json({user:user, token:token});
-
         });
     })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 });
@@ -582,8 +580,6 @@ router.get('/logout',  function (req, res) {
 
   req.session = null;
   req.logout();
-  res.clearCookie('connect.sid',{ path: '/' });
-  res.clearCookie('connect.userno',{ path: '/' });
   res.clearCookie('express:sess',{ path: '/' });
   res.clearCookie('express:sess.sig',{ path: '/' });
   //res.clearCookie('connect.sid',{ path: '/' });
