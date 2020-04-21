@@ -1,4 +1,5 @@
-import { observable, action } from 'mobx';
+import { observable, action, computed } from 'mobx';
+import StorageService from './StorageService'
 class UserStore {
   @observable me;
   @observable user;
@@ -17,6 +18,16 @@ class UserStore {
   }
   @action setToken = (token) => {
     this.token = token;
+    StorageService.setToken(this.token);
+  }
+  @computed get Token {
+    if (!this.token){
+      this.token = StorageService.getToken();
+    }
+    return this.token;
+  }
+  @action logout =() => {
+    StorageService.removeToken();
   }
 }
 const userStore = new UserStore();
