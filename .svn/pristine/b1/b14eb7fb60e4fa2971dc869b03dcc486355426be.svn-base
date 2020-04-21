@@ -52,7 +52,11 @@ module.exports = (passport) => {
 	                            console.log(err);
 	                        } else {
 		                        if(result.rows[0] != null) {
-			                           
+	
+		                            const userName = result.rows[0].user_name;
+									const userNo = result.rows[0].user_no;
+									const userEmail = result.rows[0].user_email;
+		                           
 		                            const exUser = {userid, password}
 	
 		                            let resultSet = false; 
@@ -60,13 +64,13 @@ module.exports = (passport) => {
 		                                 // console.log("result:"+result);
 		                                 if(resultSet) {
 		     	                            sUser.provider = 'local';
-		    	                            //sUser.userid = userid;
-		    	                            sUser.userno = result.rows[0].user_no;
-		    	                            sUser.username = result.rows[0].user_name,
+		    	                            sUser.userid = userid;
+		    	                            sUser.userno = userNo;
+		    	                            sUser.username = userName,
 		    	                            sUser.displayName = 'web',
-		    	                            sUser.email = result.rows[0].user_email;
-		    	                            sUser.usertype = result.rows[0].user_type;
+		    	                            sUser.email = userEmail;
 		                                	req.session.sUser = sUser;
+		                                	console.log(">>>>>4");
 		                                	conn.release();
 		                                    done(null, sUser);
 		                                 } else {

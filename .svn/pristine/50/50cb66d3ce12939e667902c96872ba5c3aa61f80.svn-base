@@ -19,6 +19,7 @@ import IconM from "@material-ui/core/Icon";
 //import Modal from '@material-ui/core/Modal';
 //import JoinPage from "components/Form/Common/JoinPage.js";
 import axios from 'axios';
+import Icon from "@material-ui/core/Icon";
 
 
 const useStyless = makeStyles(theme => ({
@@ -58,19 +59,37 @@ const styles = {
       lineHeight: "1"
     }
   },
+  cardTitleBlack: {
+    textAlign: "left",
+    color: "#000000",
+    minHeight: "auto",
+    fontWeight: "300",
+    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    marginBottom: "3px",
+    textDecoration: "none",
+    "& small": {
+      color: "#777",
+      fontSize: "65%",
+      fontWeight: "400",
+      lineHeight: "1"
+    }
+  },
 };
 
 const useStyles = makeStyles(styles);
 
-export default function TableList() {
+export default function TableList(props) {
   const classes = useStyles();
-  
+
   const [selectData,setSelectData] = useState([]);
-  const [openJoin,setOpenJoin] = useState(false);
-  const [carrierName, setCarrierName] = useState("");
+
+  const {detailParam} = props;
+
+  //debugger;
+  
   React.useEffect(() => {
 	    console.log('effect');
-	    getCarrierInfo();
+	    getSchDetailInfo();
 	    //.then(res => console.log(JSON.stringify(res.data)));
 	    
 	    return () => {
@@ -78,63 +97,43 @@ export default function TableList() {
 	    };
 	  }, []);
   
-  function getCarrierInfo() {
-	  return axios.post("/com/getCarrierInfo",{nm:""}).then(setSelectData([])).then(res => setSelectData(res.data))
-	    .catch(err => {
-		       //console.log(err.response.status);
-		        if(err.response.status == "403") {
-		        	setOpenJoin(true);
-		        }
-		    });
+  function getSchDetailInfo() {
+    return axios ({
+      url:'/sch/getScheduleDetailList',
+      method:'POST',
+      data: {carrierCode : props.detailParam.line_code,
+           startPort : props.detailParam.start_port,
+           endPort : props.detailParam.end_port,
+           voyage : props.detailParam.voyage_no,
+           vesselName : props.detailParam.vsl_name,
+           startDate : "",
+           endDate : "",
+           svc : ""
+           }
+    }).then(setSelectData([])).then(res => setSelectData(res.data));
   }
   
-  const handleCarrierSearch = () => {
-    axios.post("/com/getCarrierInfo",{nm:carrierName}).then(setSelectData([])).then(res => setSelectData(res.data))
-	    .catch(err => {
-		       //console.log(err.response.status);
-		        if(err.response.status == "403") {
-		        	setOpenJoin(true);
-		        }
-		    });
-  }
-
   return (
         <Card>
  		<CardHeader color="info" stats icon >
 		<CardIcon color="info" style={{height:'26px'}}>
 			<IconM style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</IconM>
         </CardIcon>
-        <h4 style={{textAlign: "left",color:"#000000"}}>Carrier Code Search</h4>
+        <h4 style={{textAlign: "left",color:"#000000"}}>FCL Sea Schedule Detail</h4>
+        <p/>
+        <p className={classes.cardTitleBlack}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- LINE CODE : {props.detailParam.line_code}</p>
+        <p className={classes.cardTitleBlack}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- VSL NAME : {props.detailParam.vsl_name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- VOYAGE NO : {props.detailParam.voyage_no}</p>
+        <p className={classes.cardTitleBlack}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- PORT : {props.detailParam.start_port} ({props.detailParam.start_day}) -> {props.detailParam.end_port} ({props.detailParam.end_day})</p>
   </CardHeader>
           <CardBody>
-	 	     	<GridItem>
-	 	     		<GridContainer>
-			  			<GridItem xs={12} sm={12} md={9}>
-                    <TextField 
-                      id="carrierKName" 
-                      label="Korean Name"
-                      onChange={event => setCarrierName(event.target.value)}
-                      value={carrierName} />
-			        	</GridItem>
-			        	<GridItem xs={12} sm={12} md={3}>
-							    <Button onClick={handleCarrierSearch} color="info">조회</Button>
-			        	</GridItem>
-			        </GridContainer>
-			     </GridItem>
 		         <GridItem>
 				     <Table
 				          tableHeaderColor="info"
-				          tableHead={["Carrier", "Line Carrier", "Korean ShipperName","English ShipperName"]}
+				          tableHead={["Vessel Name","Voyage No","POL","POD"]}
 				          tableData={selectData}
 				        />
 				     </GridItem>
           </CardBody>
-	{/*  <Modal
-	   		open={openJoin}
-	  		onClose={handleJoinClose}
-	      >
-	      <JoinPage mode="0" page="/svc/tracking" reTurnText="Login" />
-	   </Modal>*/}
         </Card>
   );
 }

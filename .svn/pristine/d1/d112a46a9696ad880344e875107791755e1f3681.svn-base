@@ -183,6 +183,7 @@ app.post("/loc/getBookMark", dao.pgtracking.getBookMark);
 app.post("/loc/getCntrList", dao.pgtracking.getCntrList);
 app.post("/loc/getCntrDetailList", dao.pgtracking.getCntrDetailList);
 app.post("/loc/saveBlList", dao.pgtracking.saveBlList);
+app.post("/loc/insertMyBlNo", dao.pgtracking.insertMyBlNo);
 app.post("/loc/insertBlRequest",dao.pgtracking.insertBlRequest);
 app.post("/com/getUserSetting", dao.pgtracking.getUserSetting);
 app.post("/com/getCarrierInfo", dao.pgtracking.getCarrierInfo);

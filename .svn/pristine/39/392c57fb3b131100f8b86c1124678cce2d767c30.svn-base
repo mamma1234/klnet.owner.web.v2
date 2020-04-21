@@ -32,7 +32,6 @@ import styles from "assets/jss/material-dashboard-pro-react/views/loginPageStyle
 import axios from 'axios';
 
 import { observer, inject } from 'mobx-react'; // 6.x
-import { useCookies  } from 'react-cookie';
 
 const useStyles = makeStyles(styles);
 
@@ -40,7 +39,6 @@ const useStyles = makeStyles(styles);
 // export default function LoginPage(props) {
 const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
-  const [cookies, setCookie] = useCookies(['name']);
   setTimeout(function() {
     setCardAnimation("");
   }, 700);
@@ -59,10 +57,10 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
 		        } else {
 		        	
 		        	if(res.data.token) {
-		        	/*	if(localStorage.getItem('plismplus')){
+		        		if(localStorage.getItem('plismplus')){
 		        			localStorage.removeItem('plismplus');
 		        		}
-		        		localStorage.setItem('plismplus',res.data.token);*/
+		        		localStorage.setItem('plismplus',res.data.token);
 
                 userStore.setUser(res.data.user);
                 userStore.setToken(res.data.token);

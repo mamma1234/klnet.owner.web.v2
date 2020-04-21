@@ -29,7 +29,7 @@ module.exports = (passport) => {
 			console.log("jwtPayload.userno", jwtPayload.userno);
 
 			if(err) {console.log("err",err);}
-			conn.query("select user_no,user_email,user_name, user_id,user_type from own_comp_user where user_no='"+jwtPayload.userno+"'",function(err,result) {
+			conn.query("select user_no as userno,user_email,user_name as username, user_id from own_comp_user where user_no='"+jwtPayload.userno+"'",function(err,result) {
 				if(err) {console.log(err);}
 				if(result.rows[0] != null) {
 
@@ -37,7 +37,6 @@ module.exports = (passport) => {
 					sUser.userid = result.rows[0].user_id;
 					sUser.userno = result.rows[0].user_no;
 					sUser.username = result.rows[0].user_name,
-					sUser.usertype = result.rows[0].user_type,
 					sUser.displayName = 'web',
 					sUser.email = result.rows[0].user_email;
 
