@@ -7,8 +7,9 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
-
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import axios from 'axios';
+import Typography from '@material-ui/core/Typography';
 
 /*const useStyless = makeStyles(theme => ({
 	  root: {
@@ -97,9 +98,28 @@ export default function TableList(props) {
 		   setCospan(13);
 	   }
 	  
-	  
-	    axios.post("/loc/getDemdetCntrList",
-	    		{ blbkg:data.bl_bkg,ietype: data.ie_type}
+    let eta = '';
+    if ( null != props.data.end_day) {
+      eta = props.data.end_day.replace(/\//gi, '');
+    }
+		let etd = '';
+		if ( null != props.data.start_day ) {
+			etd = props.data.start_day.replace(/\//gi, '');
+		}
+    axios.post("/loc/getDemdetCntrList",
+	    		{ 
+            req_seq : props.data.req_seq,
+            ie_type: props.data.ie_type,
+            vsl_name :props.data.vsl_name,
+            voyage_no:props.data.voyage,
+            etd:etd,
+            pol:props.data.pol,
+            eta:eta,
+            pod:props.data.pod,
+            carrier_code:props.data.carrier_code,
+            ie_type:props.data.ie_type,
+            bl_bkg:props.data.bl_bkg
+          }
 	    		,{headers:{'Authorization':'Bearer '+store.token}}
 	    )
 	    .then(res => setCntrData(res.data))
@@ -113,12 +133,16 @@ export default function TableList(props) {
   
   
   return (
+		  <div>
+		  <HighlightOff onClick={()=>props.onClose()} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
         <Card>
         	<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
         		<CardIcon color="info">
         			<Icon>content_copy</Icon>
         		</CardIcon>
-        		<h4 className={classes.cardTitleBlack}>TERMINAL ACTIVITY HISTORY</h4>
+        		{/*<h4 className={classes.cardTitleBlack}>TERMINAL ACTIVITY HISTORY</h4>*/}
+        		 <Typography variant="h6" style={{flexGrow:'1',textAlign:'start',color:'#7a7a7a'}}>TERMINAL ACTIVITY HISTORY</Typography>
+        		 
             {data.ie_type =="I"?
             <p className={classes.cardTitleBlack}>-B/L NO:&nbsp;{data.mbl_no}&nbsp;&nbsp;&nbsp;&nbsp;-컨테이너 개수(TOTAL:{data.totalcnt},&nbsp;반출:{data.full_out},&nbsp;반입:{data.mt_in})</p>
             :
@@ -127,15 +151,15 @@ export default function TableList(props) {
             </p>
             }
         	</CardHeader>
-        	<CardBody style={{paddingBottom:'2px'}}>   
+        	<CardBody style={{paddingBottom:'2px'}}> 
+
             <Table
 	            tableHeaderColor="info"
-	            tableHead={headerData}
 	            tableData={cntrData}
             	colSpan={cospan}
             	{...props}
             />
           </CardBody>
-        </Card>
+        </Card></div>
   );
 }

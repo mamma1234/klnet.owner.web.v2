@@ -48,7 +48,7 @@ export default function AuthNavbar(props) {
         <NavLink to={"/landing"} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
           <ListItemText
-            primary={"Home"}
+            primary={"닫기"}
             disableTypography={true}
             className={classes.listItemText}
           />

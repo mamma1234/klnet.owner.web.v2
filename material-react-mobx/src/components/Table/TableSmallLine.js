@@ -9,11 +9,19 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 // core components
 import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
+import Collapse from '@material-ui/core/Collapse';
+import Grid from '@material-ui/core/Grid';
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import ExpandLess from "@material-ui/icons/ExpandLess";
 
 const useStyles = makeStyles(styles);
 
 export default function CustomTable(props) {
   const classes = useStyles();
+  const [expanded, setExpanded] = React.useState(false);
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
   const { tableHead, tableData, tableHeaderColor } = props;
   return (
     <div>
@@ -35,21 +43,74 @@ export default function CustomTable(props) {
           </TableHead>
         ) : null}
         <TableBody>
-          {tableData.map((prop, key) => {
-            return (
-              <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
-                {prop.map((prop, key) => {
+        {tableData.map((prop, key) => {
+            if(tableData.length < 2 ) {
+              if (prop[2] == "(관세청 유니패스 바로가기)")
+              {
+                return (
+                  <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
+                    <TableCell className={classes.trackingtableCell} key={key+2} style={{textAlignLast:'center'}}>{prop[0]}</TableCell>
+                    <TableCell className={classes.trackingtableCell} key={key+5} style={{textAlignLast:'center'}}>{prop[1]}</TableCell>
+                    <TableCell className={classes.trackingtableCell} key={key+10} style={{textAlignLast:'center'}}><font color="blue">{prop[2]}</font></TableCell>
+                  </TableRow>
+                );
+              }
+              else{
+                return (
+                  <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
+                    {prop.map((prop, key) => {
+                      return (
+                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                          {prop}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              }
+            } else {
+              // 단건인 경우 
+              if ( key == 0 ) {
+                return (
+                  <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
+                    {prop.map((prop, key) => {
+                      return (
+                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                          {prop}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              } else {
+                // 다건인 경우에는 확장 이벤트 발생 시 펼쳐준다.
+                if (expanded) {
                   return (
-                    <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
-                      {prop}
-                    </TableCell>
+                    <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
+                      {prop.map((prop, key) => {
+                        return (
+                          <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                            {prop}
+                            <Collapse in={expanded} timeout="auto" unmountOnExit style={{width:'100%'}}>
+                            </Collapse>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
                   );
-                })}
-              </TableRow>
-            );
+                }
+              }
+
+            }
           })}
         </TableBody>
       </Table>
+      {(tableData.length < 2 ?
+      null:
+      <Grid style={{textAlignLast:'center',height:'30px',paddingTop:'5px'}}>
+          {expanded?<ExpandLess onClick = {handleExpandClick} style={{color:'#00acc1'}}/>:<ExpandMore onClick = {handleExpandClick} style={{color:'#00acc1'}}/>}
+      </Grid>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React,{ useState, useEffect } from "react";
+
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -87,6 +88,7 @@ const useStyles = makeStyles(styles);
   }
 }*/}
 let numCnt =1;
+let ieType = "I";
 
 export default function DemDetList(props) {
   
@@ -136,10 +138,11 @@ export default function DemDetList(props) {
 
 	  if(store.token) {
 	    numCnt=1;
-		  //search
+      //search
 		  axios.post("/loc/getDemDetList",{
 	      lineCode:lineCode
-	      ,mblNo:mblNo
+        ,mblNo:mblNo
+        ,ieType:ieType
 	      ,cntrNo:cntrNo
 	      ,num:numCnt
 	    },{headers:{'Authorization':'Bearer '+store.token}})
@@ -163,10 +166,10 @@ export default function DemDetList(props) {
 	  if(store.token) {
 	    //page ++
 	    numCnt=numCnt+1;
-	
-	    axios.post("/loc/getDemDetList",{
+      axios.post("/loc/getDemDetList",{
 	      lineCode:lineCode
-	      ,mblNo:mblNo
+        ,mblNo:mblNo
+        ,ieType:ieType
 	      ,cntrNo:cntrNo
 	      ,num:numCnt
 	    },{headers:{'Authorization':'Bearer '+store.token}}) 
@@ -184,7 +187,7 @@ export default function DemDetList(props) {
 
   const onCarrierSearchValue = (e) => {
     const values = e.target.value;
-    if(values != "" && values.length > 2) {
+    if(values != undefined && values != "" && values.length >= 2) {
     	if(store.token) {
 	      axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}})
 	      .then(res => setLineData(res.data))
@@ -220,7 +223,7 @@ export default function DemDetList(props) {
 	        </CardHeader>
           <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
             <Grid container spacing={1}>
-              <GridItem xs={3} sm={3} md={3}>
+              <GridItem xs={3} sm={3} md={3} >	
                 <Autocomplete
                   options = {lineData}
                   getOptionLabel = { option => option.id+" "+option.nm}
@@ -230,7 +233,7 @@ export default function DemDetList(props) {
                   setValue = {lineData}
                   inputProps={{onChange:event => setLineCode(event.target.value)}}
                   renderInput={params => (
-                    <TextField {...params} label="선사" fullWidth />
+                    <TextField {...params} label="CARRIER" fullWidth />
                   )}
                 />
               </GridItem>
@@ -254,9 +257,9 @@ export default function DemDetList(props) {
               <GridItem xs={5} sm={5} md={5} style={{textAlignLast:'right'}}>
                 {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
                 <Button color="info" onClick = {onSubmit}  >조회</Button>
-                <Button color="info" >삭제</Button>
+                {/* <Button color="info" >삭제</Button>
                 <Button color="info" //onClick = {Download} 
-                  id='btnExport' >엑셀다운로드</Button>
+                  id='btnExport' >엑셀다운로드</Button> */}
               </GridItem>
               
             </Grid>

@@ -142,6 +142,11 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
 	    })
 
   }
+  
+  const clean = () => {
+	  userStore.setUser('');
+	  userStore.setToken('');
+  }
 
   return (
     <List className={classes.list + " " + classes.mlAuto}>
@@ -168,7 +173,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           }}
           buttonIcon={LocationOn}
           dropdownList={[
-            <Link to="/svc/tracking" className={classes.dropdownLink}>
+            <Link to="/svc/tracking" className={classes.dropdownLink} refresh="true">
               <DirectionsBoat className={classes.dropdownIcons} /> Tracking
             </Link>,
             <Link to="/svc/demdet" className={classes.dropdownLink}>
@@ -196,6 +201,13 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
             >
               <ShoppingBasket className={classes.dropdownIcons} /> FCL-Sea
             </Link>,
+            <Link
+            to="/svc/cal"
+            className={classes.dropdownLink}
+            onClick={e => smoothScroll(e, "headers")}
+          >
+            <ShoppingBasket className={classes.dropdownIcons} /> TERMINAL
+          </Link>
           ]}
         />
       </ListItem>
@@ -212,7 +224,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
 	  </ListItem>
 	  <ListItem className={classes.listItem}>
 	   <Link to="/authpage/register" className={classes.dropdownLink}
-	   //onClick={props.onSignOpen}
+	   onClick={clean}
 	   >
          <PersonAdd className={classes.dropdownIcons} /> Signup
        </Link>

@@ -11,7 +11,7 @@ module.exports = (passport) => {
 		jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 		secretOrKey : process.env.JWT_SECRET_KEY
 	}, function(jwtPayload, done) {
-		console.log("jwtPayload", jwtPayload);
+		//console.log("jwtPayload", jwtPayload);
 
 		// test용 pdk ship
 		// sUser.provider = 'local';
@@ -24,22 +24,23 @@ module.exports = (passport) => {
 
 
 		pgsqlPool.connect(function(err,conn) {
-			console.log("sql:",jwtPayload);
+			//console.log("sql:",jwtPayload);
 
 			console.log("jwtPayload.userno", jwtPayload.userno);
 
 			if(err) {console.log("err",err);}
-			conn.query("select user_no,user_email,user_name, user_id,user_type from own_comp_user where user_no='"+jwtPayload.userno+"'",function(err,result) {
+			conn.query("select user_no,user_email,user_name, local_id,user_type from own_comp_user where user_no='"+jwtPayload.userno+"'",function(err,result) {
 				if(err) {console.log(err);}
-				if(result.rows[0] != null) {
+				//console.log("ROW CNT:",result.rowCount);
+	            if(result.rowCount > 0) {
 
-					sUser.provider = 'local';
-					sUser.userid = result.rows[0].user_id;
-					sUser.userno = result.rows[0].user_no;
-					sUser.username = result.rows[0].user_name,
-					sUser.usertype = result.rows[0].user_type,
+					//sUser.provider = 'local';
+					sUser.userid = sUser.userid?sUser.userid:result.rows[0].user_email;
+					sUser.userno = jwtPayload.userno;
+					sUser.username = result.rows[0].user_name;
+					sUser.usertype = result.rows[0].user_type;
 					sUser.displayName = 'web',
-					sUser.email = result.rows[0].user_email;
+					sUser.email = sUser.email?sUser.email:result.rows[0].user_email;
 
 					// req.session.sUser = sUser;
 

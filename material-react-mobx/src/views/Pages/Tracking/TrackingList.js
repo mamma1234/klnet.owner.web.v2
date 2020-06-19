@@ -195,7 +195,7 @@ useEffect(() => {
 	    const values = e.target.value;
 	    if(values != undefined && values != "" && values.length >= 2) {
 	    	if(store.token) {
-		    	axios.post("/com/getPortCode",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
+		    	axios.post("/com/getTrackingPortCode",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
 		    	.then(setPortData([]))
 			    .then(res => setPortData(res.data))
 			    .catch(err => {
@@ -305,6 +305,16 @@ useEffect(() => {
 	  props.openLogin();
   }
   
+  const handelSelectDate =(event) => {
+	  if(event.target.value === "X") {
+		  setDategb(event.target.value);
+		  setFromDate(null);
+		  setToDate(null);
+	  } else {
+		  setDategb(event.target.value);
+	  }
+  }
+  
   return (
     <GridContainer>
     	<GridItem xs={12} sm={12}>
@@ -339,7 +349,7 @@ useEffect(() => {
 						   </FormControl>
 	    				</Grid>
 	    				<Grid item xs={12} sm={3} md={3}>
-	    					<TextField id="blbk" label="BL & BK No." onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
+	    					<TextField id="blbk" label="B/L & B/K No." onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
 	    						fullWidth />
 	    				</Grid>
 	    				<Grid item xs={12} sm={2} md={2} >
@@ -350,10 +360,11 @@ useEffect(() => {
 						          id = "start_end"
 						          value={dategb}
 						          label="Date"
-						           onChange={event => setDategb(event.target.value)}
+						           onChange={handelSelectDate}
 						        >
 						        <option value="D">ETD&ATD</option>
 						        <option value="A">ETA&ATA</option>
+						        <option value="X">No Period</option>
 						        </Select>
 						   </FormControl>
     				</Grid>

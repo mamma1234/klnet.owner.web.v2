@@ -7,7 +7,14 @@ import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-
+import Terms from 'views/Pages/TermsOfService.js';
+import Privacy from 'views/Pages/PrivacyPolicy.js';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import Paper from '@material-ui/core/Paper';
+import Draggable from 'react-draggable';
 import styles from "assets/jss/material-dashboard-pro-react/components/footerStyle.js";
 
 const useStyles = makeStyles(styles);
@@ -15,6 +22,35 @@ const useStyles = makeStyles(styles);
 export default function Footer(props) {
   const classes = useStyles();
   const { fluid, white, rtlActive } = props;
+  const [open, setOpen] = React.useState(false);
+  const [serviceText, setServiceText] = React.useState(""); //약관구분
+
+  function DialogComponet() {
+  	  return (	  
+  		<Dialog
+  			open={open}
+  		    onClose={handleClose}
+  		    PaperComponent={PaperComponent}
+  		    aria-labelledby="draggable-dialog-title"
+  		>
+  		<DialogContent>
+  			{serviceText === "T"?<Terms handleClose={handleClose}/>:<Privacy handleClose={handleClose} />}
+  		</DialogContent>
+  		</Dialog>
+  	  );
+  }
+  
+  const handleClose = () => {
+  	  setOpen(false);
+  }
+
+  function PaperComponent(props) {
+  	  return (
+  			  <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'} >
+  			  	<Paper {...props} />
+  			  </Draggable>
+  			  );
+  }
   var container = cx({
     [classes.container]: !fluid,
     [classes.containerFluid]: fluid,
@@ -29,37 +65,35 @@ export default function Footer(props) {
     [classes.block]: true,
     [classes.whiteColor]: white
   });
+  const handleClickOpen = (event,name) => {
+	  
+	  if(name === "terms") {
+		  setServiceText("T");
+	  } else {
+		  setServiceText("P");
+	  }
+	  setOpen(true);
+  }
+  
   return (
     <footer className={classes.footer} style={{padding:'0'}}>
       <div className={container}>
         <div className={classes.left}>
           <List className={classes.list}>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#home" className={block}>
-                {rtlActive ? "الصفحة الرئيسية" : "Home"}
-              </a>
+            <ListItem className={classes.inlineBlock} >
+            <Link to="#" onClick={event => handleClickOpen(event,'terms')}>
+                {rtlActive ? "이용약관" : "Terms Of Service"}
+                </Link>
             </ListItem>
-            <ListItem className={classes.inlineBlock}>
-            <a href="#company" className={block}>
-              {rtlActive ? "기업소개" : "Company"}
-            </a>
+            <ListItem className={classes.inlineBlock} >
+            <Link to="#" onClick={event => handleClickOpen(event,'privacy')}>
+              {rtlActive ? "기업소개" : "Privacy Policy"}</Link>
           </ListItem>
             <ListItem className={classes.inlineBlock}>
             	<Link to="/svc/board">
             	{rtlActive ? "게시판": "Board"}
             	</Link>
-            </ListItem>
-          
-            <ListItem className={classes.inlineBlock}>
-              <a href="#portfolio" className={block}>
-                {rtlActive ? "بعدسة" : "Portfolio"}
-              </a>
-            </ListItem>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#blog" className={block}>
-                {rtlActive ? "مدونة" : "Blog"}
-              </a>
-            </ListItem>
+            </ListItem> 
           </List>
         </div>
         <p className={classes.right}>
@@ -75,8 +109,10 @@ export default function Footer(props) {
             ? ", مصنوعة مع الحب لشبكة الإنترنت أفضل"
             : ", made with love for a better web"}
         </p>
+        <DialogComponet />
       </div>
     </footer>
+    
   );
 }
 

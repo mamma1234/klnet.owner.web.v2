@@ -13,6 +13,7 @@ import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 import axios from 'axios';
 import Grid from '@material-ui/core/Grid';
+import HighlightOff from '@material-ui/icons/HighlightOff';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -23,33 +24,37 @@ const useStyles = makeStyles(theme => ({
   
 export default function ShipMap(props) {
     const classes = useStyles();
-    const { vesselName } = props;
-    const [inputValue, setInputValue] = useState("");
-    const [linkUrl,setLinkUrl] = useState("http://dev.seavantage.com/#/tracking/ship?imoNo=" + vesselName);
+    const { params } = props;
+    const [linkUrl,setLinkUrl] = useState("http://dev.seavantage.com/#/tracking/cargo?schedule=%5B%7B%22shipName%22%3A%22HYUNDAI%20UNITY%22,%22pol%22%3A%22KRINC%22,%22pod%22%3A%22MYPKG%22%7D,%7B%22shipName%22%3A%22EMIRATES%20SANA%22,%22pol%22%3A%22MYPKG%22,%22pod%22%3A%22AEJEA%22%7D%5D");
     const [value, setValue] = React.useState(0);
-    console.log(vesselName);
+    const [store,setStore] = useState(props.store);
     useEffect(() => {
         console.log('호출....');
-        setInputValue(vesselName);
+        
+        axios.post("/loc/getTsTracking",{reqseq:props.parameter.req_seq, carrierCode:props.parameter.carrier_code},{headers:{'Authorization':'Bearer '+store.token}})
+        .then(res => {
+          let url = "http://dev.seavantage.com/#/tracking/cargo?schedule=";
+          if(res.data != []) {
+            let appendUrl = '['
+            res.data.forEach(element =>{
+              appendUrl +='{shipName:'+encodeURIComponent(element.vessel)+',';
+              appendUrl += 'pol:'+encodeURIComponent(element.pol)+',';
+              appendUrl += 'pod:'+encodeURIComponent(element.pod)+'},';
+              
+            })
+            appendUrl += ']'
+            setLinkUrl(url+appendUrl)
+          }
+        })
     return () => {
         console.log('cleanup');
         };
     },[]);
     
-    const appendUrl = (appendImo) => {
-
-        if(appendImo != "") {
-            setLinkUrl(linkUrl + "&imoNo="+appendImo);
-            console.log(linkUrl);
-            setInputValue("");
-        }else {
-            alert("imo입력");
-        }
-    }
   
 return (
     <div className={classes.root}>
-          
+    <HighlightOff onClick={()=>props.onClose()} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
       <Card className={classes.cardStyle}>
           <CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
                 <CardIcon color="info" style={{height:'26px'}}>
@@ -57,28 +62,6 @@ return (
                 </CardIcon>
           </CardHeader>
             <CardBody style={{paddingBottom:'2px'}}>
-              <GridContainer>
-                  <GridItem xs={12} sm={12} md={12}>
-  
-                          <Grid container spacing={4}>
-                              <Grid item xs={12} sm={12} md={3}>
-                  <CustomInput
-                    labelText="IMO ..."
-                    id="imoNum"
-                    name="inputValue"
-                    value={vesselName}
-                    formControlProps={{fullWidth: true}}
-                    inputProps={{
-                      onChange: event => setInputValue(event.target.value),
-                      value:inputValue }}
-                    />
-                              </Grid>
-                              <Grid item xs={12} sm={12} md={3}>
-                  <Button onClick={()=> { appendUrl(inputValue)}}>Search</Button>
-                              </Grid>
-                          </Grid>
-                      </GridItem>
-                </GridContainer>
                   <Grid item item xs={12} sm={12} md={12}>
                       <form target="maplink"> 
                           <iframe name="maplink" src={linkUrl}  width="100%" height="600" display='block' border='none' position="absolute" frameBorder="0" scrolling="auto" allowFullScreen></iframe>

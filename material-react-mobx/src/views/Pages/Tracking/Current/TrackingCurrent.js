@@ -15,7 +15,7 @@ import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 //import page
 import Detail from "views/Pages/Tracking/Current/TrackingCurrentDetail.js";
-
+import HighlightOff from '@material-ui/icons/HighlightOff';
 
 import axios from 'axios';
 
@@ -82,13 +82,14 @@ export default function TableList(props) {
   
   return (
 		<div style={{maxHeight:'600px',maxWidth:'840px'}}>
-	        <Card style={{marginTop:'20px',marginBottom:'0'}}>		
+		<HighlightOff onClick={()=>props.onClose()} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
+	        <Card style={{marginTop:'26px',marginBottom:'0'}}>		
 	        	<CardHeader color="info" stats icon style={{paddingBottom:'2px',height:'45px'}}>
 	        		<CardIcon color="info" style={{padding:'4px'}}>
 	        			<Icon>content_copy</Icon>
 	        		</CardIcon>
 	        		<h4 className={classes.cardTitleBlack}>Tracking Current List</h4>
-	        		<p className={classes.cardTitleBlack}>-BKG No :&nbsp;{data.bkg_no}&nbsp;&nbsp; -BL No :&nbsp;{data.mbl_no}</p>
+	        		<p className={classes.cardTitleBlack}>-B/K No :&nbsp;{data.bkg_no}&nbsp;&nbsp; -B/L No :&nbsp;{data.mbl_no}</p>
 	        	</CardHeader>
 				<CardBody style={{paddingTop:'0',paddingLeft:'5px',paddingRight:'5px'}}>
 			    	<Detail

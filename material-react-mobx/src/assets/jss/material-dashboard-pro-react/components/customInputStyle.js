@@ -84,6 +84,22 @@ const customInputStyle = {
       color: grayColor[3]
     }
   },
+input2: {
+    color: grayColor[14],
+    height: "unset",
+	paddingBottom:'2px',
+	paddingTop:'3px',
+    "&,&::placeholder": {
+      fontSize: "14px",
+      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: "400",
+      lineHeight: "1.42857",
+      opacity: "1"
+    },
+    "&::placeholder": {
+      color: grayColor[3]
+    }
+  },
   whiteInput: {
     "&,&::placeholder": {
       color: whiteColor,

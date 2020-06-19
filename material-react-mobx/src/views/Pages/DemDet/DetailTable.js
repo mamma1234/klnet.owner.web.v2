@@ -19,6 +19,9 @@ import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import MButton from '@material-ui/core/Button';
 import Button from "components/CustomButtons/Button.js";
+import Tooltip from '@material-ui/core/Tooltip';
+import Popover from  '@material-ui/core/Popover';
+import Tariff from "views/Pages/DemDet/PopUp/tariff.js";
 
 // core components
 import { slideDown, slideUp } from "components/Slide/Slide.js";
@@ -170,13 +173,21 @@ export default function ToggleTable(props) {
       <Table className={classes.table} >
         <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px',textAlignLast:'center'}}>
           <TableRow className={classes.tableHeadRow} style={{borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
-                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>선택</TableCell>
+                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>
+                  <Checkbox
+                    value="secondary"
+                    color="primary"
+                    inputProps={{ 'aria-label': 'secondary checkbox' }}
+                  />
+                </TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>CARRIER</TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>CNTR NO</TableCell>
+                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>TERMINAL</TableCell>
+                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>STATUS</TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>DEMERRAGE</TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>DETENTION</TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>STORAGE CHARGE</TableCell>
-                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>REMARK</TableCell>
+                <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>COMBINED</TableCell>
                 <TableCell style={{borderBottomWidth:'3px'}} className={classes.demDettableCell + " " + classes.tableHeadCell}>DO신청</TableCell>
           </TableRow>
         </TableHead>
@@ -198,7 +209,7 @@ export default function ToggleTable(props) {
         {(tableData.length >= 10 ?
         <TableFooter>
         	<TableRow>
-            <TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={8}>
+            <TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={10}>
               <Button 
                 color="info" onClick={handleAddFunction}
         		    style={{paddingLeft:'60px',paddingRight:'60px'}}>
@@ -238,6 +249,9 @@ class TableRows extends React.Component {
           detExpanded: false ,
           oscExpanded: false ,
           cntrExpanded: false
+          , demOpenCurrent: false
+          , detOpenCurrent: false
+          , oscOpenCurrent: false
         };
 
   demExpander = () => {
@@ -279,6 +293,35 @@ class TableRows extends React.Component {
     }
   }; 
 
+  //dem tariff popup
+  demHandleClickOpen = () => {
+    
+      this.setState({ demOpenCurrent: true }); 
+    
+	  
+  }
+  
+  demHandleClickClose = () => {
+	  this.setState({ demOpenPopup: false, demOpenCurrent: false});
+  }
+
+  //det tariff popup
+  detHandleClickOpen = () => {
+	  this.setState({ detOpenCurrent: true }); 
+  }
+  
+  detHandleClickClose = () => {
+	  this.setState({ detOpenPopup: false, detOpenCurrent: false});
+  }
+
+  oscHandleClickOpen = () => {
+	  this.setState({ oscOpenCurrent: true }); 
+  }
+  
+  oscHandleClickClose = () => {
+	  this.setState({ oscOpenPopup: false, oscOpenCurrent: false});
+  }
+
   cntrExpander = () => {
     this.setState({ demExpanded: false });
     this.setState({ detExpanded: false });
@@ -294,8 +337,13 @@ class TableRows extends React.Component {
   };
   
   render() {
-    const { data } = this.props;
-    
+    const { data ,charge } = this.props;
+
+    const statusColor = data.cntr_status == "UNLOAD"?"orange":((data.cntr_status == "GATE IN" || data.cntr_status == "GATE OUT") ? "blue":((data.cntr_status == "DEM" || data.cntr_status == "DET") ? "red":"gray"));
+    const demOverdayColor = data.dem_over_day > 0 && data.cntr_status == "DEM" ? "red":"";
+    const detOverdayColor = data.det_over_day > 0 && data.cntr_status == "DET" ? "red":"";
+    const oscOverdayColor = data.osc_over_day > 0 && data.cntr_status == "OSC" ? "red":"";
+
     return [
       
       <TableRow key={this.props.index} className={this.staterowStyle} style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
@@ -306,15 +354,74 @@ class TableRows extends React.Component {
           inputProps={{ 'aria-label': 'secondary checkbox' }}
           />
         </TableCell>
-        <TableCell align="center" ><b><a>{(data.image_yn == 'Y')?<img alt={data.line_code} src={require("assets/img/carrier/"+data.img_line_code+".gif")} />:data.line_code}</a></b></TableCell>
-        <TableCell align="left" onClick={this.cntrExpander} ><b><a>{data.cntr_no}</a></b></TableCell>
-        <TableCell align="right" onClick={this.demExpander}>{data.dem_amount} {data.dem_unit}</TableCell>
-        <TableCell align="right" onClick={this.detExpander}>{data.det_amount} {data.det_unit}</TableCell> 
-        {/* <TableCell align="right">{this.props.data[37]} {this.props.data[39]}</TableCell> */} 
-        <TableCell align="right" onClick={this.oscExpander}>{data.osc_amount} {data.osc_unit}</TableCell>
-        <TableCell >{data.dem_det_remark}</TableCell>
-        <TableCell align="center">
-          <MButton
+        {/* <b><a>{(data.image_yn == 'Y')?<img alt={data.line_code} src={require("assets/img/carrier/"+data.img_line_code+".gif")} />:data.line_code}</a></b> */}
+        <TableCell align="center" >
+        <Tooltip title={data.line_code}>
+            	<a target="_blank" href={data.line_url}>
+        			{data.image_yn=='Y'?<img src={require("assets/img/carrier/"+data.img_line_code+".gif")} />:<img src={require("assets/img/carrier/No-Image.gif")} />}
+        		</a>
+        	</Tooltip>
+
+        </TableCell>
+        <TableCell align="center" onClick={this.cntrExpander}>{data.cntr_no}</TableCell>
+        <TableCell align="center" onClick={this.cntrExpander}>{data.terminal_kname}</TableCell>
+        <TableCell align="center" onClick={this.cntrExpander}><b><font color={statusColor}>{data.cntr_status}</font></b></TableCell>
+        <TableCell align="center" onClick={this.demHandleClickOpen}>{data.dem_date} (<font color={demOverdayColor}>+{data.dem_over_day}</font>)<br/><font color={demOverdayColor}>{data.dem_amount} {data.dem_unit}</font></TableCell>
+        <Popover
+	      	id="demPopover"
+	      	open={this.state.demOpenCurrent}
+	      	onClose={this.demHandleClickClose}
+          // anchorReference="anchorPosition"
+          // anchorPosition={{top:100,left:550}}
+          anchorOrigin={{vertical:'center',horizontal:'center',}}
+          transformOrigin={{vertical:'center',horizontal:'center',}}
+          > 
+          <Tariff
+            data={data}
+            charge="DEM"
+            //openLogin={this.props.onLoginPage} 
+            //store ={this.props.store}
+          />
+        </Popover>
+        <TableCell align="center" onClick={this.detHandleClickOpen}>{data.ret_date} (<font color={detOverdayColor}>+{data.det_over_day}</font>)<br/><font color={detOverdayColor}>{data.det_amount} {data.det_unit}</font></TableCell> 
+        <Popover
+	      	id="detPopover"
+	      	open={this.state.detOpenCurrent}
+	      	onClose={this.detHandleClickClose}
+          // anchorReference="anchorPosition"
+          // anchorPosition={{top:80,left:550}}
+          anchorOrigin={{vertical:'center',horizontal:'center',}}
+          transformOrigin={{vertical:'center',horizontal:'center',}}
+          > 
+          <Tariff
+            data={data}
+            charge="DET"
+            //openLogin={this.props.onLoginPage} 
+            //store ={this.props.store}
+          />
+        </Popover>
+        <TableCell align="center" onClick={this.oscHandleClickOpen}>{data.osc_date} (<font color={oscOverdayColor}>+{data.osc_over_day}</font>)<br/><font color={oscOverdayColor}>{data.osc_amount} {data.osc_unit}</font></TableCell>
+        <Popover
+	      	id="oscPopover"
+	      	open={this.state.oscOpenCurrent}
+	      	onClose={this.oscHandleClickClose}
+          // anchorReference="anchorPosition"
+          // anchorPosition={{top:80,left:550}}
+          anchorOrigin={{vertical:'center',horizontal:'center',}}
+          transformOrigin={{vertical:'center',horizontal:'center',}}
+          > 
+          <Tariff
+            data={data}
+            charge="OSC"
+            //openLogin={this.props.onLoginPage} 
+            //store ={this.props.store}
+          />
+        </Popover>
+        <TableCell align="center"><br/>{data.combin_amount} {data.combin_unit}</TableCell>
+        {/*<TableCell >{data.dem_det_remark}</TableCell> */} 
+        <TableCell align="center" >
+        {data.do_yn=='Y'?
+          <a target="_blank" href={data.do_url}><MButton
             variant="contained"
             //color="primary"
             size="small"
@@ -322,7 +429,7 @@ class TableRows extends React.Component {
             //startIcon={<CancelIcon/>}
             onClick={null}
           >DO신청
-          </MButton>
+          </MButton></a>:""}
         </TableCell>
       </TableRow>
       ,this.state.demExpanded && (
@@ -358,14 +465,16 @@ class TableRows extends React.Component {
             <div ref="expandCntr"> 
               <TableList
                   tableHeaderColor={this.props.color}
-                  tableHead={["SZ/TP","M-BL","VSL","VOY","POL","POD","ATA","UNLOAD","GATE OUT","GATE IN"]}
+                  tableHead={["SZ/TP","M-BL","VSL","VOY","POL","POD","ETA","UNLOAD","GATE OUT","GATE IN"]}
                   tableData={[
                               [
                               data.type_size
                               ,data.mbl_no
-                              ,data.vsl_name,data.voyage_no
+                              ,data.vsl_name
+                              ,data.voyage
                               ,data.pol,data.pod
-                              ,data.ata,data.unloading_date
+                              ,data.eta
+                              ,data.unloading_date
                               ,data.full_outgate_date,data.mt_ingate_date
                               ]
                             ]}

@@ -63,11 +63,14 @@ export default function Header(props) {
     [classes.absolute]: absolute,
     [classes.fixed]: fixed
   });
+  
+  const logo = require("assets/img/pp_logo.gif");
+  
   return (
     <AppBar className={appBarClasses}>
       <Toolbar className={classes.container}>
         <Button className={classes.title}>
-          <Link to="/">{brand}</Link>
+          <Link to="/">{brand}<img src={logo} style={{width:'32px',marginBottom:'10px'}}/></Link>
         </Button>
         <Hidden smDown implementation="css" className={classes.hidden}>
           <div className={classes.collapse}>{links}</div>

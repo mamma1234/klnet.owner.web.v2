@@ -107,7 +107,7 @@ export default function TableList(props) {
 		    return axios ({
 		      url:'/sch/getScheduleDetailList',
 		      method:'POST',
-		      data: {carrierCode : detailParam.org_line_code,
+		      data: {carrierCode : detailParam.line_code,
 		           startPort : detailParam.start_port,
 		           endPort : detailParam.end_port,
 		           voyage : detailParam.voyage_no,
@@ -146,14 +146,14 @@ export default function TableList(props) {
       </GridItem>
       </GridContainer>
   </CardHeader>
-          <CardBody>
-		         <GridItem>
+          <CardBody >
+{/* 		         <GridItem>
 				     <Table
 				          tableHeaderColor="info"
 				          tableHead={["Vessel Name","Voyage No","POL","POD"]}
 				          tableData={selectData}
 				        />
-				     </GridItem>
+				     </GridItem> */}
              <GridContainer>
              <GridItem xs={12} sm={9} md={9}/>
              <GridItem xs={12} sm={9} md={3} > {detailParam.line_url && ( <Button target="_blank" href={detailParam.line_url} color="info" >BOOKING</Button>)}

@@ -106,7 +106,7 @@ export default function TableList(props) {
 			    <IconM style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</IconM>
         </CardIcon>
           <h4 style={{textAlign: "left",color:"#000000"}}>CARRIER INFO</h4>
-  </CardHeader>
+    </CardHeader>
           <CardBody>
 	 	     	<GridItem>
 	 	     		<GridContainer>

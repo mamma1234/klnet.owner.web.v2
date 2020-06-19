@@ -33,6 +33,12 @@ const swaggerRouter = require('./swagger/swaggerDoc'); //swagger 설정 정의
 const sUser = require('./models/sessionUser');
 //console.log("sUser:",sUser);
 
+
+const java = require('java');
+
+const jarFile = __dirname + path.sep +'lib'+path.sep+'OkCert3-java1.5-2.2.3.jar';
+java.classpath.push(jarFile);
+
 app.set('views', path.join(__dirname, 'views')); //템플리트 엔진을 사용 1
 app.set('view engine', 'pug'); //템플리트 엔진을 사용 2
 app.use(swaggerRouter);//swagger API
@@ -167,7 +173,7 @@ app.get("/auth/getTestQuerySample", dao.postgresql.getTestQuerySample);
 //위치
 app.get("/loc/downloadExcel",downloadExcel.blExcelDownload);
 app.get("/loc/getTestSimple", dao.postgresql.getTestSimple);
-app.post("/loc/getPortLocation",dao.postgresql.getPortLocation);
+//app.post("/loc/getPortLocation",dao.postgresql.getPortLocation);
 app.post("/loc/getPort",dao.postgresql.getPort);
 app.post("/loc/getCustomLineCode", dao.pgcodes.getCustomLineCode);
 app.get("/loc/getTestQuerySample", dao.postgresql.getTestQuerySample);
@@ -193,7 +199,12 @@ app.post("/loc/getHotInfo", dao.tracking.getHotInfo);
 app.post("/loc/getDemDetList", dao.pgdemdet.getDemDetList);
 app.post("/loc/getTarrifList", dao.pgdemdet.getTarrifList);
 app.post("/loc/getScrapManageList", dao.pgtracking.getScrapManageList);
-
+app.post("/loc/getImportTerminalActivity", dao.pgtracking.getImportTerminalActivity);
+app.post("/loc/getExportTerminalActivity", dao.pgtracking.getExportTerminalActivity);
+app.post("/loc/getDemDetPort", dao.pgdemdet.getDemDetPort);
+app.post("/loc/getDemDetInTerminal",dao.pgdemdet.getDemDetInTerminal);
+app.post("/loc/getDemDetOutTerminal",dao.pgdemdet.getDemDetOutTerminal);
+app.post("/loc/getTsTracking", dao.pgtracking.getTsTracking)
 //공통
 app.post("/com/getUserSetting", dao.pgtracking.getUserSetting);
 app.post("/com/getCarrierInfo", dao.pgtracking.getCarrierInfo);
@@ -201,6 +212,7 @@ app.post("/com/setUserSetting", dao.pgtracking.setUserSetting);
 app.post("/com/getUserInfo", dao.pgusers.getUserInfo);
 app.get("/com/getPortCodeInfo", dao.pgcodes.getPortCodeInfo);
 app.post("/com/getPortCode", dao.pgcodes.getPortCode);
+app.post("/com/getTrackingPortCode", dao.pgcodes.getPortTrackingCode);
 app.post("/com/getUserInfoSample", dao.postgresql.getUserInfoSample);
 app.post("/com/getImpFlowSample", dao.oracle.getImpFlowSample);
 app.post("/com/getExpFlowSample", dao.oracle.getExpFlowSample);
@@ -209,6 +221,12 @@ app.post("/com/getBoardDetail", dao.pgboard.getBoardDetail);
 app.post("/com/saveBoard", dao.pgboard.saveBoard);
 app.post("/com/deleteBoard", dao.pgboard.deleteBoard);
 app.post("/com/getBoardDataList", dao.pgboard.getBoardDataList);
+app.post("/com/getExcelSchLogList", dao.postgresql.getExcelSchLogList);
+app.post("/com/getErrorLogList", dao.pgcodes.getErrorLogList)
+app.post("/com/getUserData", dao.pgcodes.getUserData)
+app.post("/com/getUserRequest", dao.pgcodes.getUserRequest);
+app.post("/com/getTerminalInfo", dao.pgcodes.getTerminalInfo)
+app.post("/com/getCodecuship", dao.pgcodes.getCodecuship)
 
 //스케줄
 app.post("/sch/getScheduleSample", dao.schedule.getScheduleSample);
@@ -221,12 +239,18 @@ app.post("/sch/getScheduleList", dao.schedule.getScheduleList);
 app.post("/sch/getPortCodeInfo", dao.schedule.getPortCodeInfo);
 app.post("/sch/getLinePicInfo", dao.schedule.getLinePicInfo);
 app.post("/sch/getScheduleDetailList", dao.schedule.getScheduleDetailList);
-
 app.post("/sch/getSchedulePortCodeList", dao.schedule.getSchedulePortCodeList);
 app.post("/sch/insertSchPortCode", dao.schedule.insertSchPortCode);
 app.post("/sch/updateSchPortCode", dao.schedule.updateSchPortCode);
 app.post("/sch/deleteSchPortCode", dao.schedule.deleteSchPortCode);
+app.post("/sch/getServiceCarrierList", dao.schedule.getServiceCarrierList);
+app.post("/sch/getTerminalScheduleList", dao.schedule.getTerminalScheduleList);
+app.post("/sch/getTerminalCodeList", dao.schedule.getTerminalCodeList);
 
+
+//사용자 알림
+app.post("/com/getUserMessage", dao.pgusers.getUserMessage);
+app.post("/com/getUserNotice", dao.pgusers.getUserNotice);
 
 //외부 api
 app.get("/api/apiSchedule", apiService.apiScheduleInfo);
@@ -234,9 +258,67 @@ app.get("/api/apiSchedule", apiService.apiScheduleInfo);
 // UNI PASS API 호출용 
 app.post("/com/uniPassApiExportAPI001", uniPassApiService.API001);
 app.post("/com/uniPassApiExportAPI002", uniPassApiService.API002);
+app.post("/com/uniPassApiSelectPassInfo", uniPassApiService.selectPassInfo);
+app.post("/com/uniPassApiSelectShedInfo", uniPassApiService.selectShedInfo);
+app.post("/com/uniPassApiSelectLcaInfo", uniPassApiService.selectLcaInfo);
+app.post("/com/uniPassApiSelectCntrInfo", uniPassApiService.selectCntrInfo);
+app.post("/com/uniPassApiSelectExpDclrInfo", uniPassApiService.selectExpDclrInfo);
 // 공지 게시판
 app.post("/api/getBoardList", dao.pgboard.getBoardList);
 app.post("/api/getBoardDetail", dao.pgboard.getBoardDetail);
+
+
+app.post("/auth/sertify", function (req,res) {
+	
+	const list = java.newInstanceSync("java.util.ArrayList"); 
+	//console.log(list.getClassSync().getNameSync());
+	java.newInstance("java.util.ArrayList", function(err, list) {
+	  list.addSync("item1");
+	  list.addSync("item2");
+	  console.log("Inside the callback");
+	  // console.log(list);
+	  // console.log(list[0]);
+	  console.log(list.toArraySync());
+	  console.log(list.getSync(0));
+	  console.log("Outside the callback");
+	});
+	list.addSync("product1");
+	list.addSync("product2");
+	console.log(list.getSync(0));
+		
+	
+	const aTarget = "PROD" //테스트="TEST", 운영="PROD"
+	const aCP_CD = "P21730000000";	// 회원사코드
+	
+	// const aLicense = "C:\\okcert3_license\\" + aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
+	const aLicense = __dirname + path.sep +"lib"+path.sep+ aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
+	//const aReqStr ='{"RETURN_URL":"http://localhost:3000/authpage/phonepopup", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
+
+
+	/*const okcert = java.newInstanceSync("kcb.module.v3.OkCert"); 
+	const case1 = okcert.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+	console.log(okcert.getClassSync().getNameSync());
+	console.log('case1=', case1);*/
+
+	const originURL = req.headers['x-forwarded-proto']+"://"+req.headers['x-forwarded-host'];
+	const javaInstance = java.import('kcb.module.v3.OkCert')();
+	let aSvcName = "";
+	let case2;
+	let aReqStr;
+console.log("RETURN URL:",originURL);
+	if(req.body.mdltkn) {
+		aSvcName = "IDS_HS_POPUP_RESULT"; //서비스명 (고정값)
+		aReqStr ='{"MDL_TKN":'+req.body.mdltkn+'}';
+		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+	} else {
+		aSvcName = "IDS_HS_POPUP_START"; //서비스명 (고정값)
+		aReqStr ='{"RETURN_URL":"http://www.plismplus.com/return_certify", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
+		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+	}
+	//console.log('case2=', case2);
+
+	return res.send(case2);	
+});
 
 //에러 처리 미들웨어: error라는 템플릿 파일을 렌더링한다. 404에러가 발생하면 404처리 미들웨어에서 넣어준 값을 사용한다.
 app.use((req, res, next) => {

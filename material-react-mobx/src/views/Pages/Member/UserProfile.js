@@ -12,13 +12,14 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardAvatar from "components/Card/CardAvatar.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
-
+import Divider from '@material-ui/core/Divider';
 // import avatar from "assets/img/faces/marc.jpg";
 import klnet from "assets/img/logo.png";
 import Switch from '@material-ui/core/Switch';
 import axios from 'axios';
-import Select from "components/CustomInput/CustomSelect.js";
-
+import Select from '@material-ui/core/Select';
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
 
 const styles = {
   cardCategoryWhite: {
@@ -41,41 +42,87 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 
-export default function UserProfile() {
-	console.log("page Load>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+export default function UserProfile(props) {
+	
+console.log("props:",props);
+  const {store} = props;
   const classes = useStyles();
-  const [pageData,setPageData] = useState([]);
-  const [company,setCompany] = useState("");
+  const [svcType,setSvcType] = useState("E");
+  const [insertDate,setInserDate] = useState("");
   const [userName,setUserName] = useState(""); // eslint-disable-line no-unused-vars
   const [userEmail,setUserEmail] = useState(""); // eslint-disable-line no-unused-vars
   const [userPhone,setUserPhone] = useState(""); // eslint-disable-line no-unused-vars
-  const [socialYn,setSocialYn] = useState("N");
   const [loginDate,setLoginDate] = useState(""); // eslint-disable-line no-unused-vars
+  const [socialUse,setSocialUse] = useState(false);
+  const [linkStatus,setLinkStatus] = useState("연계 일자");
+  const [socialLinkDate,setSocialLinkDate] = useState("");
+  
+  const [kakao,setKakao] = useState("");
+  const [naver,setNaver] = useState("");
+  const [facebook,setFacebook] = useState("");
+  const [google,setGoogle] = useState("");
   
   useEffect(() => {
 	    console.log('useEffect 호출....');
-	    axios.post("/com/getUserInfo").then(res => {
-	    	console.log(">>>>>>>>>>>>>>>>>>>>>>>>",JSON.stringify(res.data[0]));
-	    	setPageData(res.data[0]);
-	    	console.log("0:",pageData[0],"1:",pageData[1],"2:",pageData[2],"3:",pageData[3]);
+	    axios.post("/com/getUserInfo",{},{headers:{'Authorization':'Bearer '+store.token}})
+	    .then(res => {
+	    	setSvcType(res.data[0].user_type);
+	    	setInserDate(res.data[0].insert_date);
+	    	setUserName(res.data[0].user_name?res.data[0].user_name:"");
+	    	setUserPhone(res.data[0].user_phone?res.data[0].user_phone:"");
+	    	setUserEmail(res.data[0].user_email?res.data[0].user_email:"");
+	    	setSocialUse(res.data[0].social_link_yn === "Y"?true:false);
+	    	setSocialLinkDate(res.data[0].social_link_date?res.data[0].social_link_date:"");
+	    	setKakao(res.data[0].kakao_id?res.data[0].kakao_id:"");
+	    	setNaver(res.data[0].naver_id?res.data[0].naver_id:"");
+	    	setFacebook(res.data[0].face_id?res.data[0].face_id:"");
+	    	setGoogle(res.data[0].google_id?res.data[0].google_id:"");
 	    })
 	    //.then(res => console.log(">>>>>>>>>>>>>>>>>>>>>>>>",JSON.stringify(res.data[0])))
 	    .catch(err => {
-		       //console.log(err.response.status);
-		        if(err.response.status === "403") {
-		        	//setOpenJoin(true);
-		        }
+		    alert(err);
 		    });
-	    console.log('useEffect data....',pageData);
-	    
-	    console.log("0:",pageData[0],"1:",pageData[1],"2:",pageData[2],"3:",pageData[3]);
-
 	    
 	    return () => {
 	      console.log('cleanup');
 	    };
 	  }, []);  //  ==> }, [pageData]); 
   
+  function SelectBox() {
+	  
+	  return (
+			    <FormControl  fullWidth style={{marginTop:'11px'}}>
+			        <InputLabel id = "svctype">사용자구분</InputLabel>
+			        <Select
+			          native
+			          id = "svctype"
+			          value={svcType}
+			          onChange={(event) => setSvcType(event.target.value)}
+			        >
+				        <option value="S">선사</option>
+				        <option value="F">포워더</option>
+				        <option value="O">화주</option>
+				        <option value="A">관리자</option>
+				        <option value="E">기타</option>
+			        </Select>
+			    </FormControl>
+			  );
+  }
+  
+  const handleLink=(event)=>{
+	  if(socialUse) {
+		  setSocialUse(false);
+		  setLinkStatus("연계 해제 일자");
+	  } else {
+		  setSocialUse(true);
+		  setLinkStatus("연계 일자"); 
+	  }
+  }
+  
+  const onSubmit = () => {
+	  alert("서비스 준비중입니다.");
+  }
+    
   return (
     <div>
       <GridContainer>
@@ -86,101 +133,230 @@ export default function UserProfile() {
               <p className={classes.cardCategoryWhite}>Complete your profile</p>
             </CardHeader>
             <CardBody>
+
+            <GridContainer>
+                <GridItem xs={12} sm={12} md={3}>
+	                <SelectBox />
+              </GridItem>
+            <GridItem xs={12} sm={12} md={6}>
+              <CustomInput
+                labelText="가입일자"
+                id="savedate"
+                formControlProps={{
+                  fullWidth: true,
+                }}
+               labelProps={{id:"savedate"}}
+                inputProps={{
+                    value:insertDate,
+                    disabled: false,
+                  }}
+              />
+            </GridItem>
+              </GridContainer>
+              <GridContainer>
                 <GridItem xs={12} sm={12} md={5}>
                   <CustomInput
-                    labelText="Company"
-                    id="company"
+                    labelText="이름"
+                    id="name"
                     formControlProps={{
-                      fullWidth: true
+                      fullWidth: true,style:{paddingTop:'7px'}
                     }}
+                  	labelProps={{
+	            		style:{top:'-10px'},
+	            	}}
                     inputProps={{
-                      //disabled: true,
-                      value:company,
-                      onChange:({target:{value} }) => setCompany(value)
-                    }}
-                  />
-                </GridItem>
-
-
-                <GridContainer>
-	                <GridItem xs={12} sm={12} md={2}>
-		                <Select
-		                  id="serviceGb"
-		                  labelText="회원구분"
-		                  option={["선사","화주","관리자","포워더"]}
-		                	//value={profileData[0]}
-		                />
-	              </GridItem>
-                <GridItem xs={12} sm={12} md={3}>
-                  <CustomInput
-                    labelText="Username"
-                    id="username"
-                    formControlProps={{
-                      fullWidth: true,
-                      //value:profileData[2],
+                      value:userName,
                       onChange:({target:{value} }) => setUserName(value)
                     }}
                   />
                 </GridItem>
-                  </GridContainer>
                 <GridItem xs={12} sm={12} md={6}>
                   <CustomInput
-                    labelText="Email address"
-                    id="email-address"
+                    labelText="연락처"
+                    id="phone"	
                     formControlProps={{
-                      fullWidth: true,
-                      //value:profileData[1],
-                      onChange:({target:{value} }) => setUserEmail(value)
+                      fullWidth: true,style:{paddingTop:'7px'}
                     }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={6}>
-                  <CustomInput
-                    labelText="User Phone Number"
-                    id="userPhoneNum"
-                    formControlProps={{
-                      fullWidth: true,
-                      //value:profileData[4],
-                      onChange:({target:{value} }) => setUserPhone(value)
-                      
-                    }}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={6}>
-	            	<CustomInput
-	                	labelText="First Login Date"
-	                	id="firstloginDate"
-	                	formControlProps={{
-	                	disabled: true,
-	                	fullWidth: true,
-	                	//value:profileData[8]
-	                	}}
-	                />
-                </GridItem>
-	            	<GridContainer>
-	            <GridItem xs={12} sm={12} md={4}>
-		               <Switch
-		        		checked="Y"
-		    		  	onChange={() => setSocialYn(!socialYn)}
-		        		value="Y"
-		        		inputProps={{'aia-label':'checkbox'}}
-		    		  />소셜연계여부
-	            </GridItem>
-			    <GridItem xs={12} sm={12} md={6}>
-				    <CustomInput
-	            	labelText="Social Name"
-	            	id="socailName"
-	            	formControlProps={{
-	            	disabled: true,
-	            	fullWidth: true,
-	            	//value:profileData[7]
+                  	labelProps={{
+	            		style:{top:'-10px'},
 	            	}}
-				    />
-		         </GridItem>
-				    </GridContainer>
+                  	inputProps={{
+                      value:userPhone,
+                      onChange:({target:{value} }) => setUserPhone(value)
+                    }}
+                  />
+                </GridItem>
+                </GridContainer>
+                <GridContainer>
+	                <GridItem xs={12} sm={12} md={6}>
+	                  <CustomInput
+	                    labelText="Email address"
+	                    id="email"
+	                    formControlProps={{
+	                      fullWidth: true,style:{paddingTop:'7px'}
+		                }}
+		                labelProps={{style:{top:'-10px'}}}
+	                    inputProps={{value:userEmail,onChange:({target:{value} }) => setUserEmail(value)}}
+	                  />
+	                </GridItem>
+                </GridContainer> 
+
+	            <GridContainer>
+			         <GridItem xs={12} sm={12} md={4}>
+			         	<div>
+				        <Switch
+				        	checked={socialUse}
+				    		onChange={(event) => handleLink(event)}
+				        	inputProps={{'aia-label':'checkbox'}}
+				    	/>소셜연계여부
+				    	</div>
+			         </GridItem>
+				        <GridItem xs={12} sm={8} md={8}>
+				     	<CustomInput
+			            	labelText={linkStatus}
+			            	id="linkdate"
+			            	labelProps={{
+			            		style:{top:'-7px'},
+			            	}}
+			            	formControlProps={{
+			            		style:{paddingTop:'10px'},
+			            		disabled: true,
+			            		fullWidth: true,
+			            	}}
+				     		inputProps={{value:socialLinkDate}}
+						    />
+				      </GridItem>
+				</GridContainer>
+				{socialUse && (kakao||naver||facebook||google)?
+				<Card style={{paddingTop:'25px',marginTop:'0',paddingLeft:'10px',paddingRight:'10px',marginBottom:'0'}}>
+				{kakao?
+		        <GridContainer>
+			        <GridItem xs={12} sm={12} md={4}>
+				    	<CustomInput
+				    		labelText="Social Name"
+				    		id="kakao"
+				    		formControlProps={{
+			            	     style:{paddingTop:'0'},
+			            	     fullWidth: true,
+				    		}}
+					    	labelProps={{
+			            		style:{top:'-17px'},
+			            	}}
+				    		inputProps={{disabled: true,value:"KAKAO"}}
+				    	/>
+				     </GridItem>
+					 <GridItem xs={12} sm={8} md={8}>
+				     	<CustomInput
+			            	labelText="KAKAO 접속 일자"
+			            	id="socaildate"
+			            	labelProps={{
+				            	style:{top:'-17px'},
+				            }}
+			            	formControlProps={{
+			            		style:{paddingTop:'0'},
+			            		fullWidth: true,
+			            	}}
+				     	    inputProps={{disabled: true,value:kakao}}
+						    />
+				      </GridItem>
+				 </GridContainer>:null}
+				{naver?
+				        <GridContainer>
+					        <GridItem xs={12} sm={12} md={4}>
+						    	<CustomInput
+						    		labelText="Social Name"
+						    		id="naver"
+						    		formControlProps={{
+					            	     style:{paddingTop:'0'},
+					            	     fullWidth: true,
+						    		}}
+							    	labelProps={{
+					            		style:{top:'-17px'},
+					            	}}
+						    		inputProps={{disabled: true,value:"NAVER"}}
+						    	/>
+						     </GridItem>
+							 <GridItem xs={12} sm={8} md={8}>
+						     	<CustomInput
+					            	labelText="NAVER 접속 일자"
+					            	id="socaildate2"
+					            	labelProps={{
+						            	style:{top:'-17px'},
+						            }}
+					            	formControlProps={{
+					            		style:{paddingTop:'0'},
+					            		fullWidth: true,
+					            	}}
+						     	    inputProps={{disabled: true,value:naver}}
+								    />
+						      </GridItem>
+						 </GridContainer>:null}
+				{facebook?
+				        <GridContainer>
+					        <GridItem xs={12} sm={12} md={4}>
+						    	<CustomInput
+						    		labelText="Social Name"
+						    		id="facebook"
+						    		formControlProps={{
+					            	     style:{paddingTop:'0'},
+					            	     fullWidth: true,
+						    		}}
+							    	labelProps={{
+					            		style:{top:'-17px'},
+					            	}}
+						    		inputProps={{disabled: true,value:"FACEBOOK"}}
+						    	/>
+						     </GridItem>
+							 <GridItem xs={12} sm={8} md={8}>
+						     	<CustomInput
+					            	labelText="FACEBOOK 접속 일자"
+					            	id="socaildate3"
+					            	labelProps={{
+						            	style:{top:'-17px'},
+						            }}
+					            	formControlProps={{
+					            		style:{paddingTop:'0'},
+					            		fullWidth: true,
+					            	}}
+						     	    inputProps={{disabled: true,value:facebook}}
+								    />
+						      </GridItem>
+						 </GridContainer>:null}
+				{google?
+				        <GridContainer>
+					        <GridItem xs={12} sm={12} md={4}>
+						    	<CustomInput
+						    		labelText="Social Name"
+						    		id="google"
+						    		formControlProps={{
+					            	     style:{paddingTop:'0'},
+					            	     fullWidth: true,
+						    		}}
+							    	labelProps={{
+					            		style:{top:'-17px'},
+					            	}}
+						    		inputProps={{disabled: true,value:"GOOGLE"}}
+						    	/>
+						     </GridItem>
+							 <GridItem xs={12} sm={8} md={8}>
+						     	<CustomInput
+					            	labelText="GOOGLE 접속 일자"
+					            	id="socaildate4"
+					            	labelProps={{
+						            	style:{top:'-17px'},
+						            }}
+					            	formControlProps={{
+					            		style:{paddingTop:'0'},
+					            		fullWidth: true,
+					            	}}
+						     	    inputProps={{disabled: true,value:google}}
+								    />
+						      </GridItem>
+						 </GridContainer>:null}
+				</Card>:null}
             </CardBody>
             <CardFooter>
-              <Button color="primary">Update Profile</Button>
+              <Button color="primary" onClick={onSubmit}>Update Profile</Button>
             </CardFooter>
           </Card>
         </GridItem>

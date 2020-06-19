@@ -3,8 +3,7 @@ const fs = require('fs');
 
 const blExcelDownload = (request, response) => {
     var file = "BLUploadFormat.xlsx";
-    var filePath = "./downLoadFile/excelFiles/";
-    console.log(filePath ,' ', file)
+    var filePath = "/OWNER/downloadFiles/";
     fs.exists(filePath, function(exists) {
         console.log('exists',exists);
         if(exists) {

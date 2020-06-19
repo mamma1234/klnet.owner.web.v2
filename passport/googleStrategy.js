@@ -37,9 +37,18 @@ module.exports = (passport) => {
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {
         try {
-            console.log('(googleStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
+            //console.log('(googleStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
             // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
-
+            console.log("google profile:",profile);
+            sUser.provider = 'google';
+            sUser.email = profile.emails;
+            sUser.userno = '';
+            //sUser.id = profile.id;  
+            sUser.userid = profile.id;
+            sUser.username = profile.name.familyName+profile.name.givenName;
+            sUser.displayName = profile.displayName;      
+            sUser.accessToken = accessToken;
+            sUser.refreshToken = refreshToken;
 
 
             /*
@@ -80,21 +89,22 @@ module.exports = (passport) => {
         	                console.log(err);
         	            }
         	            //onsole.log(">>>",result);
-        	            console.log("ROW CNT:",result.rowCount);
+        	            //console.log("ROW CNT:",result.rowCount);
         	            if(result.rowCount > 0) {
         	                sUser.provider = 'google';
         	                sUser.email = profile.emails; 
-        	                sUser.id = profile.id;  
+        	                sUser.userid = profile.id; 
         	                sUser.userno = result.rows[0].user_no;
-        	                sUser.username = result.rows[0].user_name;
+        	                sUser.username = profile.name.familyName?profile.name.familyName+profile.name.givenName:result.rows[0].user_name;
         	                sUser.displayName = profile.displayName;      
-        	                sUser.accessToken = accessToken;
-        	                sUser.refreshToken = refreshToken;
+        	                //sUser.accessToken = accessToken;
+        	                //sUser.refreshToken = refreshToken;
         	                req.session.sUser = sUser;
+
     	                    done(null, sUser); 
         	            } else {
         	            	console.log('가입되지 않은 회원입니다.');
-        	                done(null, false, { message: '가입되지 않은 회원입니다.' });
+        	                done(null, sUser, { message: '가입되지 않은 회원입니다.' });
         	            }
         	        });
         	    });

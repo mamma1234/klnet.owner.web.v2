@@ -30,7 +30,8 @@ export default function CustomInput(props) {
     error,
     success,
     title,
-    handleProps
+    handleProps,
+    helperText
   } = props;
 
   const labelClasses = classNames({
@@ -45,13 +46,18 @@ export default function CustomInput(props) {
   const marginTop = classNames({
     [classes.marginTop]: labelText === undefined
   });
+  var helpTextClasses = classNames({
+	    [classes.labelRootError]: error,
+	    [classes.labelRootSuccess]: success && !error
+	  });
+  
   return (
     <FormControl
       {...formControlProps}
       className={formControlProps.className}
     >
-      <Grid container spacing={2}>
-      	<Grid item xs={12} sm={12} md={7} style={{height:'48px'}}>      
+      <GridContainer>
+      	<GridItem xs={12} sm={12} md={8}>      
 	        {labelText !== undefined ? (
 	                <InputLabel
 	                  className={classes.labelRoot + labelClasses}
@@ -69,17 +75,17 @@ export default function CustomInput(props) {
 	        }}
 	        id={id}
 	        {...inputProps}
-	      />
-      </Grid>
-      <Grid item xs={12} sm={12} md={1}>
-      	<Button  style={{minWidth:'100px'}} color="info" {...handleProps} >{title}</Button>
-      </Grid>
-      </Grid>
-      {error ? (
-        <Clear className={classes.feedback + " " + classes.labelRootError} />
-      ) : success ? (
-        <Check className={classes.feedback + " " + classes.labelRootSuccess} />
-      ) : null}
+	      /> 
+	      </GridItem>
+	      <GridItem xs={12} sm={12} md={4}>
+	      	<Button  color="info" {...handleProps}> 본인인증 </Button>
+	      </GridItem>
+      </GridContainer>
+      {helperText !== undefined ? (
+  	        <FormHelperText id={id + "-text"} className={helpTextClasses}>
+  	          {helperText}
+  	        </FormHelperText>
+  	      ) : null}
     </FormControl>
   );
 }

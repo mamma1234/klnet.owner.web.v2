@@ -58,7 +58,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   }
 */
   React.useEffect(() => {
-	  console.log(">>>>>main userStore.token",userStore.token);
+	 // console.log(">>>>>main userStore.token",userStore.token);
     if (userStore.token) {
       axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
         //.then(res => console.log("return:",res.data))
@@ -127,7 +127,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
     <div>
       <Header
         color="transparent"
-        brand="Plism Plus+"
+        brand="Plism Plus"
             links={<HeaderLinks dropdownHoverColor="info" onLoginOpen={handleClickLoginPage} onSignOpen={handleClickSignPage} isAuthenticated={isAuthenticated} userData={userData} logOut={handleLogOut}/>}
                 fixed
                 changeColorOnScroll={{
@@ -139,7 +139,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
       	open={open}
         onClose={handleClickClose}
       >
-       {modalGb=="login"?<DialogContent style={{maxWidth:'400px',minWidth:'350px'}}><LoginPage onClose={handleLoginClose}/></DialogContent>:
+       {modalGb=="login"?<DialogContent style={{maxWidth:'400px',minWidth:'350px',paddingLeft:'10px',paddingRight:'10px'}}><LoginPage onClose={handleLoginClose}/></DialogContent>:
     	   <DialogContent style={{maxWidth:'950px',minWidth:'350px',paddingLeft:'15px',paddingRight:'15px'}}><SignPage onClose={e=>setOpen(false)}/></DialogContent>
        }
             
@@ -170,65 +170,13 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
       <div className={classNames(classes.main, classes.mainRaised)} style={{marginLeft:'19px',marginRight:'19px'}}>
         <div className={classes.container}>
           <Board data={boardData}/>
-		  <ProductSection />
+		  {/*<ProductSection />
           <SectionProduct />
           <SectionTeam />
-          <SectionWork />
+          <SectionWork />*/}
         </div>
       </div>
-      <Footer
-        content={
-          <div>
-            <div className={classes.left}>
-              <List className={classes.list}>
-                <ListItem className={classes.inlineBlock}>
-                  <a
-                    href="https://www.creative-tim.com/?ref=mkpr-landing"
-                    target="_blank"
-                    className={classes.block}
-                  >
-                    Creative Tim
-                  </a>
-                </ListItem>
-                <ListItem className={classes.inlineBlock}>
-                  <a
-                    href="https://www.creative-tim.com/presentation?ref=mkpr-landing"
-                    target="_blank"
-                    className={classes.block}
-                  >
-                    About us
-                  </a>
-                </ListItem>
-                <ListItem className={classes.inlineBlock}>
-                  <a href="//blog.creative-tim.com/" className={classes.block}>
-                    Blog
-                  </a>
-                </ListItem>
-                <ListItem className={classes.inlineBlock}>
-                  <a
-                    href="https://www.creative-tim.com/license?ref=mkpr-landing"
-                    target="_blank"
-                    className={classes.block}
-                  >
-                    Licenses
-                  </a>
-                </ListItem>
-              </List>
-            </div>
-            <div className={classes.right}>
-              &copy; {1900 + new Date().getYear()} , made with{" "}
-              <Favorite className={classes.icon} /> by{" "}
-              <a
-                href="https://www.creative-tim.com/?ref=mkpr-landing"
-                target="_blank"
-              >
-                Creative Tim
-              </a>{" "}
-              for a better web.
-            </div>
-          </div>
-        }
-      />
+      <Footer/>
     </div>
   );
 }

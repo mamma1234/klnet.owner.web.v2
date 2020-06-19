@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/core/styles";
 //import Grid from '@material-ui/core/Grid';
 import GridItem from "components/Grid/GridItem.js";
 //import GridContainer from "components/Grid/GridContainer.js";
-import Table from "components/Table/TablePaging.js";
+import Table from "components/Table/Table.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
@@ -104,7 +104,7 @@ export default function TableList(props) {
 		    return axios ({
 		      url:'/sch/getLinePicInfo',
 		      method:'POST',
-		      data: {carrierCode : detailParam.org_line_code
+		      data: {carrierCode : detailParam.line_code
 		           },
 		      headers:{'Authorization':'Bearer '+store.token}
 		    }).then(setSelectData([])).then(res => setSelectData(res.data));
@@ -126,7 +126,7 @@ export default function TableList(props) {
 		         <GridItem>
 				     <Table
 				          tableHeaderColor="info"
-				          tableHead={["Position","ATTN","TEL"]}
+				          tableHead={["지역","업무","이름/직급","전화번호","이메일","C.P","비고"]}
 				          tableData={selectData}
 				        />
 				     </GridItem>

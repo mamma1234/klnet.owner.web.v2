@@ -13,8 +13,7 @@ import wizardStyle from "assets/jss/material-dashboard-pro-react/components/wiza
 
 class Wizard extends React.Component {
   constructor(props) {
-	  console.log("wizard value:",props);
-
+	  //console.log("wizard value:",props);
     super(props);
     var width;
     if (this.props.steps.length === 1) {
@@ -46,8 +45,10 @@ class Wizard extends React.Component {
         transition: "transform 0s"
       },
       allStates: {},
+      provider:'',
       kakaoid:'',tokenkakao:'',naverid:'',tokennaver:'',
-	  faceid:'',tokenface:'',googleid:'',tokengoogle:''
+	  faceid:'',tokenface:'',googleid:'',tokengoogle:'',
+	  socialuser:''
     };
     
     this.navigationStepChange = this.navigationStepChange.bind(this);
@@ -59,18 +60,22 @@ class Wizard extends React.Component {
   }
   wizard = React.createRef();
   componentDidMount() {
-    if(this.props.setvalue) {
+    if(this.props.setvalue.user) {
+    	//console.log("user info:",this.props.setvalue.user);
     	this.setState({currentStep:2,
     				   previousButton:false,
     				   nextButton:false,
-    				   finishButton:true,kakaoid:this.props.setvalue.provider === "kakao"?this.props.setvalue.provider:'',
-    	    			tokenkakao:this.props.setvalue.provider === "kakao"?this.props.setvalue.accessToken:'',
-    	    	    	naverid:this.props.setvalue.provider === "naver"?this.props.setvalue.provider:'',
-    	    	    	tokennaver:this.props.setvalue.provider === "naver"?this.props.setvalue.accessToken:'',
-    	    	    	faceid:this.props.setvalue.provider === "facebook"?this.props.setvalue.provider:'',
-    	    	    	tokenface:this.props.setvalue.provider === "facebook"?this.props.setvalue.accessToken:'',
-    	    	    	googleid:this.props.setvalue.provider === "google"?this.props.setvalue.provider:'',
-    	    	    	tokengoogle:this.props.setvalue.provider === "google"?this.props.setvalue.accessToken:'',
+    				   finishButton:true,
+    				   provider:this.props.setvalue.user.provider,
+    				   kakaoid:this.props.setvalue.user.provider === "kakao"?this.props.setvalue.user.userid:'',
+    	    		   tokenkakao:this.props.setvalue.user.provider === "kakao"?this.props.setvalue.user.accessToken:'',
+    	    	       naverid:this.props.setvalue.user.provider === "naver"?this.props.setvalue.user.userid:'',
+    	    	       tokennaver:this.props.setvalue.user.provider === "naver"?this.props.setvalue.user.accessToken:'',
+    	    	       faceid:this.props.setvalue.user.provider === "facebook"?this.props.setvalue.user.userid:'',
+    	    	       tokenface:this.props.setvalue.provider === "facebook"?this.props.setvalue.user.accessToken:'',
+    	    	       googleid:this.props.setvalue.user.provider === "google"?this.props.setvalue.user.userid:'',
+    	    	       tokengoogle:this.props.setvalue.user.provider === "google"?this.props.setvalue.user.accessToken:'',
+    	    	       socialuser:this.props.setvalue.user.username	   
     	});
 
     	this.refreshAnimation(2);
@@ -134,7 +139,8 @@ class Wizard extends React.Component {
       this.props.validate === undefined
     ) {
     	//인증
-    	console.log(">>>>>>>실명인증");
+    	//console.log(">>>>>>>실명인증");
+    	//window.open("/authpage/phonepopup", "auth_popup", "width=430,height=640,scrollbar=yes");
     	
       if (
         this[this.props.steps[this.state.currentStep].stepId].sendState !==
@@ -214,23 +220,25 @@ class Wizard extends React.Component {
         () => {
           //this.props.finishButtonClick(this.state.allStates);
           //this.props.finishButtonClick("회원가입이 완료 되었습니다.(no Database)");
+        	console.log(">>>>",this.state.allStates.step1);
+        	console.log(">>>>",this.state.allStates);
         	return axios ({
     			url:'/auth/join',
     			method:'POST',
     			//headers:{'Authorization':'Bearer '+this.props.store.token},
-    			data: {email : this.state.allStates.step1.email,
-    				   password : this.state.allStates.step1.password,
-    				   signgb : this.state.allStates.step1.signGubun,
-    				   name : this.state.allStates.step2.name,
-    				   phone: this.state.allStates.step2.phone,
-    				   company: this.state.allStates.step2.company,
+    			data: {provider:this.state.provider?this.state.provider:'local',
+    				   email : this.state.allStates.step1 !== undefined?this.state.allStates.step1.email:'socail',
+    				   password : this.state.allStates.step1 !== undefined?this.state.allStates.step1.password:'test',
+    				   name : this.state.allStates.step2 !== undefined?this.state.allStates.step2.name?this.state.allStates.step2.name:this.state.socialuser:this.state.socialuser,
+    				   phone: this.state.allStates.step2 !== undefined?this.state.allStates.step2.phone:'',
+    				   company: this.state.allStates.step2 !== undefined?this.state.allStates.step2.company:'',
     				   kakaoid:this.state.kakaoid,
     				   tokenkakao:this.state.tokenkakao,
-    				   naverid:this.state.kakaoid,
+    				   naverid:this.state.naverid,
     				   tokennaver:this.state.tokennaver,
-    				   faceid:this.state.kakaoid,
+    				   faceid:this.state.faceid,
     				   tokenface:this.state.tokenface,
-    				   googleid:this.state.kakaoid,
+    				   googleid:this.state.googleid,
     				   tokengoogle:this.state.tokengoogle, 
     				   }
     		}).then(res=>this.props.finishButtonClick("success"))

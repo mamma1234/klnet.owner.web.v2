@@ -5,7 +5,7 @@ const pgsqlPool = require("../database/pool.js").pgsqlPool
 // console.log("sUser:",sUser);
 
 module.exports = (passport) => {
-    // Client Secret	= s94tuPZ0Go
+    // Client Secret	= s94tuPZ0Go  5VoB2_ZRwUMHKM0JPuUM
     passport.use(new NaverStrategy({
         clientID: '5VoB2_ZRwUMHKM0JPuUM', 
         clientSecret: 'hni8LPrnpY',
@@ -18,10 +18,10 @@ module.exports = (passport) => {
             process.nextTick(function () {
                 // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
 
-                const userid = profile.id
-                const password = accessToken
-                const exUser = {userid, password}
-                console.log(exUser);
+                //const userid = profile.id
+                //const password = accessToken
+               // const exUser = {userid, password}
+               // console.log(exUser);
 
 
                /* pgSql.setUserSocial('naver',userid, password, function(error, exUser) {
@@ -58,7 +58,7 @@ module.exports = (passport) => {
                 
            	 sUser.provider = profile.provider;
              sUser.email = profile._json.email; //mamma1234@naver.com
-             sUser.id = profile._json.id;  //30625476
+             sUser.userid = profile._json.id;  //30625476
              sUser.username = profile._json.nickname;
              sUser.displayName = profile.displayName; 
              sUser.accessToken = accessToken;
@@ -66,7 +66,7 @@ module.exports = (passport) => {
              
             	const sql = {
             	        text: "SELECT * FROM OWN_COMP_USER  \n"+
-            	              " where naver_id = $1 \n"+
+            	              " where upper(naver_id) = upper($1) \n"+
             	        	  "  limit 1 ",
             	        values: [profile._json.id],
             	        //rowMode: 'array',
@@ -83,7 +83,7 @@ module.exports = (passport) => {
             	                console.log(err);
             	            }
             	           // console.log(">>>",result);
-            	            console.log("ROW CNT:",result.rowCount);
+            	           // console.log("ROW CNT:",result.rowCount);
             	            if(result.rowCount > 0) {
             	            	sUser.userno = result.rows[0].user_no;
         	     /*	            sUser.provider = 'kakao';
@@ -94,7 +94,13 @@ module.exports = (passport) => {
                                 sUser.accessToken = accessToken;
                                 sUser.refreshToken = refreshToken;
                                 sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
-*/
+					*/         	sUser.provider = profile.provider;
+								sUser.email = profile._json.email; //mamma1234@naver.com
+								sUser.userid = profile._json.id;  //30625476
+								sUser.username = profile._json.nickname;
+								sUser.displayName = profile.displayName; 
+								//sUser.accessToken = accessToken;
+								//sUser.refreshToken = refreshToken;
         	                    req.session.sUser = sUser;
         	                    done(null, sUser); 
             	            } else {

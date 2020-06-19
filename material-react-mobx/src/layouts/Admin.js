@@ -33,12 +33,12 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [miniActive, setMiniActive] = React.useState(true);
-  const [image, setImage] = React.useState(require("assets/img/sidebar-2.jpg"));
+  const [image, setImage] = React.useState(require("assets/img/sidebar-4.jpg"));
   const [color, setColor] = React.useState("blue");
   const [bgColor, setBgColor] = React.useState("black");
   // const [hasImage, setHasImage] = React.useState(true);
   const [fixedClasses, setFixedClasses] = React.useState("dropdown");
-  const [logo, setLogo] = React.useState(require("assets/img/logo-white.svg"));
+  const [logo, setLogo] = React.useState(require("assets/img/pp_logo.gif"));
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [open,setOpen] = React.useState(false);
   const [userData,setUserData] =React.useState([]);

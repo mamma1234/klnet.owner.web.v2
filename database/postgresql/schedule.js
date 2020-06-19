@@ -12,7 +12,7 @@ const getCarrierInfo = (request, response) => {
 	      +" WHERE A.KLNET_ID = B.KLNET_ID(+)"
         +" ORDER BY A.LINE_CODE ASC"; */
  	const sql = "select distinct line_code, '[' || line_code || '] ' || nm_kor as line_name  "
-        +" from own_code_cuship where line_code is not null and nm_kor is not null order by line_code";
+        +" from own_code_cuship where line_code is not null and view_yn = 'Y' and nm_kor is not null order by line_code";
 
         console.log ("query:" +sql);
 
@@ -62,12 +62,12 @@ const getScheduleList = (request, response) => {
     }
     sql = sql + "order by a.etd, a.line_Code, a.vsl_name, a.voyage_no, svc, b.eta" */
 
-    let sql = "select case when length(line_code) = 4 then (select line_code from own_code_cuship cus where id = sch.line_code limit 1) else line_code end, line_code as org_line_code, vsl_name,voyage_no,to_char(to_date(start_date,'YYYYMMDD'),'YYYY-MM-DD') as start_day, start_port_code as start_port, coalesce(start_port_name,start_port_code) as start_port_name, \n "
-    + "to_char(to_date(end_date,'YYYYMMDD'),'YYYY-MM-DD') as end_day, end_port_code as end_port, coalesce(end_port_name,end_port_code) as end_port_name, '[' || line_code || '] ' || vsl_name as title, to_date(start_date,'YYYYMMDD') as start, to_date(start_date,'YYYYMMDD') as end, \n"
+    let sql = "select * from (select case when length(line_code) = 4 then (select line_code from own_code_cuship cus where id = sch.line_code limit 1) else line_code end, line_code as org_line_code, vsl_name,voyage_no,to_char(to_date(start_date,'YYYYMMDD'),'YYYY-MM-DD') as start_day, start_port_code as start_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = start_port_code) as start_port_name, \n "
+    + "to_char(to_date(end_date,'YYYYMMDD'),'YYYY-MM-DD') as end_day, end_port_code as end_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = end_port_code) as end_port_name, '[' || line_code || '] ' || vsl_name as title, to_date(start_date,'YYYYMMDD') as start, to_date(start_date,'YYYYMMDD') as end, \n"
     + "'true' as \"allDay\", (select image_yn from own_code_cuship cus where line_code = sch.line_code limit 1) as image_yn, (select url from own_code_cuship where line_code = sch.line_code limit 1) as line_url, coalesce((select nm_kor from own_code_cuship where line_code = sch.line_code limit 1),sch.line_code ) as line_nm, \n" 
     + "case when to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') in ('0','1') then to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Day' else to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Days' end as tt, \n" 
-    + "(select ts from own_code_ts where line_code = sch.line_code and start_port_code = sch.start_port_code and end_port_code = sch.end_port_code) as ts from own_vsl_sch sch \n"
-    + "where (length(start_date) = 8 and length(end_date) = 8) and start_port_code = '"+request.body.startPort+"' and end_port_code = '"+request.body.endPort+"'  \n"
+    + "(select ts from own_code_ts where line_code = sch.line_code and start_port_code = sch.start_port_code and end_port_code = sch.end_port_code limit 1) as ts from own_vsl_sch sch \n"
+    + "where (length(start_date) = 8 and length(end_date) = 8) and start_date >= to_char(now(),'yyyymmdd') and start_port_code = '"+request.body.startPort+"' and end_port_code = '"+request.body.endPort+"'  \n"
     //+ "and start_date >= '"+request.body.startDate+"' and start_date <= '"+request.body.endDate+"' \n"
     if(request.body.tapNum == "1") {
         sql = sql + "and start_date like substring('"+request.body.startDate+"',1,6) || '%' \n"
@@ -82,7 +82,10 @@ const getScheduleList = (request, response) => {
         sql = sql + "and vsl_name LIKE '%"+request.body.vesselName+"%' \n";	
     }
     sql = sql + "group by line_Code, vsl_name, voyage_no, start_port_code, end_port_code, start_date, end_date, start_port_name, end_port_name \n"
-    sql = sql + "order by start_date, line_Code, vsl_name, voyage_no, end_date"
+    sql = sql + "order by start_date, vsl_name) a where 1=1 "
+    if(request.body.direct == true) {
+        sql = sql + "and ts = 'DIRECT'";	
+    }
             
             console.log ("query:" +sql);
 
@@ -234,8 +237,8 @@ const getLinePicInfo = (request, response) => {
 	console.log (">>PARAM1:"+request.body.carrierCode);
 	
     const sql = {
-        text: "select pic_position, pic_name, pic_tel \n"
-        + "from own_code_pic where line_code = $1 order by pic_position, pic_name ",
+        text: "select pic_area, pic_dept, pic_name, pic_tel, pic_email, pic_cell, pic_remark \n"
+        + "from own_code_pic where line_code = $1 order by array_position(array['서울','부산','인천','광양','평택','울산','포항','군산','대산','마산','싱가폴'],pic_area::TEXT), array_position(array['영업'],pic_dept::TEXT), pic_name asc ",
         values: [request.body.carrierCode],
         rowMode: 'array',
     }
@@ -266,6 +269,144 @@ const getLinePicInfo = (request, response) => {
             });
 }
 
+const getServiceCarrierList = (request, response) => {
+	console.log(">>>>>> getServiceCarrierList log");
+    console.log (">>PARAM1:"+request.body.startPort);
+    console.log (">>PARAM2:"+request.body.endPort);
+	
+    const sql = {
+        text: "select a.*,row_number() over() as rownum from (select distinct COALESCE(b.nm_kor,nm) as title, case when b.image_yn = 'Y' then \n"
+        + "a.line_code else 'No-Image' end img,a.line_Code,(select url from own_code_cuship where line_code = a.line_code limit 1) as line_url \n"
+        + "from own_Code_ts a, own_code_cuship b where start_port_code = $1 and end_port_code = $2 \n"
+        + "and a.line_code = b.line_code order by a.line_code) a ",
+        values: [request.body.startPort,request.body.endPort],
+        //rowMode: 'array',
+    }
+            
+            console.log ("query:" +sql);
+
+            pgsqlPool.connect(function(err,conn,done) {
+                if(err){
+                    console.log("err" + err);
+                    response.status(400).send(err);
+                }
+                console.log("sql : " + sql.text);
+                conn.query(sql, function(err,result){
+                    done();
+                    if(err){
+                        console.log(err);
+                        response.status(400).send(err);
+                    }
+        
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    console.log(result);
+                    response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+        
+                });
+        
+                // conn.release();
+            });
+}
+
+const getTerminalScheduleList = (request, response) => {
+    const vesselName = request.body.vesselName;
+    const start = request.body.startDate;
+    const end = request.body.endDate;
+    const terminal = request.body.terminal;
+    const working = request.body.working;
+    const area = request.body.area;
+    console.log(vesselName + start + end + terminal + working + area);
+
+/*     let sql = "select LOG_DATE as \"LOG_DATE\", SEQ as \"SEQ\", NAME as \"NAME\", MESSAGE as \"MESSAGE\" from own_scheduleloader_log "
+        sql += " where 1=1 ";
+    cntrNo == "" ? sql +="" : sql += " and port_code = '" + cntrNo + "'"  */
+    const sql = {
+      text: "select distinct b.port_kname as port_name, (select cal_list_ter_nm from own_terminal_info where terminal = d.terminal ) as terminal_name, (select cal_ter_nm from own_terminal_info where terminal = d.terminal ) as f_terminal_name, a.vessel_name, "
+      + " case when (a.im_voy is null or a.im_voy = '1') and (a.ex_voy is null or a.ex_voy = '1') then '' else coalesce((case when a.im_voy = '1' then null else a.im_voy end),' ') || ' / ' || coalesce((case when a.ex_voy = '1' then null else a.ex_voy end),' ') end as voyage_no, "
+      + " to_char(to_timestamp(a.load_begin_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24:MI') as atb, "
+      +" case when length(a.closing_time) = 6 and a.closing_time != '000000' " 
+      + " then SUBSTR(LOAD_BEGIN_DATE, 1, 4) || '-' || substr(CLOSING_TIME,1,2) || '-' || substr(CLOSING_TIME,3,2) || ' ' || substr(CLOSING_TIME,5,2) || ':00'  else '' end AS CLOSING_TIME, "
+      + " to_char(to_timestamp(a.load_end_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24:MI') atd, a.carrier_code, to_char(a.unload_container,'9,999') unload_container, to_char(a.load_container,'9,999') load_container, to_char(a.shifting_container,'9,999') shifting_container, "
+      + " (CASE WHEN SIGN(TO_CHAR(now(), 'YYYYMMDDHH24')::numeric - A.LOAD_BEGIN_DATE::numeric) = -1 THEN "
+      + " (case WHEN SIGN(TO_CHAR(now(), 'YYYYMMDDHH24')::numeric - (SUBSTR (LOAD_BEGIN_DATE, 1, 4) || CLOSING_TIME)::numeric) = -1 "
+      + " THEN '예정' ELSE '마감' END) ELSE " 
+      + " CASE WHEN SIGN(TO_CHAR (now(), 'YYYYMMDDHH24')::numeric - A.LOAD_END_DATE::numeric) =- 1 "
+      + " THEN '작업중' ELSE '완료' END END)  AS STATUS, COALESCE((select nm_kor from own_code_cuship where line_code = a.carrier_code limit 1), a.carrier_code) line_nm "
+      + " from own_cal_sch a, own_code_port b, own_code_berth d "
+      + " where 1=1 "
+      + " and b.nation_code = 'KR' and a.terminal = d.terminal and d.terminal not like 'BS%' and d.wharf_code not like 'W%' "
+      + " AND (case when D.LOC = 'ONS' then 'USN' when d.loc in ('YMH','SHG') then 'KPO' else d.loc end) = SUBSTR (B.PORT_CODE, 3) "
+      + " and a.load_begin_date >= $1 || '00' and a.load_begin_date <= $2 || '23' " 
+      + " and case when $3 != '' then a.VESSEL_NAME like '%' || upper($3) || '%' else 1=1 end " 
+      + " and case when $4 != '' then d.terminal in (" + terminal + "'') else 1=1 end " 
+      + " and case when $5 = true then SIGN(TO_CHAR(now(), 'YYYYMMDDHH24')::numeric - A.LOAD_BEGIN_DATE::numeric) != -1 AND SIGN(TO_CHAR (now(), 'YYYYMMDDHH24')::numeric - A.LOAD_END_DATE::numeric) =- 1 else 1=1 end "
+      //+ " and d.loc = $6 "
+      + "order by TERMINAL_NAME, atb " ,
+      values: [start,end,vesselName,terminal,working],
+      //rowMode: 'array',
+  }
+
+    //seq == "" ? sql.text +="" : sql.text += " and port_code = " + seq
+
+    console.log("query == ",sql);    
+    pgsqlPool.connect(function(err,client,done) {
+      if(err){
+        console.log("err" + err);
+        response.status(400).send(err);
+      }
+      client.query(sql, function(err,result){
+        done();
+        if(err){
+          console.log(err);
+          response.status(400).send(err);
+        }
+        console.log(result.rows);
+        response.status(200).send(result.rows);
+      });
+  
+    });
+  
+  }  
+
+  const getTerminalCodeList = (request, response) => {
+	console.log(">>>>>> getTerminalCodeList log");
+    console.log (">>PARAM1:"+request.body.area);
+	
+    const sql = {
+        text: "SELECT DISTINCT B.TERMINAL AS CODE, a.cal_ter_nm AS NAME \n"
+        + "FROM own_terminal_info A, own_code_berth B \n"
+        + "WHERE a.cal_yn = 'Y' and A.TERMINAL = B.TERMINAL AND case when $1 = 'GIN' then a.terminal = 'HJITC' else a.terminal != 'HJITC' and LOCATION_CODE = $1 end AND B.TERMINAL NOT LIKE 'BS%' AND B.WHARF_CODE NOT LIKE 'W%' \n"
+        + " ORDER BY NAME, CODE ",
+        values: [request.body.area],
+        //rowMode: 'array',
+    }
+            
+            console.log ("query:" +sql);
+
+            pgsqlPool.connect(function(err,conn,done) {
+                if(err){
+                    console.log("err" + err);
+                    response.status(400).send(err);
+                }
+                console.log("sql : " + sql.text);
+                conn.query(sql, function(err,result){
+                    done();
+                    if(err){
+                        console.log(err);
+                        response.status(400).send(err);
+                    }
+        
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    console.log(result);
+                    response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+        
+                });
+        
+                // conn.release();
+            });
+}
 
 const getScheduleSample = (request, response) => {
 
@@ -473,5 +614,8 @@ module.exports = {
         insertSchPortCode,
         updateSchPortCode,
         deleteSchPortCode,
-        getLinePicInfo
+        getLinePicInfo,
+        getServiceCarrierList,
+        getTerminalScheduleList,
+        getTerminalCodeList
 	}

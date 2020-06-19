@@ -36,6 +36,12 @@ import ScrapManage from "views/Pages/TestPage/ScrapManage.js";
 import ScrapResult from "views/Pages/TestPage/ScrapResult.js";
 import ScrapPort from "views/Pages/TestPage/ScrapPort.js";
 import SchPortCode from "views/Pages/TestPage/SchPortCodeList";
+import ExcelSchLog from "views/Pages/TestPage/ExcelSchLogPage.js";
+import ErrorLogPage from 'views/Pages/TestPage/ErrorLogList.js';
+import UserList from 'views/Pages/TestPage/UserList.js';
+import UserRequest from 'views/Pages/TestPage/UserRequest.js';
+import TerminalInfo from 'views/Pages/TestPage/TerminalInfo.js';
+import LineCode from 'views/Pages/TestPage/LineCode.js';
 // @material-ui/icons
 import Apps from "@material-ui/icons/Apps";
 //import DashboardIcon from "@material-ui/icons/Dashboard";
@@ -50,92 +56,231 @@ import ScrapIcon from '@material-ui/icons/Description';
 import TerminalIcon from "@material-ui/icons/LocalShippingOutlined";
 var dashRoutes = [
   {
-	path: "/schedule",
-	name: "Excel Sch Row Data",
-	rtlName: "Excel Sch Row Data",
-	icon: TerminalIcon,
-	component: SampleData,
-	layout: "/admin"
-  },
-  {
-	path: "/demdetosc",
-	name: "DEM&DET&OSC Data",
-	rtlName: "DEM&DET&OSC Data",
-	icon: TerminalIcon,
-	component: SampleData,
-	layout: "/admin"
-  },
-  {
-		path: "/usersetting",
-		name: "User Setting Manage",
-		rtlName: "User Setting Manage",
-		icon: TerminalIcon,
-		component: SampleData,
-		layout: "/admin"
-  },
-  {
     collapse: true,
-    name: "Code",
-    rtlName: "코드",
-    icon: Apps,
-    state: "componentsCollapse",
+    name: "Excel Sch",
+    rtlName: "Excel Sch",
+    icon: ScrapIcon,
+    state: "ExcelCollapse",
+    // layout: "/admin"
     views: [
       {
+      path: "/schedule",
+      name: "Excel Sch Row Data",
+      rtlName: "Excel Sch Row Data",
+      icon: TerminalIcon,
+      component: SampleData,
+      layout: "/admin"
+      },
+      {
         path: "/portcode",
-        name: "PORT CODE PAGE",
+        name: "Excel Sch Port Code",
         rtlName: "항구코드",
         mini: "PT",
         rtlMini: "PT",
         component: SchPortCode,
         layout: "/admin"
       },
+     
     ]
   },
   {
-      collapse: true,
-	    name: "Web Scraping",
-	    rtlName: "Web Scraping",
-	    icon: ScrapIcon,
-      // layout: "/admin"
-      views: [
+    collapse: true,
+    name: "Web Scraping",
+    rtlName: "Web Scraping",
+    icon: ScrapIcon,
+    state: "ScrapingCollapse",
+    // layout: "/admin"
+    views: [
+      {
+        path: "/lineManage",
+        name: "LINE SCRAP MANAGE",
+        rtlName: "선사별 스크랩 설정",
+        mini: "PT",
+        rtlMini: "PT",
+        component: Buttons,
+        component: ScrapManage,
+        layout: "/admin"
+      },
+      {
+        path: "/lineScrap",
+        name: "LINE SCRAP",
+        rtlName: "선사별 스크랩 조회",
+        mini: "PT",
+        rtlMini: "PT",
+        component: ScrapResult,
+        layout: "/admin"
+      },
+      {
+        path: "/linePort",
+        name: "LINE PORT",
+        rtlName: "선사별 스크랩 PORT",
+        mini: "PT",
+        rtlMini: "PT",
+        component: ScrapPort,
+        layout: "/admin"
+      },
+    ]
+  },
+  {
+    collapse: true,
+    name: "Monitoring",
+    rtlName: "Monitoring",
+    mini:'Mo',
+    rtlMini:'Mo',
+    state: "MonitoringCollapse",
+    // layout: "/admin"
+    views: [
+      {
+        path: "/excelSchLog",
+        name: "Excel Sch Log",
+        rtlName: "Excel Sch Log",
+        icon: TerminalIcon,
+        component: ExcelSchLog,
+        layout: "/admin"
+      },
+      {
+        path: "/errorlog",
+        name: "ERROR LOG PAGE",
+        rtlName: "Error log page",
+        component:ErrorLogPage,
+        icon: TerminalIcon,
+        layout: "/admin"
+      },
+      {
+        path: "/own_thread_manage",
+        name: "ownthreadmanage",
+        rtlName: "ThreadManage",
+        //component:
+        icon: TerminalIcon,
+        layout: "/admin"
+      },
+
+
+      
+    ]
+  },
+  {
+    collapse: true,
+    name: "Code",
+    rtlName: "Code",
+    mini:'Co',
+    rtlMini:'Co',
+    // layout: "/admin"
+    state: "CodeCollapse",
+    views: [
+      {
+        path: "/cuship",
+        name: "Line Code",
+        rtlName: "LINE CODE",
+        icon: TerminalIcon,
+        component: LineCode,
+        layout: "/admin"
+      },
+      {
+        path: "/terminalinfo",
+        name: "Terminal Code",
+        rtlName: "Terminal code",
+        icon: TerminalIcon,
+        component: TerminalInfo,
+        layout: "/admin"
+      },
+      {
+        path: "/codeport",
+        name: "Port code",
+        rtlName: "Port Code",
+        icon: TerminalIcon,
+        //component: SampleData,
+        layout: "/admin"
+      },
+      {
+        path: "/vslinfo",
+        name: "Vessel Code",
+        rtlName: "Vessel Code",
+        icon: TerminalIcon,
+        //component: SampleData,
+        layout: "/admin"
+      },
+      {
+        path: "/vsltype",
+        name: "Vessel Type Code",
+        rtlName: "Vessel Type Code",
+        icon: TerminalIcon,
+        //component: SampleData,
+        layout: "/admin"
+      },
+    ]
+  },  
+  {
+    collapse: true,
+    name: "Business",
+    rtlName: "Business",
+    mini:'Bs',
+    rtlMini:'Bs',
+    state: "BusinessCollapse",
+    // layout: "/admin"
+    views: [
+      {
+        path: "/blList",
+        name: "User BL Data",
+        rtlName: "UserBlData",
+        icon: TerminalIcon,
+        component: UserRequest,
+        layout: "/admin"
+      },
+      {
+        path: "/board",
+        name: "Board Data",
+        rtlName: "Board Data",
+        icon: TerminalIcon,
+        //component: SampleData,
+        layout: "/admin"
+      },
+      {
+        path: "/demdetosc",
+        name: "DEM&DET&OSC Data",
+        rtlName: "DEM&DET&OSC Data",
+        icon: TerminalIcon,
+        component: SampleData,
+        layout: "/admin"
+      },
         {
-          path: "/lineManage",
-          name: "LINE SCRAP MANAGE",
-          rtlName: "선사별 스크랩 설정",
-          mini: "PT",
-          rtlMini: "PT",
-          component: Buttons,
-          component: ScrapManage,
+          path: "/sample",
+          name: "Inland Tracking",
+          rtlName: "Inland Tracking",
+          icon: TerminalIcon,
+          component: SampleData,
           layout: "/admin"
         },
-        {
-          path: "/lineScrap",
-          name: "LINE SCRAP",
-          rtlName: "선사별 스크랩 조회",
-          mini: "PT",
-          rtlMini: "PT",
-          component: ScrapResult,
-          layout: "/admin"
-        },
-        {
-          path: "/linePort",
-          name: "LINE PORT",
-          rtlName: "선사별 스크랩 PORT",
-          mini: "PT",
-          rtlMini: "PT",
-          component: ScrapPort,
-          layout: "/admin"
-        },
-      ]
-	  },
-	  {
-	    path: "/sample",
-	    name: "Exp&Imp Tracking Data",
-	    rtlName: "Exp&Imp Tracking Data",
-	    icon: TerminalIcon,
-	    component: SampleData,
-	    layout: "/admin"
-	  },
+
+    ]
+  },  
+  {
+    collapse: true,
+    name: "User",
+    rtlName: "User",
+    mini:'Us',
+    rtlMini:'Us',
+    state: "UserCollapse",
+    // layout: "/admin"
+    views: [
+      {
+        path: "/userlist",
+        name: "User List Data",
+        rtlName: "User List Data",
+        icon: TerminalIcon,
+        component: UserList,
+        layout: "/admin"
+      },
+      {
+        path: "/useruisetting",
+        name: "User Ui Setting",
+        rtlName: "User Ui Setting",
+        icon: TerminalIcon,
+        //component: SampleData,
+        layout: "/admin"
+      },
+    ]
+  },
   {
     collapse: true,
     name: "MANAGE",
@@ -154,6 +299,6 @@ var dashRoutes = [
       },
       
     ]
-  },
+  },  
 ];
 export default dashRoutes;

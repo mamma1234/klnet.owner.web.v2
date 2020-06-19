@@ -12,8 +12,9 @@ RUN yarn build
 FROM nginx:1.16.1
 # RUN rm -rf /etc/nginx/conf.d
 COPY ./conf.d/default.conf /etc/nginx/conf.d/default.conf
-
+COPY ./ssl /usr/local/ssl/
 COPY --from=build /usr/src/klnet.owner.web/build /usr/share/nginx/html/
 
-EXPOSE 80
+# EXPOSE 80
+EXPOSE 443
 CMD ["nginx","-g","daemon off;"]

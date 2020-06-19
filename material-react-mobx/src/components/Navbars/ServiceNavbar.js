@@ -24,7 +24,8 @@ const useStyles = makeStyles(styles);
 
 export default function ServiceNavbar(props) {
   const classes = useStyles();
-  const { color, rtlActive, brandText,isAuthenticated ,...rest} = props;
+
+  const { color, rtlActive, brandText,isAuthenticated,store ,...rest} = props;
 
   const appBarClasses = cx({
     [" " + classes[color]]: color
@@ -68,7 +69,11 @@ export default function ServiceNavbar(props) {
           </Button>
         </div>
         <Hidden smDown implementation="css">
-          <ServiceNavbarLinks rtlActive={rtlActive} onLoginPageOpen={props.onLoginPageOpen} isAuthenticated={isAuthenticated} {...rest} />
+          <ServiceNavbarLinks 
+          	rtlActive={rtlActive} 
+            onLoginPageOpen={props.onLoginPageOpen} 
+            isAuthenticated={isAuthenticated} 
+            {...rest} />
         </Hidden>
         <Hidden mdUp implementation="css">
           <Button

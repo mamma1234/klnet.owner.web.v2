@@ -17,6 +17,7 @@ import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import Tooltip from '@material-ui/core/Tooltip';
 import Popover from "@material-ui/core/Popover";
+//import Paper from "@material-ui/core/Paper";
 
 // core components
 import styles from "assets/jss/material-dashboard-react/components/tableStyle.js";
@@ -127,7 +128,7 @@ TablePageinationActions.propTypes = {
   const classes = useStyles();
   const { tableHead, tableData, tableHeaderColor } = props;
   const [page,setPage] = React.useState(0);
-  const [rowsPerPage,setRowsPerPage] = React.useState(5);
+  const [rowsPerPage,setRowsPerPage] = React.useState(10);
 
   const [det,setDet] = useState(true);
 
@@ -151,7 +152,7 @@ TablePageinationActions.propTypes = {
   
   return (
     <div className={classes.tableResponsive}>
-      <Table className={classes.table}>
+      <Table className={classes.table} size="small" stickyHeader={true}>
         {tableHead !== undefined ? (
           <TableHead className={classes[tableHeaderColor + "TableHeader"]}>
             <TableRow className={classes.tableHeadRow}>
@@ -176,12 +177,12 @@ TablePageinationActions.propTypes = {
                 })}
            
         </TableBody>
-        {(tableData.length >= 5 ?
+        {(tableData.length >= 10 ?
         <TableFooter>
         	<TableRow>
         		<TablePagination 
-        			rowsPerPageOptions={[5,10,15,{label:'All',value:-1}]}
-        			colSpan={5}
+        			rowsPerPageOptions={[10,20,40,{label:'All',value:-1}]}
+        			colSpan={8}
         			count={tableData.length}
         		    rowsPerPage={rowsPerPage}
         			page={page}
@@ -234,7 +235,7 @@ ToggleTable.propTypes = {
 
   componentDidMount() {
     console.log("componentDidMount");
-    this.scheduleToSearch();
+    //this.scheduleToSearch();
   }
 
   componentDidUpdate(prevProps) {
@@ -242,7 +243,7 @@ ToggleTable.propTypes = {
     //debugger;
     if(this.props.page != prevProps.page) {
       this.setState({ expanded: false });
-      this.scheduleToSearch();
+      //this.scheduleToSearch();
     }
   }
 
@@ -252,7 +253,7 @@ ToggleTable.propTypes = {
     return axios ({
 		url:'/sch/getScheduleDetailList',
 		method:'POST',
-		data: {carrierCode : this.props.data.org_line_code,
+		data: {carrierCode : this.props.data.line_code,
 			   startPort : this.props.data.start_port,
 			   endPort : this.props.data.end_port,
 			   voyage : this.props.data.voyage_no,
@@ -269,7 +270,7 @@ ToggleTable.propTypes = {
  
   // 로우 생성
   toggleExpander = () => {
-    if (!this.state.expanded) {
+/*     if (!this.state.expanded) {
       this.setState({ expanded: true }, () => {
         if (this.refs.expanderBody) {
           slideDown(this.refs.expanderBody);//this.scheduleToSearch();
@@ -281,7 +282,7 @@ ToggleTable.propTypes = {
           this.setState({ expanded: false });
         }
       });
-    }
+    } */
 
   };
 
@@ -301,7 +302,7 @@ ToggleTable.propTypes = {
     return [
       <TableRow  key={this.props.index}  >
         {/* <TableCell >{this.props.data.line_code}</TableCell> */}
-        <TableCell onClick={this.handleClick} style={{cursor: "pointer"}}><Tooltip title={this.props.data.line_nm}>{this.props.data.image_yn=='Y'?<img src={require("assets/img/carrier/"+this.props.data.line_code+".gif")} />:<img src={require("assets/img/carrier/No-Image.gif")} />}</Tooltip>
+        <TableCell onClick={this.handleClick} style={{cursor: "pointer"}}><Tooltip title={this.props.data.line_nm}>{this.props.data.image_yn=='Y'?<img width='40' height='40' src={require("assets/img/carrier/"+this.props.data.line_code+".gif")} />:<img width='40' height='40' src={require("assets/img/carrier/No-Image.gif")} />}</Tooltip>
         </TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.vsl_name}</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.voyage_no}</TableCell>
@@ -309,7 +310,7 @@ ToggleTable.propTypes = {
         <TableCell onClick={this.toggleExpander}>{this.props.data.end_port_name} ({this.props.data.end_day})</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.tt}</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.ts}</TableCell>
-        <TableCell >{this.props.data.line_url && ( <Button target="_blank" href={this.props.data.line_url} color="info" fullWidth>BOOKING</Button>)}</TableCell>
+        <TableCell >{this.props.data.line_url && ( <Button size="sm" target="_blank" href={this.props.data.line_url} color="info" >BOOKING</Button>)}</TableCell>
                               
         <Popover
                     id="pop"

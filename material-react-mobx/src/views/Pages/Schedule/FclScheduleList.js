@@ -19,13 +19,25 @@ import Button from "components/CustomButtons/Button.js";
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
 //import CustomInput from "components/CustomInput/CustomInput.js";
 import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+//import FormGroup from '@material-ui/core/FormGroup';
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from '@material-ui/core/Select';
-import Tooltip from '@material-ui/core/Tooltip';
+//import Tooltip from '@material-ui/core/Tooltip';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
+//import StarIcon from '@material-ui/icons/StarBorder';
+
 // other import
 import axios from 'axios';
 import moment from 'moment';
 import ScheduleToggleTable from "views/Pages/Schedule/ScheduleDetailTable.js";
+import SchLinePicPop from "views/Pages/Schedule/SchLinePicPop.js";
+
 
 import CustomTabs from "components/CustomTabs/CustomTabs2.js";
 
@@ -41,6 +53,7 @@ import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 
 import Checkbox from '@material-ui/core/Checkbox';
+//import Box from '@material-ui/core/box';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
@@ -57,6 +70,24 @@ const localizer = momentLocalizer(moment);
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+
+
+  
+/*  const tileData = [
+   {
+     img: require('assets/img/carrier/CMA.gif'),
+     title: 'CMA',
+   },   
+   {
+	img: require('assets/img/carrier/APL.gif'),
+	title: 'APL',
+  },
+  {
+	img: require('assets/img/carrier/HAS.gif'),
+	title: 'HEUNG-A',
+  },
+ ]; */
+ 
 
 
 //const useStyles2 = makeStyles(styles2);
@@ -120,11 +151,19 @@ export default function ScheduleList(props) {
   const [selectData,setSelectData] = useState([]);
   const [portData,setPortData] = useState([]);
   const [scheduleData,setScheduleData] = useState([]);
+  const [tileData,setTileData] = useState([]);
   const [sDate,setSDate] = useState(new Date());
   const [eDate,setEDate] = useState(setEndDate.setDate(setEndDate.getDate()+6));
   const [eWeek,setEWeek] = useState("4 week");
   const [formatter,setFormatter] = useState("yyyy-MM-dd");
-  
+  const [state, setState] = React.useState({
+	checkedA: false,
+	pop2: false,
+	line_code: ""
+  });
+  const handleChange = (event) => {
+    setState({ ...state, [event.target.name]: event.target.checked });
+  };
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -147,10 +186,14 @@ export default function ScheduleList(props) {
 		setSDate(pDate);
 		setFormatter("yyyy-MM");
 		onSubmit(null,pDate,nDate,e);
-	} else {
+	} 
+	
+	if (e==0) {
 		setFormatter("yyyy-MM-dd");
 		onSubmit(null,null,null,e);
 	}
+
+	if(e==2) getServiceCarrierList();
   }
 
   const handleEWeek = (e) => {
@@ -225,11 +268,18 @@ export default function ScheduleList(props) {
   }
   
   const onSubmit = (e,sPDate,ePDate,eTabnum) => {
-	  let sQDate = "";
-	  let eQDate = "";
-	  let pTapnum = "";
+
+	//debugger;
+	
+	if(eTabnum == undefined && tapNum==2) {
+		getServiceCarrierList();
+	} else {
+
+	  //let sQDate = "";
+	  //let eQDate = "";
+	  //let pTapnum = "";
 	  
-	  if (sPDate != undefined) {
+/* 	  if (sPDate != undefined) {
 		sQDate = sPDate;
 	  } else {
 		sQDate = sDate;
@@ -239,28 +289,30 @@ export default function ScheduleList(props) {
 		eQDate = ePDate;
 	  } else {
 		eQDate = eDate;
-	  }
+	  } */
 
-	  if (eTabnum != undefined) {
+/* 	  if (eTabnum != undefined) {
 		pTapnum = eTabnum;
 	  } else {
 		pTapnum = tapNum;
-	  }
+	  } */
 
-	setScheduleData([]);
+	
 	  //search
 	
 	//console.log("SUBMIT",store.token);
 		if(store.token) {
+		  
 		  axios.post("/sch/getScheduleList",{ carrierCode:carrierCode,
-			  								  startDate:moment(sQDate).format('YYYYMMDD'),
-												endDate:moment(eQDate).format('YYYYMMDD'),
-												eWeek:eWeek,tapNum:pTapnum,
+			  								  startDate:moment(sPDate != undefined ? sPDate:sDate).format('YYYYMMDD'),
+												endDate:moment(ePDate != undefined ? ePDate:eDate).format('YYYYMMDD'),
+												eWeek:eWeek,tapNum:eTabnum != undefined ? eTabnum:tapNum,
 			  								  startPort:sPort,
 			  								  endPort:ePort,
-			  								  vesselName:vesselName
+												vesselName:vesselName,
+												direct:state.checkedA
 		  									},{headers:{'Authorization':'Bearer '+store.token}})
-			.then(res => setScheduleData(res.data))
+			.then(setScheduleData([])).then(res => setScheduleData(res.data))
 		    .catch(err => {
 		        if(err.response.status == "403"||err.response.status == "401") {
 		        	props.openLogin();
@@ -272,7 +324,30 @@ export default function ScheduleList(props) {
 		//if(sDate.toString() != "Invalid Date") {
 		//	setCDate(sDate);
 		//}
+	}
   }
+
+  function getServiceCarrierList() {
+	if(store.token) {
+		  return axios ({
+			url:'/sch/getServiceCarrierList',
+			method:'POST',
+			data: {startPort:sPort,
+				endPort:ePort
+				 },
+			headers:{'Authorization':'Bearer '+store.token}
+		  }).then(setTileData([])).then(res => setTileData(res.data))
+		  .catch(err => {
+			if(err.response.status == "403"||err.response.status == "401") {
+				props.openLogin();
+			}
+		});
+	} else {
+		
+		props.openLogin();
+	}
+	console.log(tileData[0]);
+}
   
   const classes = useStyles();
 
@@ -308,6 +383,20 @@ export default function ScheduleList(props) {
 	console.log(moment(sDate).format('YYYYMMDD') + moment(eDate).format('YYYYMMDD'));
 	onSubmit(null,pDate,nDate,null);
   };
+
+  const testClick = () => {
+	  alert("111");
+  }
+
+  const handleClick2 = (e,line_code) => {
+	  debugger;
+    setState({pop2:true, line_code:line_code});
+  };
+
+  const handleClose2 = () => {
+    setState({pop2:false});
+  };
+  
 
   /*
   const addNewEventAlert = slotInfo => {
@@ -365,7 +454,7 @@ export default function ScheduleList(props) {
 					<CardIcon color="info" style={{height:'26px'}}>
 						<Icon style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</Icon>
 				</CardIcon>
-				<h4 className={classes.cardTitleBlack}>FCL Sea Schedule</h4>
+		<h4 className={classes.cardTitleBlack}>FCL Sea Schedule</h4>
 	  		</CardHeader>
           <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
           	<Card>
@@ -375,18 +464,7 @@ export default function ScheduleList(props) {
 			      		<GridItem xs={12} sm={9} md={10}>
 			      			<GridContainer spacing={1}>
 			      				<GridItem xs={12} sm={4}>
-					        	  	<CalendarBox
-					        			labelText ="Start Date"
-										id="portDate"
-										disabled={tapNum == 1}
-					      				format={formatter}
-					      				setValue={sDate}
-					        			onChangeValue={date => setSDate(date)}
-					        			formControlProps={{fullWidth: true}}
-					        	  	/>
-					        	</GridItem>
-					        	<GridItem xs={12} sm={4}>
-					        		<Autocomplete
+								  <Autocomplete
 					        			options = {portData}
 					        			getOptionLabel = { options => "["+options.port_code+"] "+options.port_name}
 					        			id="start"
@@ -397,8 +475,8 @@ export default function ScheduleList(props) {
 					        			)}
 					        		/>
 					        	</GridItem>
-								<GridItem xs={12} sm={4}>
-					        		<Autocomplete
+					        	<GridItem xs={12} sm={4}>
+									<Autocomplete
 					        			options = {portData}
 					        			getOptionLabel = { options => "["+options.port_code+"] "+options.port_name}
 					        			id="end"
@@ -409,16 +487,27 @@ export default function ScheduleList(props) {
 					        			)}
 					        		/>
 					        	</GridItem>
+								<GridItem xs={12} sm={4}>
+								{tapNum != 2 && (<CalendarBox
+					        			labelText ="Start Date"
+										id="portDate"
+										disabled={tapNum != 0}
+					      				format={formatter}
+					      				setValue={sDate}
+					        			onChangeValue={date => setSDate(date)}
+					        			formControlProps={{fullWidth: true}}
+					        	  	/>)}
+					        	</GridItem>
 {/* 					        	<GridItem xs={12} sm={4}>
 									<TextField id="vesselName" label="Vessel Name" onChange={event => setVesselName(event.target.value)} value={vesselName} fullWidth />
 					        	</GridItem> */}
 					        	<GridItem xs={12} sm={4}>
-									<FormControl fullWidth>
+								{tapNum != 2 && (<FormControl fullWidth>
 									<InputLabel ></InputLabel>
-									<Select
+									<Select 
 									native
 									id = "portDateWeek"
-									disabled={tapNum == 1}
+									disabled={tapNum != 0}
 									value={eWeek}
 									label=""
 									onChange={handleEWeek}
@@ -428,7 +517,7 @@ export default function ScheduleList(props) {
 									<option value="6 week">6 Weeks Out</option>
 									<option value="8 week">8 Weeks Out</option>
 									</Select>
-									</FormControl>
+									</FormControl>)}
 {/* 					        		<CalendarBox
 					        			labelText ="입항일자"
 					        			id="portDate"
@@ -440,8 +529,10 @@ export default function ScheduleList(props) {
 					        			formControlProps={{fullWidth: true}}
 					        		/> */}
 					        	</GridItem>
-					        	<GridItem xs={12} sm={4} md={4}>
-					        		<Autocomplete
+					        	<GridItem xs={12} sm={4}>
+								{tapNum != 2 && (<Autocomplete
+									disabled={tapNum == 2}
+										size="small"
 										multiple
 										options = {selectData}
 										disableCloseOnSelect
@@ -463,8 +554,16 @@ export default function ScheduleList(props) {
 											  {option.line_name}
 											</React.Fragment>
 										  )}
-					        		/>
+					        		/>)}
 					        	</GridItem>
+								<GridItem xs={12} sm={4}>
+								{tapNum != 2 && (<FormControlLabel style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '0px',paddingRight: '15px'}}
+								control={
+								<Checkbox checked={state.checkedA} color="default" 
+								onChange={handleChange} name="checkedA" />}
+								label="Direct Only">
+									</FormControlLabel>)}
+								</GridItem>
 				        	 </GridContainer>
 			        	 </GridItem>
 			        	<GridItem xs={12} sm={2} md={2}>
@@ -481,8 +580,9 @@ export default function ScheduleList(props) {
 							tabName: "List"
 							,tabContent: (
           			<GridContainer>
+						<h5 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',fontWeight:'bold',marginTop:'0px',marginBottom:'0px' }}>※ {scheduleData.length} 건 검색 완료</h5>
           				<GridItem xs={12}>
-          					<ScheduleToggleTable
+          					<ScheduleToggleTable 
 		                        tableHeaderColor="info"
 		                        tableHead={["Carrier", "Vessel Name", "Voyage No", "Origin", "Destination", "T/Time", "T/S", "Booking"]}
 								tableData={scheduleData}
@@ -498,7 +598,7 @@ export default function ScheduleList(props) {
 									<GridItem xs={12}>
 									  <Card>
 										<CardBody calendar>
-										  <BigCalendar
+										  <BigCalendar 
 											selectable
 											localizer={localizer}
 											//events={events}
@@ -525,7 +625,8 @@ export default function ScheduleList(props) {
 											}
 											defaultView="month"
 											popup
-											views={['month','agenda']}
+											//views={['month','agenda']}
+											views={["month"]}
 											scrollToTime={new Date(1970, 1, 1, 6)}
 											//defaultDate={new Date()}
 											defaultDate={new Date(sDate)}
@@ -534,7 +635,7 @@ export default function ScheduleList(props) {
 											//eventPropGetter={eventColors}
 											onNavigate={date => navigatedEvent(date)}
 											//elementProps={{ onClick: e => selectedEvent(e.currentTarget,e.event)}}
-											//style={{height: "1000px"}}
+											style={{height: "700px"}}
 										  />
 										<Popover
 											id={id}
@@ -556,8 +657,58 @@ export default function ScheduleList(props) {
 
 								  </GridContainer>
 								)
-					 }]}>    
+					 },
+					 {
+						tabName: "Carrier List"
+						,tabContent: (
+				  <GridContainer>
+					  <GridItem xs={12}>
+					  <div className={classes.root}>
+      <GridList cellHeight={180} className={classes.gridList}>
+        <GridListTile key="Subheader" cols={2} style={{ height: 'auto' }}>
+          <ListSubheader component="div"></ListSubheader>
+        </GridListTile>
+        {tileData.map((tile) => (
+          <GridListTile key={tile.rownum} style={{ height: '150px',width:'400px'}}>
+<div align='center'>
+		<img src={require("assets/img/carrier/"+tile.img+".gif")} alt={tile.title} width='100' height='100' />
+		</div>
+            <GridListTileBar  
+			  title={
+				<IconButton className={classes.cardTitleWhite} onClick={(e) => handleClick2(e,tile.line_code)} size="small">{tile.title}
+			  </IconButton>
+			}
+              //subtitle={<span>by: {tile.author}</span>}
+              actionIcon={tile.line_url && (
+                <IconButton target="_blank" href={tile.line_url}>
+                  <InfoIcon className={classes.cardTitleWhite}/>
+                </IconButton>)
+              }
+            />
+          </GridListTile>
+))}
+      </GridList>
+    </div>
+	<Popover
+                    id="pop2"
+                    open={state.pop2}
+                    onClose={handleClose2}
+                    anchorReference="anchorPosition"
+                    anchorPosition={{top:80,left:550}}
+                        anchorOrigin={{vertical:'bottom',horizontal:'center',}}
+                        transformOrigin={{vertical:'top',horizontal:'center',}}
+                  >
+											<SchLinePicPop
+												detailParam = {state} store={store}
+											/>
+                  </Popover>
+					</GridItem>
+				</GridContainer>
+						)
+						}
+					 ]}>   
 					</CustomTabs>
+					<h6 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',color:'red',fontWeight:'bold' }}>※ 상기 스케줄은 실제 운항 스케줄과 상이할수 있습니다. 업무 진행시 선사와 필히 확인하시기 바랍니다.</h6>
 				  </CardBody>
           	</Card>
           </CardBody>

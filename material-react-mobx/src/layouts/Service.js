@@ -33,14 +33,14 @@ var ps;
 
 const useStyles = makeStyles(styles);
 
-const userbuttonStyles = makeStyles((theme)=> ({
+/*const userbuttonStyles = makeStyles((theme)=> ({
 	root: {
 		top:'693px',
 		position: 'fixed',
 		bottom:theme.spacing(2),
 		right: theme.spacing(2),
 	},
-}));
+}));*/
 
 //export default function Dashboard(props) {
 const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
@@ -50,7 +50,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [miniActive, setMiniActive] = React.useState(true); // default true로  설정
   //const [image, setImage] = React.useState(require("assets/img/sidebar-2.jpg"));
-  const image = require("assets/img/sidebar-2.jpg");
+  const image = require("assets/img/sidebar-4.jpg");
   //const [color, setColor] = React.useState("blue");
   const color = "blue";
   //const [bgColor, setBgColor] = React.useState("black");
@@ -58,12 +58,11 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   // const [hasImage, setHasImage] = React.useState(true);
   //const [fixedClasses, setFixedClasses] = React.useState("dropdown");
   //const [logo, setLogo] = React.useState(require("assets/img/logo-white.svg"));
-  const logo = require("assets/img/logo-white.svg");
+  const logo = require("assets/img/pp_logo.gif");
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [open,setOpen] = React.useState(false);
   const [userData,setUserData] =React.useState([]);
   const store =userStore;
-  
   // styles
   const classes = useStyles();
   const mainPanelClasses =
@@ -78,7 +77,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const mainPanel = React.createRef();
   // effect instead of componentDidMount, componentDidUpdate and componentWillUnmount
   
-  
+  console.log("layout");
   React.useEffect(() => {
 
 	    /*if (userStore.token) {*/
@@ -189,7 +188,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           <Route
             path={prop.layout + prop.path}
             //component={prop.component}
-          	render={() =><prop.component openLogin={()=>setOpen(true)} loginClose={handleLoginClose} store={store}/>}
+          	render={() =><prop.component openLogin={()=>setOpen(true)} loginClose={handleLoginClose} store={store} {...props}/>}
             key={key}
           />
         );
@@ -267,7 +266,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
         )}
         {BLuploadPage() ? <Footer fluid /> : null}
         
-      <div className={"fixed-plugin"} style={{top:'680px',width:'35px'}}>
+      <div className={"fixed-plugin"} style={{top:'85%',width:'35px'}}>
 	    <div onClick={handleClick}>
 	    	<Tooltip title="Scroll Top">
 	    		<i className="fa fa-angle-double-up fa-2x" style={{color:'white'}}/>

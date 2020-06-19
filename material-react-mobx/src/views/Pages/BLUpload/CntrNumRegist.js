@@ -18,7 +18,8 @@ import CardIcon from "components/Card/CardIcon.js";
 import IconM from "@material-ui/core/Icon";
 //import Modal from '@material-ui/core/Modal';
 //import JoinPage from "components/Form/Common/JoinPage.js";
-
+import CardIcon from "components/Card/CardIcon.js";
+import IconM from "@material-ui/core/Icon";
 const useStyless = makeStyles(theme => ({
 	  root: {
 	'& >*': {

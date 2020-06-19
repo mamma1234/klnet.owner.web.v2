@@ -10,7 +10,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import MenuList from "@material-ui/core/MenuList";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import Paper from "@material-ui/core/Paper";
-import Grow from "@material-ui/core/Grow";
+//import Grow from "@material-ui/core/Grow";
 import Hidden from "@material-ui/core/Hidden";
 import Popper from "@material-ui/core/Popper";
 import Divider from "@material-ui/core/Divider";
@@ -35,10 +35,29 @@ const useStyles = makeStyles(styles);
 //export default function HeaderLinks(props) {
 	
 const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {  
-	
+
   const [openNotification, setOpenNotification] = React.useState(null);
   
-  const { rtlActive , isAuthenticated} = props;
+  const { rtlActive , isAuthenticated } = props;
+  
+  const [msgCnt,setMsgCnt] = React.useState();
+  const [msg,setMsg] = React.useState([]);
+
+  React.useEffect(() => {
+	  
+	  if(userStore.token) {
+		  axios.post("/com/getUserNotice",{},{headers:{'Authorization':'Bearer '+userStore.token}})
+		    .then(res => setMsgCnt(res.data[0].noti_cnt))
+		    .catch(err => {
+		       console.log("HeaderLinks err",err);
+		    });  
+	  }
+	  
+	  return () => {
+	      console.log('cleanup');
+	    }; 
+	  
+  }, []);
   
   const handleClickNotification = event => {
     if (openNotification && openNotification.contains(event.target)) {
@@ -120,6 +139,27 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
 		    })
 
 	  }
+  const handleSelectMsg = (event) => {
+	  if(userStore.token) {
+		  axios.post("/com/getUserMessage",{},{headers:{'Authorization':'Bearer '+userStore.token}}
+			  )//.then(res=>console.log(res.data))
+			.then(setMsg([]))
+		    .then(res => {setMsg(res.data);setMsgCnt(0);})
+		    .catch(err => {
+		       console.log("HeaderLinks err",err);
+		    });  
+	  }
+	    if (openNotification && openNotification.contains(event.target)) {
+	        setOpenNotification(null);
+	      } else {
+	        setOpenNotification(event.currentTarget);
+	      }
+  }
+  
+  const handleMoreMessage = () => {
+	  alert('서비스준비중입니다.');
+  }
+  
   
   return (
     <div className={wrapper}>
@@ -177,7 +217,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           aria-label="Notifications"
           aria-owns={openNotification ? "notification-menu-list" : null}
           aria-haspopup="true"
-          onClick={handleClickNotification}
+          onClick={handleSelectMsg}
           className={rtlActive ? classes.buttonLinkRTL : classes.buttonLink}
           muiClasses={{
             label: rtlActive ? classes.labelRTL : ""
@@ -192,7 +232,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
                 : classes.links)
             }
           />
-          <span className={classes.notifications}>5</span>
+          {msgCnt>0?<span className={classes.notifications}>{msgCnt}</span>:null}
           <Hidden mdUp implementation="css">
             <span
               onClick={handleClickNotification}
@@ -215,56 +255,29 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
             [classes.popperNav]: true
           })}
         >
-          {({ TransitionProps }) => (
-            <Grow
-              {...TransitionProps}
-              id="notification-menu-list"
-              style={{ transformOrigin: "0 0 0" }}
-            >
-              <Paper className={classes.dropdown}>
+          <Paper className={classes.dropdown}>
                 <ClickAwayListener onClickAway={handleCloseNotification}>
-                  <MenuList role="menu">
-                    <MenuItem
-                      onClick={handleCloseNotification}
+                <MenuList role="menu">
+			          {msg.map((data,key) => {
+			        	  return (
+			                      <MenuItem
+			                        key={key}
+			                        onClick={handleCloseNotification}
+			                        className={dropdownItem}
+			                      >
+			                        {data.message}
+			                      </MenuItem>  
+			        	  );
+			          })}
+			          <MenuItem
+                      onClick={handleMoreMessage}
                       className={dropdownItem}
                     >
-                      {rtlActive
-                        ? "إجلاء أوزار الأسيوي حين بل, كما"
-                        : "Mike John responded to your email"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive
-                        ? "شعار إعلان الأرضية قد ذلك"
-                        : "You have 5 new tasks"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive
-                        ? "ثمّة الخاصّة و على. مع جيما"
-                        : "You're now friend with Andrew"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive ? "قد علاقة" : "Another Notification"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive ? "قد فاتّبع" : "Another One"}
+                      ...더보기
                     </MenuItem>
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
-            </Grow>
-          )}
         </Popper>
       </div>
 
@@ -334,11 +347,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           })}
         >
           {({ TransitionProps }) => (
-            <Grow
-              {...TransitionProps}
-              id="profile-menu-list"
-              style={{ transformOrigin: "0 0 0" }}
-            >
+
               <Paper className={classes.dropdown}>
                 <ClickAwayListener onClickAway={handleCloseProfile}>
                   <MenuList role="menu">
@@ -378,7 +387,6 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
-            </Grow>
           )}
         </Popper>
       </div>

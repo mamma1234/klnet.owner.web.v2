@@ -15,7 +15,6 @@ module.exports = {
         userno:'',
         userid:'',
         usertype:'',
-        id:'',
         email:'',
         accessToken:'',
         refreshToken:'',

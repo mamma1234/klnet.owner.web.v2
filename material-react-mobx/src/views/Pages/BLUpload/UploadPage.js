@@ -1,7 +1,7 @@
 
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles } from '@material-ui/core/styles';
+import { lighten, makeStyles, useTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -22,6 +22,7 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
+import IconButton from '@material-ui/core/IconButton'
 // @material-ui/core components
 // core components
 
@@ -48,13 +49,14 @@ import MuiAlert from '@material-ui/lab/Alert';
 import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
+import RefreshIcon from '@material-ui/icons/Refresh';
 //import Modal from '@material-ui/core/Modal';
 //import JoinPage from "components/Form/Common/JoinPage.js";
 import axios from 'axios';
 import leftPad from "left-pad";
 // import page
 import CarrierPage from "views/Pages/BLUpload/CarrierInfoPage.js";
-
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 
 
@@ -112,16 +114,16 @@ return (
       <TableRow>
 	  	<TableCell padding="checkbox">
           <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={numSelected > 0 && numSelected < rowCount}
+            indeterminate={numSelected > 0 }
+            checked={numSelected > 0}
             onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? "left": "center"}
+			key={headCell.id}
+            align={"left"}
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -178,7 +180,10 @@ const useStyles = makeStyles((theme) => ({
     top: 20,
     width: 1,
   },
-
+  marginRightForm: {
+	  paddingRight:'40px',
+	  right:0
+  },
 
   Toolbarroot: {
     paddingLeft: theme.spacing(2),
@@ -195,7 +200,7 @@ const useStyles = makeStyles((theme) => ({
           backgroundColor: theme.palette.secondary.dark,
         },
   Toolbartitle: {
-    flex: '1 1 100%',
+    flex: '1 1 15%',
   },
   FooterStyle: {
 	backgroundColor:"#EEEEEE",
@@ -217,7 +222,37 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonClass: {
 	  margin: theme.spacing(1)
-  }
+  },
+
+
+
+
+
+  Cardroot: {
+	display: 'flex',
+  },
+  Carddetails: {
+	display: 'flex',
+	flexDirection: 'column',
+  },
+  Cardcontent: {
+	flex: '1 0 auto',
+  },
+  Cardcover: {
+	width: 151,
+  },
+  Cardcontrols: {
+	display: 'flex',
+	alignItems: 'center',
+	paddingLeft: theme.spacing(1),
+	paddingBottom: theme.spacing(1),
+  },
+  iconSize: {
+	height: "65px",
+	width: "65px",
+	marginRight:"10px",
+	//padding: "20px",
+  },
 
 }));
 
@@ -231,6 +266,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function EnhancedTable(props) {
+  const theme = useTheme();
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -243,11 +279,8 @@ export default function EnhancedTable(props) {
   const [insertBlNo, setInsertBlNo] = useState("");
   const [insertBkNo, setInsertBkNo] = useState("");
   const [insertCntrNo, setInsertCntrNo] = useState("");
-  //icon상태
-  const [blState, setBlState] = useState(true);
-  const [bkState, setBkState] = useState(true);
-  const [cntrState, setCntrState] = useState(true);
-  const [carrierState, setCarrierState] = useState(true);
+  const [insertCarriernm,setInsertCarriernm] =useState("");
+
   //에러메시지
   const [blErrMessage,setBlErrMessage] = useState("");
   const [carrierErrMessage,setCarrierErrMessage] = useState("");
@@ -277,8 +310,6 @@ export default function EnhancedTable(props) {
   const [anchorU, setAnchorU] = useState(null);
   const [anchorD, setAnchorD] = useState(null);  
   const [openJoin, setOpenJoin] = useState(false);
-  const [rowBLNO, setRowBLNO] = useState("");
-  const [cntrList, setCntrList] = useState([]);
   const [severity, setSeverity] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [bladdCard, setBladdCard] = useState(false);
@@ -349,7 +380,7 @@ const handleSelectAllClick = (event) => {
 		}
 	  });
 
-
+	  console.log('newSelecteds',newSelecteds)
       setSelected(newSelecteds);
       return;
 	}
@@ -389,8 +420,16 @@ const handleSelectAllClick = (event) => {
 	}
 
   const onInsertCarrierChange = (e,data) => {
-	if(data) {setInsertCarrier(data.id);} else {setInsertCarrier("");}
+	  
+	if(data) {
+		setInsertCarrier(data.id);
+		setInsertCarriernm(data.nm);
+	} else {
+		setInsertCarrier("");
+		setInsertCarriernm("");
 	}
+
+  }
 	
   const isSelected = (name) => selected.indexOf(name) !== -1;
   
@@ -417,15 +456,11 @@ const handleSelectAllClick = (event) => {
 		alert( "종료일자가 시작 일자보다 빠릅니다. 다시 확인하세요." );
 		return false;
 	}
-	searchBefore();
+	//searchBefore();
 	axios.post("/loc/getMyBlList",{ carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
 	.then(res => (setSelectData(res.data)));
   };
 const initState = () => {
-	setBlState(true);
-	setCntrState(true);
-	setBkState(true);
-	setCarrierState(true);
 	setBlErrMessage("");
 	setCarrierErrMessage("");
 	setBkErrMessage("");
@@ -440,12 +475,18 @@ const AlertMessage = (message,icon) => {
 	setAlertOpen(true);
 }
 const onRowReset = () => {
+	
+	console.log('insertCarrier',insertCarrier)
+	
 	initState();
 	setInsertIeType("I");
 	setInsertCarrier("");
 	setInsertBlNo("");
 	setInsertBkNo("");
 	setInsertCntrNo("");
+	setInsertCarriernm("");
+
+
 
 }
 const onRowAdd = () => {
@@ -499,7 +540,6 @@ const onRowAdd = () => {
 		})
 	}
 const rowDelete = () => {
-	console.log(selected);
 	const rowCount = selected.length;
 	if(selected.length == 0) {
 		AlertMessage('삭제할 행이 존재하지 않습니다.', 'error');
@@ -510,11 +550,31 @@ const rowDelete = () => {
 										
 		})
 	AlertMessage(rowCount+ '개의 행을 삭제 하였습니다.', 'success');
+	setSelected([]);
+	handleClose();
 	onSubmit();
 	}
 	
 }
 
+const searchinit = (param) => {
+	console.log(param);
+	setIeGubun(param[0]);
+	setCarrierCode(param[1]);
+	if(param[2] != null && param[3] != null) {
+		setSearchKey(param[2]);
+	}else if( param[2] != null && param[3] == null) {
+		setSearchKey(param[2])
+	}else if( param[2] == null && param[3] != null) {
+		setSearchKey(param[3])
+	}
+	setTimeout(function() {
+		onSubmit();
+	},500)
+	
+	
+
+}
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, selectData.length - page * rowsPerPage);
 
 
@@ -542,19 +602,21 @@ const rowDelete = () => {
 								/>								
 							</Grid>
 							<Grid item xs={12} sm={12} md={2}>
-								<TextField id="blbk" label={"B/L No. & B/K No."} onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
-									fullWidth />
-							</Grid>
-							<Grid item  xs={12} sm={12} md={3}>
 								<Autocomplete
 									options = {lineCode}
 									getOptionLabel = { option => option.id + '\n' +option.nm }
 									id="carrierCode"
 									onChange={onCarrierChange}
+									
 									renderInput={params => (
 										<TextField inputProps={{maxLength:4}} {...params} label="Carrier" fullWidth />
 									)}
 								/>
+							</Grid>
+							<Grid item  xs={12} sm={12} md={3}>
+								<TextField id="blbk" label={"B/L No. & B/K No."} onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
+									fullWidth />
+								
 							</Grid>
 							<Grid item xs={12} sm={12} md={2}>
 							<CalendarBox
@@ -597,7 +659,7 @@ const rowDelete = () => {
 		<Grid>
 			<Toolbar className={clsx(classes.Toolbarroot, {[classes.Toolbarhighlight]: selected.length > 0,})}>
 			
-					<GridItem item xs={12} sm={12} md={11}>
+					<GridItem item xs={12} sm={12} md={10}>
 						<Grid style={{paddingTop:'10px'}}>
 							<Button
 								variant="contained"
@@ -647,21 +709,24 @@ const rowDelete = () => {
 						</Grid>
 					</GridItem>
 					<GridItem item xs={12} sm={12} md={1}>
-						<Grid style={{paddingTop:'10px'}}>
-							Total : {selectData.length}
-						</Grid>
+
 					</GridItem>
+					{/* <GridItem item xs={12} sm={12} md={1}>
+						<Grid style={{paddingTop:'10px', textAlignLast:'right'}}>
+							<span>Total : {selectData.length}</span>
+						</Grid>
+					</GridItem> */}
 				
 			</Toolbar>
-			<GridItem>
+			<GridItem style={{backgroundColor:'#00acc126'}}>
 				<Grid container spacing={3}>
-					<Grid item xs={12} sm={12} md={2}>
+					<Grid  item xs={12} sm={12} md={2}>
 						<FormControl style={{marginLeft:'20px', position:"center"}} component="div">
 							<RadioGroup row aria-label="position" name="position" defaultValue="I" value={insertIeType} >
 								<FormControlLabel
 									value="I"
 									control={<Radio color="primary" size="small" />}
-									label={<span style={{fontSize:'smaller'}}>IMPORT</span>}
+									label={<span style={{fontSize:'smaller', color:'#000000'}}>IMPORT</span>}
 									labelPlacement="left"
 									style={{marginTop:'10px'}}
 									onChange={(checked) => {if(checked){setInsertIeType('I')}}}
@@ -671,7 +736,7 @@ const rowDelete = () => {
 									value="E"
 									style={{marginTop:'10px'}}
 									control={<Radio color="primary" size="small" fullWidth/>}
-									label={<span style={{fontSize:'smaller'}}>EMPORT</span>}
+									label={<span style={{fontSize:'smaller', color:'#000000'}}>EXPORT</span>}
 									labelPlacement="left"
 									onChange={(checked) => {if(checked){setInsertIeType('E')}}}
 									/>
@@ -684,15 +749,17 @@ const rowDelete = () => {
 							options = {lineCode}
 							getOptionLabel = { option => option.id + '\n' +option.nm }
 							id="carrierCode"
+							value={{id:insertCarrier,nm:insertCarriernm}}
 							onChange={onInsertCarrierChange}
+							onInputChange ={(event,value) => console.log(event, value)}
 							renderInput={params => (
-								<TextField inputProps={{maxLength:4}} {...params} label="Carrier" fullWidth/>
+								<TextField inputProps={{maxLength:4}} {...params} label={<span style={{color:'#000000'}}>Carrier</span>} fullWidth/>
 							)}/>
 					</Grid>
 					<Grid item xs={12} sm={12} md={2}>
 						<TextField 
 							id="insertBL" 
-							label="B/L No."
+							label={<span style={{color:'#000000'}}>B/L No.</span>}
 							value={insertBlNo}
 							fullWidth
 							onChange={event => setInsertBlNo(event.target.value)}/>
@@ -700,7 +767,7 @@ const rowDelete = () => {
 					<Grid item xs={12} sm={12} md={2}>
 						<TextField 
 							id="insertBK" 
-							label="B/K No."
+							label={<span style={{color:'#000000'}}>B/K No.</span>}
 							value={insertBkNo}
 							fullWidth
 							onChange={event => setInsertBkNo(event.target.value)}/>
@@ -708,26 +775,34 @@ const rowDelete = () => {
 					<Grid item xs={12} sm={12} md={2}>
 						<TextField 
 							id="CntrNum" 
-							label="Container No."
+							label={<span style={{color:'#000000'}}>Container No.</span>}
 							value={insertCntrNo}
 							fullWidth
 							onChange={event => {setInsertCntrNo(event.target.value);}}/>
 					</Grid>
 					<Grid item xs={12} sm={12} md={1}>
-						<Button
+						{/* <Button
 							variant="contained"
 							color="info" fullWidth
-							onClick = {() => onRowReset()}>
-							INIT
-						</Button>
+							//onClick={() => rowDelete()}
+							onClick = {() => onRowReset()}
+							startIcon={<RefreshIcon/>}>
+						</Button>&nbsp;&nbsp; */}
+						<FormControl style={{textAlignLast:'right', marginRight:'50px'}} component="div" fullWidth>
+						<IconButton>
+							<RefreshIcon onClick = {() => onRowReset()}/>
+						</IconButton>
+						</FormControl>
 					</Grid>
-					<Grid item xs={12} sm={12} md={1}>
-						<Button
-							variant="contained"
-							color="info" fullWidth
-							onClick = {() => onRowAdd()}>
-							ADD
-						</Button>
+					<Grid item xs={12} sm={12} md={1} >
+						<FormControl className={classes.marginRightForm} component="div" fullWidth>
+							<Button
+								variant="contained"
+								color="info" 
+								onClick = {() => onRowAdd()}>
+								ADD
+							</Button>
+						</FormControl>
 					</Grid>
 				</Grid>
 			</GridItem>
@@ -735,43 +810,60 @@ const rowDelete = () => {
 		{selected.length > 0 &&(
 		<Grid>
 			<Toolbar className={clsx(classes.Toolbarroot, {[classes.Toolbarhighlight]: selected.length > 0,})}>
-			
-					<GridItem item xs={12} sm={12} md={11}>
-						<Grid style={{paddingTop:'10px'}}>
+				<span style={{fontWeight:'bold'}}>{selected.length}</span>
+				<Typography  style={{marginLeft:'15px', width:'100%', padding:'10px', margin:'0 auto', textAlign:'center', textAlignLast:'center',}} color="inherit" variant="subtitle1" component="div">
 						<Button
 							variant="contained"
 							color="info"
 							size="sm"
 							//onClick={() => rowDelete()}
-							onClick = {(e) => setAnchorD(e.currentTarget)}
-							startIcon={<BackupIcon/>}>B/L DELETE
-						</Button>&nbsp;&nbsp;
+							onClick = {(e) => setAnchorD(e.currentTarget)}>DELETE
+						</Button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<Button
+							variant="contained"
+							color="warning"
+							onClick = {(e) => handleSelectAllClick(e)}
+							size="sm">Cancel
+						</Button>
 						<Popover
 							id={deletePop}
 							open={delete_open}
 							anchorEl={anchorD}
 							onClose={handleClose}
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
-							transformOrigin={{vertical:'top',horizontal:'center',}}>
-							<Grid item xs={12} sm={12} md={12} style={{backgroundColor:'#E5E5E5'}}>		
-								<FormControl  style={{marginLeft:"15px"}} component="div">
+							transformOrigin={{vertical:'top',horizontal:'center',}}>	
+							<Card style={{width:'400px'}}>
+								<CardBody>
+									<GridItem>
+										<GridContainer>
+											<GridItem xs={12} sm={12} md={3}>
+												<DeleteForeverIcon color="action" className={classes.iconSize } fontSize="large"></DeleteForeverIcon>											</GridItem>
+											<GridItem xs={12} sm={12} md={9}>
+												<GridContainer>
+													<h4>Are you sure you want to delete?</h4>
+												</GridContainer>	
+												<GridContainer>
+													<GridItem xs={12} sm={12} md={6}>
+														<Button size="sm" color="info" onClick={() => rowDelete()} >Confirm</Button>
+													</GridItem>
+													<GridItem xs={12} sm={12} md={6}>
+														<Button size="sm" color="warning" onClick={() => handleClose()} >Cancel</Button>
+													</GridItem>
+												</GridContainer>
+											</GridItem>
+										</GridContainer>
+									</GridItem>
+								</CardBody>
+							</Card>
+								{/* <GridContainer>
 									<h4>Are You Sure?</h4> 
-									
-								</FormControl>
-								<FormControl style={{marginLeft:'10px'}}  component="div">
 									<CheckIcon fontSize="large" onClick={() => rowDelete()}></CheckIcon>
-								</FormControl>
-								<FormControl  style={{marginRight:"15px"}} component="div">
-									<ClearIcon fontSize="large" onClick={() => handleClose()}></ClearIcon> 
-								</FormControl>
-								
-							</Grid>
+									<ClearIcon fontSize="large" onClick={() => handleClose()}></ClearIcon>
+
+								</GridContainer> */}
 						</Popover>		
-							
-							
-						</Grid>
-					</GridItem>
-				<Typography className={classes.Toolbartitle} color="inherit" variant="subtitle1" component="div">{selected.length} SELECT</Typography>
+					</Typography>
+				
 			</Toolbar>
 			
 		</Grid>
@@ -815,7 +907,12 @@ const rowDelete = () => {
 							anchorPosition={{top:10,left:550}}
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
 							transformOrigin={{vertical:'top',horizontal:'center',}}><Excel token={store}
-																							params={lineCode} />
+																							params={lineCode}
+																							returnFunction={() =>handleClose()}
+																							returnMessage={(message, state)=> AlertMessage(message, state)}
+																							returnState={()=>onSubmit()} 
+																							searchFunction={(param) => searchinit(param)}
+																							/>
 						</Popover>
 						
 						<Popover
@@ -830,11 +927,7 @@ const rowDelete = () => {
 						</Popover>
 					</Grid>
 				</GridItem>
-				<GridItem item xs={12} sm={12} md={1}>
-					<Grid style={{paddingTop:'10px'}}>
-						Total : {selectData.length}
-					</Grid>
-				</GridItem>
+				<span style={{fontSize:'small'}}>Total : {selectData.length}</span>
 			
 		</Toolbar>
 			
@@ -871,7 +964,8 @@ const rowDelete = () => {
                       aria-checked={isItemSelected}
                       tabIndex={-1}
                       key={row.num}
-                      selected={isItemSelected}
+					  selected={isItemSelected}
+					  
                     >
 					  <TableCell padding="checkbox">
                         <Checkbox
@@ -881,12 +975,12 @@ const rowDelete = () => {
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">{row.num}</TableCell>
 				 
-                      <TableCell align="center">{row.ie_type=="I"?"IMPORT":"EXPORT"}</TableCell>
-					  <TableCell align="center"><Tooltip title={row.nm_kor} arrow><span>{row.carrier_code}</span></Tooltip></TableCell>
-                      <TableCell align="center">{row.bl_no}</TableCell>
-                      <TableCell align="center">{row.bkg_no}</TableCell>
-					  <TableCell align="center">{row.cntr_no}</TableCell>
-					  <TableCell align="center">{row.insert_date}</TableCell>
+                      <TableCell align="left">{row.ie_type=="I"?"IMPORT":"EXPORT"}</TableCell>
+					  <TableCell align="left"><Tooltip title={row.nm_kor} arrow><span>{row.carrier_code}</span></Tooltip></TableCell>
+                      <TableCell align="left">{row.bl_no}</TableCell>
+                      <TableCell align="left">{row.bkg_no}</TableCell>
+					  <TableCell align="left">{row.cntr_no}</TableCell>
+					  <TableCell align="left">{row.insert_date}</TableCell>
                     </TableRow>
                   );
                 })}

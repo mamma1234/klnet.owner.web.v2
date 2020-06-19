@@ -25,8 +25,17 @@ import CardIcon from "components/Card/CardIcon.js";
 
 import Grid from '@material-ui/core/Grid';
 import CustomTabs from "components/CustomTabs/CustomTabs2.js";
-import ImpTable from "components/Table/TablePaging.js";
-import ExpTable from "components/Table/TablePaging.js";
+//import ImpTable from "components/Table/TablePaging.js";
+//import ExpTable from "components/Table/TablePaging.js";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableHead from "@material-ui/core/TableHead";
+import TableFooter from "@material-ui/core/TableFooter";
+
+import tablestyles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
+
 
 const styles = {
   cardCategoryWhite: {
@@ -73,6 +82,7 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 
+const tableStyles = makeStyles(tablestyles);
 
 export default function ScheduleList(props) {
 
@@ -118,6 +128,10 @@ export default function ScheduleList(props) {
 
 		  }
   }
+  
+  const onSubmitAdd = () => {
+	  
+  }
   const classes = useStyles();
   
   return (
@@ -156,8 +170,8 @@ export default function ScheduleList(props) {
 	              ,tabContent: (
 	                  <ImpTable
 	                      tableHeaderColor="info"
-	                      tableHead={[  "SEQ","CNTR_NO","UNLOAD_DATE_TIME","UNLOAD_VESSEL_CODE","UNLOAD_TERMINAL_REF_NO","UNLOAD_TERMINAL","UNLOAD_CARRIER_CODE","UNLOAD_SEAL_NO","UNLOAD_BL_NO","UNLOAD_BOOKING_NO","UNLOAD_FULL_EMPTY","UNLOAD_VESSEL_NAME","UNLOAD_CARRIER_REF_NO","UNLOAD_POL","UNLOAD_POD","OUT_DATE_TIME","OUT_TERMINAL","OUT_FULL_EMPTY","OUT_BL_NO","OUT_CARRIER_CODE","OUT_SEAL_NO","OUT_CAR_NO","IN_DATE_TIME","IN_TERMINAL","IN_FULL_EMPTY","IN_BL_NO","IN_CARRIER_CODE","IN_SEAL_NO","IN_CAR_NO","MFCS_MRN","MFCS_ARV_DATE","MFCS_LINE_CODE","MFCS_BL_NO","MFCS_SEAL_NO","MFCS_POD","MFCS_POL","DISCHARGE_TERMINAL","UNLOAD_COARRI_THIS_IPM","OUT_CODECO_THIS_IPM","OUT_CODECO_KEY_ID","IN_CODECO_THIS_IPM","IN_CODECO_KEY_ID","REG_DATE","UPDATE_DATE","CLOSE_DATE","CARRIER_CODE","BL_NO","TYPE_SIZE","POD","POL","DELIVERY_ORDER_NO"]}
 	                      tableData={importData}
+	                      onClickHandle = {onSubmitAdd}
 	                  />
 	              )
 	          }
@@ -169,7 +183,7 @@ export default function ScheduleList(props) {
 	              ,tabContent: (
 	                  <ExpTable
 	                      tableHeaderColor="info"
-	                      tableHead={[   "SEQ","CNTR_NO","OUT_DATE_TIME","OUT_TERMINAL","OUT_FULL_EMPTY","OUT_BKG_NO","OUT_BL_NO","OUT_CARRIER_CODE","OUT_SEAL_NO","OUT_CAR_NO","PRE_IN_DATE_TIME","PRE_IN_TERMINAL","PRE_IN_FULL_EMPTY","PRE_IN_BKG_NO","PRE_IN_BL_NO","PRE_IN_CARRIER_CODE","PRE_IN_SEAL_NO","PRE_IN_CAR_NO","POL","POL_IN_DATE_TIME","POL_IN_TERMINAL","POL_IN_FULL_EMPTY","POL_IN_BKG_NO","POL_IN_BL_NO ","POL_IN_CARRIER_CODE","POL_IN_SEAL_NO","POL_IN_CAR_NO","IN_DATE_TIME","IN_TERMINAL","IN_FULL_EMPTY","IN_BKG_NO","IN_BL_NO","IN_CARRIER_CODE","IN_SEAL_NO","IN_CAR_NO","RETURN_DATE","LOAD_DATE_TIME","LOAD_VESSEL_CODE","LOAD_TERMINAL_REF_NO","LOAD_TERMINAL","LOAD_CARRIER_CODE","LOAD_SEAL_NO","LOAD_BL_NO","LOAD_BOOKING_NO","LOAD_FULL_EMPTY","MFCS_MRN","MFCS_DPT_DATE","MFCS_LINE_CODE","MFCS_BL_NO","MFCS_SEAL_NO","CLL_SEQ","CLL_CARRIER_CODE","CLL_SOC","CLL_BL_NO","CLL_SEAL_NO","OUT_SCH_ETA","OUT_SCH_ETD","OUT_SCH_LINE_CODE","OUT_SCH_TERMINAL","OUT_SCH_VESSEL_CODE","OUT_SCH_TERMINAL_REF_NO","OUT_SCH_ROUTE_CODE","OUT_SCH_ETB","OUT_SCH_LINE_VSL","OUT_SCH_VOYAGE_NO","OUT_BKG_SHIPPER_ID","OUT_BKG_SHIPPER_NAME","IN_SCH_ETA","IN_SCH_ETD","IN_SCH_LINE_CODE","IN_SCH_TERMINAL","IN_SCH_VESSEL_CODE","IN_SCH_TERMINAL_REF_NO","IN_SCH_ROUTE_CODE","IN_SCH_ETB","IN_SCH_LINE_VSL","IN_SCH_VOYAGE_NO","IN_BKG_SHIPPER_ID","IN_BKG_SHIPPER_NAME","CLL_SCH_CH_LINE_CODE","CLL_SCH_TERMINAL","CLL_SCH_VESSEL_CODE","CLL_SCH_TERMINAL_REF_NO","CLL_SCH_ROUTE_CODE","CLL_SCH_ETB","CLL_SCH_LINE_VSL","CLL_SCH_VOYAGE_NO","LOAD_SCH_ETA","LOAD_SCH_ETD","LOAD_SCH_LINE_CODE","LOAD_SCH_TERMINAL","LOAD_SCH_VESSEL_CODE","LOAD_SCH_TERMINAL_REF_NO","LOAD_SCH_ROUTE_CODE","LOAD_SCH_ETB","LOAD_SCH_LINE_VSL","LOAD_SCH_VOYAGE_NO","CHANGE_VESSEL_CODE","CHANGE_TERMINAL_REF_NO","CHANGE_LINE_VSL","CHANGE_VOYAGE_NO","CHANGE_ROUTE","CHANGE_TERMINAL","CHANGE_ETA","CHANGE_ETB","CHANGE_ETD","CHANGE_POL","OUT_CODECO_THIS_IPM","OUT_CODECO_KEY_ID","PRE_IN_CODECO_THIS_IPM","PRE_IN_CODECO_KEY_ID","POL_IN_CODECO_THIS_IPM","POL_IN_CODECO_KEY_ID","IN_CODECO_THIS_IPM","IN_CODECO_KEY_ID","LOAD_COARRI_THIS_IPM","OUT_BKG_SIETA","CLL_SCH_ETD","CLL_SD","IN_BKG_SID","OUT_SCH_VOYAGE_SID","IN_SCH_VOYAGE_SID","CLL_SCH_VOYAGE_SID","LOAD_SCH_VOYAGE_SID","REG_DATE","UPDATE_DATE","CLOSE_DATE"," CARRIER_CODE","BL_NO","TYPE_SIZE"]}
+	                      //tableHead={[   "SEQ","CNTR_NO","OUT_DATE_TIME","OUT_TERMINAL","OUT_FULL_EMPTY","OUT_BKG_NO","OUT_BL_NO","OUT_CARRIER_CODE","OUT_SEAL_NO","OUT_CAR_NO","PRE_IN_DATE_TIME","PRE_IN_TERMINAL","PRE_IN_FULL_EMPTY","PRE_IN_BKG_NO","PRE_IN_BL_NO","PRE_IN_CARRIER_CODE","PRE_IN_SEAL_NO","PRE_IN_CAR_NO","POL","POL_IN_DATE_TIME","POL_IN_TERMINAL","POL_IN_FULL_EMPTY","POL_IN_BKG_NO","POL_IN_BL_NO ","POL_IN_CARRIER_CODE","POL_IN_SEAL_NO","POL_IN_CAR_NO","IN_DATE_TIME","IN_TERMINAL","IN_FULL_EMPTY","IN_BKG_NO","IN_BL_NO","IN_CARRIER_CODE","IN_SEAL_NO","IN_CAR_NO","RETURN_DATE","LOAD_DATE_TIME","LOAD_VESSEL_CODE","LOAD_TERMINAL_REF_NO","LOAD_TERMINAL","LOAD_CARRIER_CODE","LOAD_SEAL_NO","LOAD_BL_NO","LOAD_BOOKING_NO","LOAD_FULL_EMPTY","MFCS_MRN","MFCS_DPT_DATE","MFCS_LINE_CODE","MFCS_BL_NO","MFCS_SEAL_NO","CLL_SEQ","CLL_CARRIER_CODE","CLL_SOC","CLL_BL_NO","CLL_SEAL_NO","OUT_SCH_ETA","OUT_SCH_ETD","OUT_SCH_LINE_CODE","OUT_SCH_TERMINAL","OUT_SCH_VESSEL_CODE","OUT_SCH_TERMINAL_REF_NO","OUT_SCH_ROUTE_CODE","OUT_SCH_ETB","OUT_SCH_LINE_VSL","OUT_SCH_VOYAGE_NO","OUT_BKG_SHIPPER_ID","OUT_BKG_SHIPPER_NAME","IN_SCH_ETA","IN_SCH_ETD","IN_SCH_LINE_CODE","IN_SCH_TERMINAL","IN_SCH_VESSEL_CODE","IN_SCH_TERMINAL_REF_NO","IN_SCH_ROUTE_CODE","IN_SCH_ETB","IN_SCH_LINE_VSL","IN_SCH_VOYAGE_NO","IN_BKG_SHIPPER_ID","IN_BKG_SHIPPER_NAME","CLL_SCH_CH_LINE_CODE","CLL_SCH_TERMINAL","CLL_SCH_VESSEL_CODE","CLL_SCH_TERMINAL_REF_NO","CLL_SCH_ROUTE_CODE","CLL_SCH_ETB","CLL_SCH_LINE_VSL","CLL_SCH_VOYAGE_NO","LOAD_SCH_ETA","LOAD_SCH_ETD","LOAD_SCH_LINE_CODE","LOAD_SCH_TERMINAL","LOAD_SCH_VESSEL_CODE","LOAD_SCH_TERMINAL_REF_NO","LOAD_SCH_ROUTE_CODE","LOAD_SCH_ETB","LOAD_SCH_LINE_VSL","LOAD_SCH_VOYAGE_NO","CHANGE_VESSEL_CODE","CHANGE_TERMINAL_REF_NO","CHANGE_LINE_VSL","CHANGE_VOYAGE_NO","CHANGE_ROUTE","CHANGE_TERMINAL","CHANGE_ETA","CHANGE_ETB","CHANGE_ETD","CHANGE_POL","OUT_CODECO_THIS_IPM","OUT_CODECO_KEY_ID","PRE_IN_CODECO_THIS_IPM","PRE_IN_CODECO_KEY_ID","POL_IN_CODECO_THIS_IPM","POL_IN_CODECO_KEY_ID","IN_CODECO_THIS_IPM","IN_CODECO_KEY_ID","LOAD_COARRI_THIS_IPM","OUT_BKG_SIETA","CLL_SCH_ETD","CLL_SD","IN_BKG_SID","OUT_SCH_VOYAGE_SID","IN_SCH_VOYAGE_SID","CLL_SCH_VOYAGE_SID","LOAD_SCH_VOYAGE_SID","REG_DATE","UPDATE_DATE","CLOSE_DATE"," CARRIER_CODE","BL_NO","TYPE_SIZE"]}
 	                      tableData={exportData}
 	                  />
 	              )
@@ -179,3 +193,250 @@ export default function ScheduleList(props) {
     </GridContainer>
   );
 }
+
+
+
+function ImpTable(props) {
+
+	  const classes = tableStyles();
+	  const { tableData, tableHeaderColor, tableRownum } = props;
+
+	  const handleAddFunction = () => {
+	    props.onClickHandle();
+	  }
+
+	  return (
+	    <div className={classes.tableResponsive} style={{marginTop:'0px'}}>
+	    	<Table className={classes.table}>
+	          <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px'}}>
+	            <TableRow className={classes.tableHeadRow} style={{borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>SEQ</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CNTR_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_DATE_TIME<br/>UNLOAD_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_TERMINAL_REF_NO<br/>UNLOAD_TERMINAL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_CARRIER_CODE<br/>UNLOAD_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_BL_NO<br/>UNLOAD_BOOKING_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_FULL_EMPTY<br/>UNLOAD_VESSEL_NAME</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_CARRIER_REF_NO<br/>UNLOAD_POL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UNLOAD_POD<br/>OUT_DATE_TIME</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_TERMINAL<br/>OUT_FULL_EMPTY</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_BL_NO<br/>OUT_CARRIER_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SEAL_NO<br/>OUT_CAR_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_DATE_TIME<br/>IN_TERMINAL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_FULL_EMPTY<br/>IN_BL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CARRIER_CODE<br/>IN_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CAR_NO<br/>MFCS_MRN</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MFCS_ARV_DATE<br/>MFCS_LINE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MFCS_BL_NO<br/>MFCS_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MFCS_POD<br/>MFCS_POL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>DISCHARGE_TERMINAL<br/>UNLOAD_COARRI_THIS_IPM</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_CODECO_THIS_IPM<br/>OUT_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CODECO_THIS_IPM<br/>IN_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>REG_DATE<br/>UPDATE_DATE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLOSE_DATE<br/>CARRIER_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>BL_NO<br/>TYPE_SIZE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POD<br/>POL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>DELIVERY_ORDER_NO</TableCell>
+	            </TableRow>
+	          </TableHead>
+	        <TableBody>
+	           {
+	              tableData.map((prop, key) => {
+	                  return (
+	          	            <TableRow key={key}>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.SEQ}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.CNTR_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_DATE_TIME}<br/>{prop.UNLOAD_VESSEL_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_TERMINAL_REF_NO}<br/>{prop.UNLOAD_TERMINAL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_CARRIER_CODE}<br/>{prop.UNLOAD_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_BL_NO}<br/>{prop.UNLOAD_BOOKING_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_FULL_EMPTY}<br/>{prop.UNLOAD_VESSEL_NAME}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_CARRIER_REF_NO}<br/>{prop.UNLOAD_POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_POD}<br/>{prop.OUT_DATE_TIME}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_TERMINAL}<br/>{prop.OUT_FULL_EMPTY}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_BL_NO}<br/>{prop.OUT_CARRIER_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_SEAL_NO}<br/>{prop.OUT_CAR_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_DATE_TIME}<br/>{prop.IN_TERMINAL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_FULL_EMPTY}<br/>{prop.IN_BL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CARRIER_CODE}<br/>{prop.IN_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CAR_NO}<br/>{prop.MFCS_MRN}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_ARV_DATE}<br/>{prop.MFCS_LINE_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_BL_NO}<br/>{prop.MFCS_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_POD}<br/>{prop.MFCS_POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.DISCHARGE_TERMINAL}<br/>{prop.UNLOAD_COARRI_THIS_IPM}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_CODECO_THIS_IPM}<br/>{prop.OUT_CODECO_KEY_ID}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CODECO_THIS_IPM}<br/>{prop.IN_CODECO_KEY_ID}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.REG_DATE}<br/>{prop.UPDATE_DATE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.CLOSE_DATE}<br/>{prop.CARRIER_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.BL_NO}<br/>{prop.TYPE_SIZE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.POD}<br/>{prop.POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.DELIVERY_ORDER_NO}</TableCell>
+			  	            </TableRow>      
+	                  );
+	                })
+	           }
+	           
+	        </TableBody>
+	        {(tableData.length >= 10 ?
+	        <TableFooter >
+	        	<TableRow  >
+	        	<TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={8}>
+	        		<Button
+					    color="info"
+						onClick={handleAddFunction}
+	        		    style={{paddingLeft:'60px',paddingRight:'60px'}}
+					>MORE&nbsp;(&nbsp;{tableRownum}&nbsp;/&nbsp;{tableData[0].tot_page}&nbsp;)</Button>
+			    </TableCell>
+	        	</TableRow>
+	        </TableFooter>: null )}
+	      </Table>
+	    </div>
+	  );
+	}
+
+
+function ExpTable(props) {
+
+	  const classes = tableStyles();
+	  const { tableData, tableHeaderColor, tableRownum } = props;
+
+	  const handleAddFunction = () => {
+	    props.onClickHandle();
+	  }
+
+	  return (
+	    <div className={classes.tableResponsive} style={{marginTop:'0px'}}>
+	    	<Table className={classes.table}>
+	          <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px'}}>
+	            <TableRow className={classes.tableHeadRow} style={{borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>SEQ</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CNTR_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_DATE_TIME<br/>OUT_TERMINAL</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_FULL_EMPTY<br/>OUT_BKG_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_BL_NO<br/>OUT_CARRIER_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SEAL_NO<br/>OUT_CAR_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>PRE_IN_DATE_TIME<br/>PRE_IN_TERMINAL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>PRE_IN_FULL_EMPTY<br/>PRE_IN_BKG_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>PRE_IN_BL_NO<br/>PRE_IN_CARRIER_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>PRE_IN_SEAL_NO<br/>PRE_IN_CAR_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL<br/>POL_IN_DATE_TIME</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL_IN_TERMINAL<br/>POL_IN_FULL_EMPTY</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL_IN_BKG_NO<br/>POL_IN_BL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL_IN_CARRIER_CODE<br/>POL_IN_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL_IN_CAR_NO<br/>IN_DATE_TIME</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_TERMINAL<br/>IN_FULL_EMPTY</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_BKG_NO<br/>IN_BL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CARRIER_CODE<br/>IN_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CAR_NO<br/>RETURN_DATE</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_DATE_TIME<br/>LOAD_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_TERMINAL_REF_NO<br/>LOAD_TERMINAL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_CARRIER_CODE<br/>LOAD_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_BL_NO<br/>LOAD_BOOKING_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_FULL_EMPTY<br/>MFCS_MRN</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MFCS_DPT_DATE<br/>MFCS_LINE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MFCS_BL_NO<br/>MFCS_SEAL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SEQ<br/>CLL_CARRIER_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SOC<br/>CLL_BL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SEAL_NO<br/>OUT_SCH_ETA</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SCH_ETD<br/>OUT_SCH_LINE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SCH_TERMINAL<br/>OUT_SCH_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SCH_TERMINAL_REF_NO<br/>OUT_SCH_ROUTE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SCH_ETB<br/>OUT_SCH_LINE_VSL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_SCH_VOYAGE_NO<br/>OUT_BKG_SHIPPER_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_BKG_SHIPPER_NAME<br/>IN_SCH_ETA</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_ETD<br/>IN_SCH_LINE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_TERMINAL<br/>IN_SCH_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_TERMINAL_REF_NO<br/>IN_SCH_ROUTE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_ETB<br/>IN_SCH_LINE_VSL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_VOYAGE_NO<br/>IN_BKG_SHIPPER_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_BKG_SHIPPER_NAME<br/>CLL_SCH_CH_LINE_CODE</TableCell>
+	                  
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SCH_TERMINAL<br/>CLL_SCH_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SCH_TERMINAL_REF_NO<br/>CLL_SCH_ROUTE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SCH_ETB<br/>CLL_SCH_LINE_VSL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SCH_VOYAGE_NO<br/>LOAD_SCH_ETA</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_ETD<br/>LOAD_SCH_LINE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_TERMINAL<br/>LOAD_SCH_VESSEL_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_TERMINAL_REF_NO<br/>LOAD_SCH_ROUTE_CODE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_ETB<br/>LOAD_SCH_LINE_VSL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_VOYAGE_NO<br/>LOAD_SCH_VOYAGE_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CHANGE_VESSEL_CODE<br/>CHANGE_TERMINAL_REF_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CHANGE_LINE_VSL<br/>CHANGE_VOYAGE_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CHANGE_ROUTE<br/>CHANGE_TERMINAL</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CHANGE_ETA<br/>CHANGE_ETB</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CHANGE_ETD<br/>CHANGE_POL</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>OUT_CODECO_THIS_IPM<br/>OUT_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>PRE_IN_CODECO_THIS_IPM<br/>PRE_IN_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL_IN_CODECO_THIS_IPM<br/>POL_IN_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_CODECO_THIS_IPM<br/>IN_CODECO_KEY_ID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_COARRI_THIS_IPM<br/>OUT_BKG_SIETA</TableCell>
+	                  
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CLL_SCH_ETD<br/>CLL_SD</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_BKG_SID<br/>OUT_SCH_VOYAGE_SID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IN_SCH_VOYAGE_SID<br/>CLL_SCH_VOYAGE_SID</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LOAD_SCH_VOYAGE_SID<br/>REG_DATE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>UPDATE_DATE<br/>CLOSE_DATE</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CARRIER_CODE<br/>BL_NO</TableCell>
+	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>TYPE_SIZE</TableCell>
+	            </TableRow>
+	          </TableHead>
+	        <TableBody>
+	           {
+	              tableData.map((prop, key) => {
+	                  return (
+	          	            <TableRow key={key}>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.SEQ}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.CNTR_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_DATE_TIME}<br/>{prop.UNLOAD_VESSEL_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_TERMINAL_REF_NO}<br/>{prop.UNLOAD_TERMINAL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_CARRIER_CODE}<br/>{prop.UNLOAD_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_BL_NO}<br/>{prop.UNLOAD_BOOKING_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_FULL_EMPTY}<br/>{prop.UNLOAD_VESSEL_NAME}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_CARRIER_REF_NO}<br/>{prop.UNLOAD_POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.UNLOAD_POD}<br/>{prop.OUT_DATE_TIME}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_TERMINAL}<br/>{prop.OUT_FULL_EMPTY}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_BL_NO}<br/>{prop.OUT_CARRIER_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_SEAL_NO}<br/>{prop.OUT_CAR_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_DATE_TIME}<br/>{prop.IN_TERMINAL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_FULL_EMPTY}<br/>{prop.IN_BL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CARRIER_CODE}<br/>{prop.IN_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CAR_NO}<br/>{prop.MFCS_MRN}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_ARV_DATE}<br/>{prop.MFCS_LINE_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_BL_NO}<br/>{prop.MFCS_SEAL_NO}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.MFCS_POD}<br/>{prop.MFCS_POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.DISCHARGE_TERMINAL}<br/>{prop.UNLOAD_COARRI_THIS_IPM}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.OUT_CODECO_THIS_IPM}<br/>{prop.OUT_CODECO_KEY_ID}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.IN_CODECO_THIS_IPM}<br/>{prop.IN_CODECO_KEY_ID}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.REG_DATE}<br/>{prop.UPDATE_DATE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.CLOSE_DATE}<br/>{prop.CARRIER_CODE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.BL_NO}<br/>{prop.TYPE_SIZE}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.POD}<br/>{prop.POL}</TableCell>
+			  	                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>{prop.DELIVERY_ORDER_NO}</TableCell>
+			  	            </TableRow>      
+	                  );
+	                })
+	           }
+	           
+	        </TableBody>
+	        {(tableData.length >= 10 ?
+	        <TableFooter >
+	        	<TableRow  >
+	        	<TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={8}>
+	        		<Button
+					    color="info"
+						onClick={handleAddFunction}
+	        		    style={{paddingLeft:'60px',paddingRight:'60px'}}
+					>MORE&nbsp;(&nbsp;{tableRownum}&nbsp;/&nbsp;{tableData[0].tot_page}&nbsp;)</Button>
+			    </TableCell>
+	        	</TableRow>
+	        </TableFooter>: null )}
+	      </Table>
+	    </div>
+	  );
+	}

@@ -29,9 +29,16 @@ module.exports = (passport) => {
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {
         try {
-            console.log('(facebookStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
+            //console.log('(facebookStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
             // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
-
+            sUser.provider = 'facebook';
+        	sUser.userno = '';
+            sUser.email = profile.email;
+            sUser.id = profile.id;  //3383301225075545
+            sUser.username = profile.username;
+            sUser.displayName = profile.displayName;       
+            sUser.accessToken = accessToken;
+            sUser.refreshToken = refreshToken;
             /*
                 2020.01.21 pdk ship 
 
@@ -69,16 +76,16 @@ module.exports = (passport) => {
         	                console.log(err);
         	            }
         	            //onsole.log(">>>",result);
-        	            console.log("ROW CNT:",result.rowCount);
+        	            //console.log("ROW CNT:",result.rowCount);
         	            if(result.rowCount > 0) {
         	            	sUser.provider = 'facebook';
         	            	sUser.userno = result.rows[0].user_no;
-        	                 sUser.email = profile.email; //mamma1234@naver.com
+        	                sUser.email = profile.email; //mamma1234@naver.com
         	                sUser.id = profile.id;  //3383301225075545
         	                sUser.username = result.rows[0].user_name;
         	                sUser.displayName = profile.displayName;       
-        	                sUser.accessToken = accessToken;
-        	                sUser.refreshToken = refreshToken;
+        	                //sUser.accessToken = accessToken;
+        	                //sUser.refreshToken = refreshToken;
         	                req.session.sUser = sUser;
     	                    done(null, sUser); 
         	            } else {

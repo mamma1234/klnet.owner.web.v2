@@ -1,198 +1,412 @@
 
 import PropTypes from 'prop-types';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import React,{ useState, useEffect } from "react";
+import React,{ useState, useEffect, Component } from "react";
 // @material-ui/core components
-//import { createPortal } from 'react-dom';
-//import {MAP} from 'react-google-maps/lib/constants'
+import { createPortal } from 'react-dom';
+import {MAP} from 'react-google-maps/lib/constants'
 // core components
-import GridItem from "components/Grid/GridItem.js";
-import GridContainer from "components/Grid/GridContainer.js";
-import Card from "components/Card/Card.js";
-import CardHeader from "components/Card/CardHeader.js";
-import CardBody from "components/Card/CardBody.js";
-import Button from "components/CustomButtons/Button.js";
-import CustomInput from "components/CustomInput/CustomInput.js";
-import DemDetMap1 from "components/Map/DemDetMap.js"
-import TrackingMap from "components/Map/TrackingMap.js"
-import AppBar from '@material-ui/core/AppBar';
-import Icon from "@material-ui/core/Icon";
-import CardIcon from "components/Card/CardIcon.js";
+//import CardIcon from "components/Card/CardIcon.js";
+// other import
+//import moment from 'moment';
 import {TextField} from "@material-ui/core";
-//import Autocomplete from "@material-ui/lab/Autocomplete";
-//import TerminalList from 'views/Pages/DemDet/Map/TerminalList.js';
-//import axios from 'axios';
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import TerminalList from './TerminalList.js';
+import axios from 'axios';
+import MapSkin from './CustomMap';
+import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <Typography
-      component="div"
-      role="tabpanel"
-      hidden={value !== index}
-      id={`nav-tabpanel-${index}`}
-      aria-labelledby={`nav-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </Typography>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `nav-tab-${index}`,
-    'aria-controls': `nav-tabpanel-${index}`,
-  };
-}
-
-function LinkTab(props) {
-  return (
-    <Tab
-      component="a"
-      onClick={event => {
-        event.preventDefault();
-      }}
-      {...props}
-    />
-  );
-}
-
+import FilterIcon from '@material-ui/icons/Filter';
+import RoomIcon from '@material-ui/icons/Room';
+import {
+    withScriptjs,
+    withGoogleMap,
+    GoogleMap,
+    Marker
+  } from "react-google-maps";
+import { compose, withStateHandlers, withProps, withHandlers, withState } from "recompose";
+import Switch from '@material-ui/core/Switch';
+import dotenv from "dotenv";
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
   },
-  margin:{
-    margin: theme.spacing(1)
+  autoSize: {
+    width: 180,
+  },
+  title: {
+    marginTop:'7px',
+    fontWeight:'bold',
+    fontSize:'24px',
+  },
+  logo: {
+    width:'24px',
+    height:'24px'
   }
 }));
+dotenv.config();
 
 
 
-
-export default function DemDetMap() {
-  const [inputValue, setInputValue] = useState("");
-	const [linkUrl,setLinkUrl] = useState("http://dev.seavantage.com/#/tracking/ship?");
+export default function DemDetMap(props) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(0);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };  
- 
-    useEffect(() => {
-      console.log('호출....');
-      return () => {
-          console.log('cleanup');
-        };
-    },[]);
+  const [portCode, setPortCode] = useState([]);
+  const [portCodeCopy, setPortCodeCopy] = useState([]);
+  const [store,setStore] = useState(props.store);
+  const portwgs84 = {lat: 36.431748, lng: 127.384496};
+  const [openJoin,setOpenJoin] = useState(false);
+  
+  
+  
+  useEffect(() => {
+    console.log('props====',props)
+    // axios.post("/loc/getPort",{ portCode:""},{headers:{'Authorization':'Bearer '+store.token}}).then(res => setPortCode(res.data));
     
-    
-    
-    
-    /*const ValidationTextField = withStyles({
-      root:{
-        '& input:valid + fieldset' : {
-          borderColor: 'green',
-          borderWidth: 2,
-        },
-        '& input:invalid + fieldset': {
-          borderColor: 'red',
-          borderWidth: 2,
-        },
-        '& input:valid:focus + fieldset': {
-          borderLeftWidth: 6,
-          padding: '4px !important'
-        },
+    // axios.post("/loc/getPort",{ portCode:""},{headers:{'Authorization':'Bearer '+store.token}}).then(res => setPortCodeCopy(res.data));
+    axios.post("/loc/getDemDetPort",{},{headers:{'Authorization':'Bearer '+store.token}}).then(res => {setPortCode(res.data);setPortCodeCopy(res.data)})
+    .catch(err => {
+      if(err.response.status == "403" || err.response.status == "401") {
+        props.openLogin();
 
       }
-    })(TextField);*/
+  });;
+    return () => {
+        console.log('cleanup');
+      };
+  },[]);
     
-    const appendUrl = (appendImo) => {
+    
+  const getPort = (port) => {
+    if (port != null) {
+        axios.post("/loc/getDemDetPort",{ portCode:port.port},{headers:{'Authorization':'Bearer '+store.token}}).then(res => setPortPosition(res.data))
+        .catch(err => {
+          if(err.response.status == "403" || err.response.status == "401") {
+            props.openLogin();
+          }
+      });;
 
-      if(appendImo != "") {
-        setLinkUrl(linkUrl + "&imoNo="+appendImo);
-        console.log(linkUrl);
-        setInputValue("");
-      }else {
-        alert("imo입력");
-      }
 
+
+    } else{
+        axios.post("/loc/getDemDetPort",{},{headers:{'Authorization':'Bearer '+store.token}}).then(res => setPortPosition(res.data))
+        .catch(err => {
+          if(err.response.status == "403" || err.response.status == "401") {
+            props.openLogin();
+          }
+        });;
+    }
+  }
+    
+  const setPortPosition = (data) => {
+    setPortCode(data);
+  }
+
+  const getPortInfo = (port, props) =>  {
+    return(
+      <TerminalList port={port} token={store.token}/>
+    )
+  }
+  
+  const DemDetMap = compose(
+    
+    withProps({
+  
+      googleMapURL: "https://maps.googleapis.com/maps/api/js?key="+process.env.REACT_APP_GOOGLE_MAPS_API_KEY+"&language=en&region=KR",
+      loadingElement: <div style={{ height:`100%`}}/>,
+      containerElement: <div style={{width:'100%', height: `80vh` }}/>,
+      mapElement: <div style={{height:`100%` }}/>,
+    }),
+    withStateHandlers(() => ({
+      isOpen: false,
+      port: "",
+      centerPosition: portwgs84
+    }), 
+    {
+    onToggleOpen: ({ isOpen }) =>(portCode) => ({
+      isOpen: !isOpen,
+      port: portCode})
+    
+    },
+    {
+    onToggleOpen2: ({isOpen}) => ({
+      isOpen: !isOpen
+    })
+    }
+    ),
+    withStateHandlers(() => ({
+      setStyle: []
+    }),
+    {
+    onSetMapStyle: () =>(skin) => ({
+      setStyle: skin
+    }),
       
     }
+    ),
+    withStateHandlers(() => ({
+      markerVisible: true
+    }),
+    {
+    onMarkerView: () =>(switchMarker) => ({
+      markerVisible: switchMarker
+    }),
+    }
+    ),
+    withStateHandlers(() => ({
+      menuVisible1: false
+    }),
+    {
+    onMenuVisible1: ({ menuVisible1 }) =>() => ({
+      menuVisible1: !menuVisible1,
+    }),
+    }),
+    withStateHandlers(() => ({
+      menuVisible2: false,
+      
+    }),
+    {
+    onMenuVisible2: ({ menuVisible2 }) =>() => ({
+      menuVisible2: !menuVisible2,
+  
+    }),
+    }),  
+    withStateHandlers(() => ({
+      menuDisplay1: "none",
+      menuDisplay2: "none"
+      
+    }),
+    {
+    onMenuDisplay: () =>(menuDisplay1, menuDisplay2) => ({
+      menuDisplay1: menuDisplay1,
+      menuDisplay2: menuDisplay2,
+  
+    }),
+    }),
+    withStateHandlers(() => ({
+      locationlat: 0,
+      locationlng: 0
+      
+    }),
+    {
+    onLocation: () =>(lat, lng) => ({
+      locationlat: lat,
+      locationlng: lng,
+  
+    }),
+    }),        
+    withState('zoom','onZoomChange',8),
+    withHandlers(() => {
+      const refs = {
+        map: undefined,
+      }
 
-return (
-  <div className={classes.root}>
-    <AppBar position="static">
-      <Tabs
-        variant="fullWidth"
-        value={value}
-        onChange={handleChange}
-        aria-label="nav tabs example"
-      >
-        <LinkTab label="DEM/DET/STOR MAP" href="/drafts" {...a11yProps(0)} />
-        <LinkTab label="Cargo Tracking Map" href="/trash" {...a11yProps(1)} />
-        <LinkTab label="TEST" href="/trash" {...a11yProps(2)} />
-      </Tabs>
-    </AppBar>
-    <TabPanel value={value} index={0}>
-      <DemDetMap1></DemDetMap1>
-    </TabPanel>
-    <TabPanel value={value} index={1}>
-      <TrackingMap port={'KRPUS'}></TrackingMap>
-    </TabPanel>
-    <TabPanel value={value} index={2}>
-    <Card className={classes.cardStyle}>
-    	<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
-	    	<CardIcon color="info" style={{height:'26px'}}>
-				<Icon style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</Icon>
-      		</CardIcon>
-      	</CardHeader>
-      	<CardBody style={{paddingBottom:'2px'}}>
-			<GridContainer>
-				<GridItem xs={12} sm={12} md={12}>
+      return {
+        onMapMounted: () => ref => {
+          refs.map = ref
+        },
+        onZoomChanged: ({onZoomChange}) => () => {
+          onZoomChange(refs.map.getZoom())
+        }
+      }
+    }),
+    withScriptjs,
+    withGoogleMap
+  
+  )
+  
+  (props =>
+    <div id = 'map'>
+  
+    <GoogleMap
+    id = {props.map}
+    defaultZoom={props.zoom}
+    zoom={props.zoom}
+    center={props.centerPosition}
+    ref={props.onMapMounted}
+    defaultCenter={ props.centerPosition }
+    defaultOptions={{
+      
+      scrollwheel: true,
+      zoomControl: true,
+      disableDefaultUI: true,
+      keyboardShortcuts: true,
+      styles: props.setStyle,
+      mapTypeControl: true,
+      minZoom: 3,
+     
+      mapTypeControlOptions: {
+        mapTypeIds: ['styled_map']
+      },
+      zoomControlOptions: {
+        position: window.google.maps.ControlPosition.RIGHT_CENTER
+      }
+    }}
+    onZoomChanged ={props.onZoomChanged}
+    options={{
+      scrollwheel: true,
+      zoomControl: true,
+      disableDefaultUI: true,
+      keyboardShortcuts: true,
+      styles: props.setStyle,
+      mapTypeControl: true,
+      minZoom: 3,
+      mapTypeControlOptions: {
+        mapTypeIds: ['styled_map']
+      },
+      zoomControlOptions: {
+        position: window.google.maps.ControlPosition.RIGHT_CENTER
+      }
+    }}
+    mapContainerStyle={{
+      height:"37vh",
+      width:"100%"
+    }}
+    onMouseMove={(e) => {props.onLocation(e.latLng.lat(),e.latLng.lng())}
+    
+    }
+    onClick={(e)=> {props.onToggleOpen()}}
+    style={{width:'100%', height: `400px` }}
+    
+    >
+      <MapControl position = {window.google.maps.ControlPosition.LEFT_TOP}>
+        <div style={{marginTop:"10px", marginLeft:"5px", borderRadius:'15px', float:'left'}}>
+          <img src={require("assets/img/reactlogo.png")} width={"60px"} height={"40px"}/>
+          <a className={classes.title}>PLISM PLUS</a>
+        </div>
+      </MapControl>
+      <MapControl position = {window.google.maps.ControlPosition.RIGHT_BOTTOM}>
+          <a>lat : {props.locationlat}, lng : {props.locationlng}</a>
+      </MapControl>
+      <MapControl position = {window.google.maps.ControlPosition.RIGHT_BOTTOM}>
+          <a>{"Zoom Level : " + props.zoom}</a>
+      </MapControl>  
+      <MapControl position = {window.google.maps.ControlPosition.RIGHT_TOP}>
+        <div style={{backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px', float:'right'}}>
+          <IconButton
+            color="secondary"
+            onClick={() => {
+              if (props.menuDisplay1 == "none") {
+                  props.onMenuDisplay("block",props.menuDisplay2);
+              }else {
+                  props.onMenuDisplay("none", props.menuDisplay2);
+              }
+            }}> 
+           <FilterIcon/>
+          </IconButton>
+        </div>      
+        <div style={{display:'inline-block', backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px'}}>
+          <div style={{display:props.menuDisplay1}}>
+            <img style={{marginLeft:"20px"}} src={require("assets/img/googleMap/dark.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleDark)}/>
+            <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/aubergine.png")} onClick={() => props.onSetMapStyle(MapSkin.MapAubergine)}/>
+            <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/night.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleNight)}/>
+            <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/retro.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleRetro)}/>
+            <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/silver.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleSilver)}/>
+            <img style={{marginLeft:"5px",marginRight:"20px"}} src={require("assets/img/googleMap/normal.png")} onClick={() => props.onSetMapStyle([])}/>
+          </div>
+        </div>
+    </MapControl>
+  
+  
+    
+    <MapControl position = {window.google.maps.ControlPosition.RIGHT_TOP}>
+        <div style={{backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px', float:'right'}}>
+          <IconButton
+            color="secondary"
+            onClick={() => {
+              if (props.menuDisplay2 == "none") {
+                  props.onMenuDisplay(props.menuDisplay1,"block");
+              }else {
+                  props.onMenuDisplay(props.menuDisplay1,"none");
+              }
+            }}> 
+          <RoomIcon/>
+          </IconButton>
+        </div>      
+        <div style={{display:'inline-block', backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'10px'}}>
+          <div style={{display:props.menuDisplay2, marginTop:"10px", marginLeft:"15px", marginRight:"15px", marginBottom:"5px"}}>
+            <h4>Marker On/Off</h4>
+            <Grid component="label" container alignItems="center" spacing={1}>
+              <Grid item>Off</Grid>
+              <Grid item>
+                <Switch defaultChecked={true}
+                        onChange={e => props.onMarkerView(e.target.checked)}
+                        value="MapSwitch"/>
+              </Grid>
+              <Grid item>On</Grid>
+            </Grid>
+            <h4>Search Port</h4>
+              <div className={classes.autoSize}>
+                <Autocomplete
+                  options = {portCodeCopy}
+                  getOptionLabel = { option => "["+option.port_kname+"] "+option.port}
+                  id="portCodeCopy"
+                  defaultValue={{port_kname:"전체",port:""}}
+                  onChange={(e, value) => getPort(value) }
+                  renderInput={params => (<TextField {...params} label="Select Port" fullWidth />)}/>
+             </div>   
+          </div>    
+        </div>
+    </MapControl>  
+    {
+      portCode.length !== 0 && (portCode.map((data, index) => {
+  
+          return(
+            <Marker 
+              key = {data.port}
+              draggable = {false} 
+              position={{lat:data.wgs84_y, lng:data.wgs84_x}} // 마커 위치 설정 {lat: ,lng: }   
+              icon={data.sum=="0"?require("assets/img/marker.png"):require("assets/img/marker_red.png")}
+              animation={data.sum=="0"?0:1}
+              defaultVisible={props.markerVisible}
+              options ={{
+                label:{
+                  text: data.sum!="0"?"　"+data.sum:" ",
+                  fontSize:'25px',
+                  fontWeight:'bold'
+                }
+              }}
+              visible={props.markerVisible}
+              onClick={() => props.onToggleOpen(data.port, data.wgs84_x, data.wgs84_y) }>
+              {props.isOpen && data.port == props.port && getPortInfo(data)}
+            </Marker>
+          )
+          
+      }))
+      
+    } 
+          
+        </GoogleMap>
+    </div>
+  )
+  return (
+        <DemDetMap></DemDetMap>
+        );
+  
+  
+  }
 
-						<Grid container spacing={4}>
-							<Grid item xs={12} sm={12} md={3}>
-                <CustomInput
-                  labelText="IMO ..."
-                  id="imoNum"
-                  name="inputValue"
-                  formControlProps={{fullWidth: true}}
-                  inputProps={{
-                    onChange: event => setInputValue(event.target.value),
-                    value:inputValue }}
-                  />
-							</Grid>
-							<Grid item xs={12} sm={12} md={3}>
-                <Button onClick={()=> { appendUrl(inputValue)}}>Search</Button>
-							</Grid>
-						</Grid>
-					</GridItem>
-			  </GridContainer>
-			    <Grid item item xs={12} sm={12} md={12}>
-				    <form target="maplink"> 
-					    <iframe name="maplink" src={linkUrl}  width="100%" height="600" display='block' border='none' position="absolute" frameBorder="0" scrolling="auto" allowFullScreen></iframe>
-				    </form>
-			    </Grid>
-			  </CardBody>
-	    </Card> 
-    </TabPanel>
-  </div>
-);
-}
-
-
-
-
+  
+  class MapControl extends Component {
+    static contextTypes = {
+      [MAP] : PropTypes.object
+    }
+  
+    componentWillMount() {
+      this.map = this.context[MAP]
+      this.controlDiv = document.createElement('div');
+      this.map.controls[this.props.position].push(this.controlDiv);
+    }
+  
+    componentWillUnmount() {
+      const controlArray = this.map.controls[this.props.position].getArray()
+      for (let index in controlArray) {
+        if(controlArray[index] === this.controlDiv) {
+          this.map.controls[this.props.position].removeAt(index);
+        }
+      }
+    }
+    render() {
+      return createPortal(this.props.children,this.controlDiv)
+    }
+  }

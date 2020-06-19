@@ -220,53 +220,6 @@ const getSnkMasterList = (request, response) => {
   
 
 
-  const getPortLocation = (request, response) => {
-    const port = request.body.portCode;
-
-    if (port == undefined) {
-      response.set('parameter','error');
-      response.status(400).send();
-      return;
-    }
-    let idx = 0;
-    let sql = "SELECT terminal, terminal_kname, terminal_ename, float8(wgs84_x) as wgs84_x, float8(wgs84_y) as wgs84_y FROM own_terminal_info "
-        sql += " where 1=1 ";
-        sql += " and info_type = 'Y' "
-        sql += " and odcy_use = 'N' "
-        sql += " and terminal_id is not null "
-    port == "" ? sql +="" : 
-    
-    port.forEach(element => {
-      const nationCode = element.substr(0,2);
-      const portCode = element.substr(2,3);
-      if (idx == 0) {
-        sql+= " and (nation_code = '" + nationCode +"' and location_code = '" + portCode + "') ";
-      }else{
-        sql+= " or (nation_code = '" + nationCode +"' and location_code = '" + portCode + "') ";
-      }
-      idx++;
-    });
-    
-        
-    console.log("query == ",sql);    
-    pgsqlPool.connect(function(err,client,done) {
-      if(err){
-        console.log("err" + err);
-        response.status(400).send(err);
-      }
-      client.query(sql, function(err,result){
-        done();
-        if(err){
-          console.log(err);
-          response.status(400).send(err);
-        }
-        response.status(200).send(result.rows);
-      });
-  
-    });
-  
-  }
-
   const getAllPort = (request, response) => {
     const port = request.body.portCode;
     
@@ -481,6 +434,7 @@ const getExcelSchLogList = (request, response) => {
     });
   
   }  
+
   
 module.exports = {
     getTestSimple,
@@ -491,7 +445,6 @@ module.exports = {
     getKmdMasterList,
     getYmlMasterList,
     getUserInfoSample,
-    getPortLocation,
     getPort,
     getAllPort,
     getPortwgx84,

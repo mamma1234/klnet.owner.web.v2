@@ -8,14 +8,11 @@ const google = require('./googleStrategy');
  
 module.exports = (passport) => {
 
-	console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>passport index");
     passport.serializeUser((user, done) => {
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>serializeUser:"+user);
         done(null, user);
     });
     
     passport.deserializeUser((id, done) => {
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>deserializeUser:"+id);
        done(null, id);
         
         // User.find({ where: { id } })

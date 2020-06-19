@@ -59,14 +59,14 @@ export default function DetailTable(props) {
     	<Table className={classes.table}>
           <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px'}}>
             <TableRow className={classes.tableHeadRow} style={{borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
-                  <TableCell style={{borderBottomWidth:'3px',width:'15%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>(B/K NO.)<br/>B/L NO.</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'5%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IMPORT(I)<br/>EXPORT(E)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'5%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CARRIER</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'13%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>VESSEL<br/>/VOYAGE</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LAST CURRENT</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'12%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL<br/><font color="orange">ETD</font>/<font color="blue">ATD</font>(<font color="red">TO</font>)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'12%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POD<br/><font color="orange">ETA</font>/<font color="blue">ATA</font>(<font color="red">TO</font>)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'2%'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MORE</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'15%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>(B/K NO.)<br/>B/L NO.</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'5%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IMPORT(I)<br/>EXPORT(E)</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'5%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CARRIER</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'13%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>VESSEL<br/>/VOYAGE</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LAST STATUS</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL<br/><font color="orange">ETD</font>/<font color="blue">ATD</font>(<font color="red">TO</font>)</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POD<br/><font color="orange">ETA</font>/<font color="blue">ATA</font>(<font color="red">TO</font>)</TableCell>
+                  <TableCell style={{borderBottomWidth:'3px',width:'2%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MORE</TableCell>
             </TableRow>
           </TableHead>
         <TableBody>
@@ -133,15 +133,15 @@ DetailTable.propTypes = {
   componentDidMount() {
 	  this.setState({bookmarkIcon:this.props.data.book_mark});
 	  
-	  return axios ({
-			url:'/loc/getdemdetCurrent',
-			method:'POST',
-			headers:{'Authorization':'Bearer '+this.props.store.token},
-			data: {blbkg : this.props.data.bl_bkg,
-				   ietype : this.props.data.ie_type,
-				   }
-		})//.then(response => console.log("db data",response.data));
-		.then(response => this.setState({demdetlist:response.data })); 
+	//   return axios ({
+	// 		url:'/loc/getdemdetCurrent',
+	// 		method:'POST',
+	// 		headers:{'Authorization':'Bearer '+this.props.store.token},
+	// 		data: {blbkg : this.props.data.bl_bkg,
+	// 			   ietype : this.props.data.ie_type,
+	// 			   }
+	// 	})//.then(response => console.log("db data",response.data));
+	// 	.then(response => this.setState({demdetlist:response.data })); 
   }
   
   // 테이블 조회
@@ -159,6 +159,28 @@ DetailTable.propTypes = {
 	}).then(response => this.setState({port:response.data }));*/
     
   }
+
+  __makeDateFormatFromString = (params) => {
+	let message = ''
+	if( params == '' ) {
+		message = ''
+	} else {
+		if( params.length == 14 ) {
+			let yyyy = params.substr(0,4);
+			let mm = params.substr(4,2);
+			let dd = params.substr(6,2);
+			let hh = params.substr(8,2);
+			let mi = params.substr(10,2);
+			message = yyyy+"-"+mm+"-"+dd+" "+hh+":"+mi;
+		} else if (params.length == 8 ) {
+			let yyyy = params.substr(0,4);
+			let mm = params.substr(4,2);
+			let dd = params.substr(6,2);
+			message = yyyy+"-"+mm+"-"+dd;
+		}
+	}
+	return message;
+  }
  
   // 로우 생성
   toggleExpander = () => {
@@ -170,12 +192,14 @@ DetailTable.propTypes = {
 				//console.log( '수출', this.props.data.ie_type, this.props.data.bl_yy);
 				this.__getUniPassExport(this.props);
 				this.__getTrackingGoogleMap(this.props);
+				this.__getExportTerminalActivity( this.props );
 
 			} else if( "I" == this.props.data.ie_type ) {
 				// 수입
 				//console.log('수입', this.props.data.ie_type, this.props.data.bl_yy);
 				this.__getUniPassImport(this.props);
 				this.__getTrackingGoogleMap(this.props);
+				this.__getImportTerminalActivity( this.props );
 			}
           slideDown(this.refs.expanderBody);
         }
@@ -314,12 +338,12 @@ DetailTable.propTypes = {
 			res.data.forEach( element => {
 				let returnValue = [];
 				if( 'NO_DATA' == element.message ) {
-					returnValue.push( '');
-					returnValue.push( 'NO DATA');
-					returnValue.push( '');
+					returnValue.push( 'SIMPLE B/L만 조회 가능합니다' );
+					returnValue.push( 'H-B/L이 발행된 경우 유니패스에서 확인하세요' );
+					returnValue.push( '(관세청 유니패스 바로가기)' );
 				} else {
 					returnValue.push( element.exp_dclr_no);
-					returnValue.push( element.tkof_dt);
+					returnValue.push( this.__makeDateFormatFromString(element.tkof_dt));
 					returnValue.push( element.shpm_cmpl_yn);
 				}
 				returnList.push(returnValue);
@@ -333,7 +357,7 @@ DetailTable.propTypes = {
 
 	// 세관정보 API 수입용
 	__getUniPassImport = (props) => {
-		console.log(props);
+		// console.log(props);
 
 		return axios ({
 			url:'/com/uniPassApiExportAPI001',
@@ -347,15 +371,19 @@ DetailTable.propTypes = {
 	    .then(res => {
 			let returnList = [];
 			res.data.forEach( element => {
-				console.log( element );
+				// console.log( element );
 				let returnValue = [];
 				if( 'NO_DATA' == element.message ){
-					returnValue.push( '' );
-					returnValue.push( 'NO DATA' );
-					returnValue.push( '' );
+					returnValue.push( 'SIMPLE B/L만 조회 가능합니다' );
+					returnValue.push( 'H-B/L이 발행된 경우 유니패스에서 확인하세요' );
+					returnValue.push( '(관세청 유니패스 바로가기)' );
 				} else {
-					returnValue.push( element.mbl_no+ "-"+element.hbl_no);
-					returnValue.push( element.clearance+"("+element.clearance_date+")");
+					if( element.hbl_no == undefined || element.hbl_no == 'undefined' ){
+						returnValue.push( element.mbl_no);
+					} else {
+						returnValue.push( element.mbl_no+ "-"+element.hbl_no);
+					}
+					returnValue.push( element.clearance+"("+this.__makeDateFormatFromString(element.clearance_date)+")");
 					returnValue.push( element.mt_trgt_carg_yn_nm);
 				}
 				returnList.push(returnValue);
@@ -367,7 +395,71 @@ DetailTable.propTypes = {
 	    });
 	}
 
-  
+	// TERMINAL ACTIVITY 조회
+	__getImportTerminalActivity = (props) => {
+		let eta = '';
+		if ( null != props.data.end_day) {
+			eta = props.data.end_day.replace(/\//gi, '');
+		}
+		return axios ({
+			url:'/loc/getImportTerminalActivity',
+			method:'POST',
+			headers:{'Authorization':'Bearer '+this.props.store.token},
+			data: {
+				req_seq : props.data.req_seq,
+				ie_type: props.data.ie_type,
+				vsl_code :props.data.vsl_code,
+				vsl_name :props.data.vsl_name,
+				voyage_no:props.data.voyage,
+				eta:eta,
+				pod:props.data.pod,
+				carrier_code:props.data.carrier_code,
+				ie_type:props.data.ie_type,
+				bl_bkg:props.data.bl_bkg
+			}
+		})
+		.then(res => {
+			console.log(res.data);
+			this.setState({demdetlist:res.data }) 
+		})
+	    .catch(err => {
+	        console.log(err);
+	    });
+
+	}
+	__getExportTerminalActivity = (props) => {
+		let etd = '';
+		if ( null != props.data.start_day ) {
+			etd = props.data.start_day.replace(/\//gi, '');
+		}
+		return axios ({
+			url:'/loc/getExportTerminalActivity',
+			method:'POST',
+			headers:{'Authorization':'Bearer '+this.props.store.token},
+			data: {
+				req_seq : props.data.req_seq,
+				ie_type: props.data.ie_type,
+				vsl_name :props.data.vsl_name,
+				voyage_no:props.data.voyage,
+				etd:etd,
+				pol:props.data.pol,
+				carrier_code:props.data.carrier_code,
+				ie_type:props.data.ie_type,
+				bl_bkg:props.data.bl_bkg
+			}
+		})
+		.then(res => {
+			console.log(res.data);
+			this.setState({demdetlist:res.data }) 
+		})
+	    .catch(err => {
+	        console.log(err);
+	    });
+
+	}
+
+
+
   render() {
      const { data } = this.props;
 
@@ -375,7 +467,7 @@ DetailTable.propTypes = {
      const endColor = this.props.data.end_db =="E"?"orange":"BLUE";
     return [
       <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
-        <TableCell style={{padding:'8px ',textAlignLast:'left',borderBottomWidth:'3px'}}>{data.bl_bkg}
+        <TableCell style={{padding:'8px ',textAlignLast:'left',borderBottomWidth:'3px'}}>{data.view_bl_bkg}
         	{this.state.bookmarkIcon == 'Y'?<Tooltip title="BookMark"><StarIcon onClick={this.handleStarClick} style={{color:'#00acc1',verticalAlign:'bottom'}} /></Tooltip>:
         	<Tooltip title="BookMark"><StarBorderIcon onClick={this.handleStarClick} style={{color:'#00acc1',verticalAlign:'bottom'}} /></Tooltip>}</TableCell>
         <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>{data.ie_type}</TableCell>
@@ -390,7 +482,7 @@ DetailTable.propTypes = {
         	{data.vsl_name}<br/>{data.voyage?"/"+data.voyage:""}
         	<Tooltip title="vessel map infomation"><MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickMapOpen} /></Tooltip></TableCell>
         <TableCell style={{padding:'8px',borderBottomWidth:'3px'}} onClick={this.handleClickOpen}>
-        {/*{data.last_current.length>18?data.last_current.substring(0,15)+" ...":data.last_current}*/}{data.last_current}
+        {/*{data.last_current.length>18?data.last_current.substring(0,15)+" ...":data.last_current}*/}{data.last_status}<br/>{data.last_status_time}
         </TableCell>
         <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>
         	{data.pol}<br/>
@@ -411,7 +503,7 @@ DetailTable.propTypes = {
     	<CurrentList
     		data={data}
     		openLogin={this.props.onLoginPage} 
-    		store ={this.props.store}/>
+    		store ={this.props.store} onClose={this.handleClickClose}/>
     </Popover>
         <Popover
 	      	id="popover"
@@ -424,7 +516,7 @@ DetailTable.propTypes = {
 	     > 
         	<CntrListTable 
         		data={data}
-        		store ={this.props.store} />
+        		store ={this.props.store} onClose={this.handleClickClose} />
         </Popover>
         <Popover
         	id="popover_map"
@@ -435,7 +527,8 @@ DetailTable.propTypes = {
         	anchorOrigin={{vertical:'bottom',horizontal:'center',}}
       		transformOrigin={{vertical:'top',horizontal:'center',}}>
       		<ShipMap
-		  		vesselName={data.vsl_name}>
+				  parameter={data} onClose={this.handleClickClose}
+				  store ={this.props.store}>
 			</ShipMap>
           </Popover>
 		  <Popover
@@ -450,7 +543,9 @@ DetailTable.propTypes = {
 			  setData={this.state.terminalPosition}
 			  store={this.props.store.token}
 			  ieGubun={data.ie_type}
+      		  onClose={this.handleClickClose}
 			  polyRender={this.state.polyRender}>
+      		  
 			</TackingMap>
           </Popover>
       </TableRow>,
@@ -500,7 +595,7 @@ DetailTable.propTypes = {
 			          	<GridContainer>
 			          		<GridItem xs={12} sm={4} md={5}>
 			          		<div>
-			          			<TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />TERMINAL(ARRIVAL)　　　TRACKING MAP
+			          			<TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />TERMINAL(DEPARTURE)　　　TRACKING MAP
 								<MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickTrackingMap} />
 							</div>
 				          		

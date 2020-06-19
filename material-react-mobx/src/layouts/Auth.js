@@ -17,16 +17,35 @@ import login from "assets/img/login.jpeg";
 import lock from "assets/img/lock.jpeg";
 import error from "assets/img/clint-mckoy.jpg";
 import pricing from "assets/img/bg-pricing.jpeg";
+import queryString from 'query-string';
+import { observer, inject } from 'mobx-react'; // 6.x
+import { useCookies  } from 'react-cookie';
 
 const useStyles = makeStyles(styles);
-
-export default function Pages(props) {
+//export default function Pages(props) {
+const Pages = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props}) => {
   const { ...rest } = props;
+  const query = queryString.parse(window.location.search);
+  const [cookies, setCookie, removeCookie] = useCookies(['name']);
+  
+  if(query.auth ==="social") {
+	  userStore.setUser('');
+	  userStore.setToken('');
+	  userStore.setUser(cookies['plismplus'].user);
+	  userStore.setToken(cookies['plismplus'].token);
+	  removeCookie('plismplus',{path:'/'});
+  } else if(query.auth ==="register") {
+	  userStore.setUser('');
+	  userStore.setUser(cookies['plismplus'].user);
+	  removeCookie('plismplus',{path:'/'});
+  }
+
   // ref for the wrapper div
   const wrapper = React.createRef();
   // styles
   const classes = useStyles();
   React.useEffect(() => {
+
     document.body.style.overflow = "unset";
     // Specify how to clean up after this effect:
     return function cleanup() {};
@@ -52,7 +71,7 @@ export default function Pages(props) {
   const getBgImage = () => {
     if (window.location.pathname.indexOf("/authpage/register") !== -1) {
       return register;
-    } else if (window.location.pathname.indexOf("/authpage/aaaaaaaaaaaaa") !== -1) {
+    } else if (window.location.pathname.indexOf("/authpage/authcheck") !== -1) {
       return login;
     } else if (window.location.pathname.indexOf("/authpage/pricing") !== -1) {
       return pricing;
@@ -92,11 +111,14 @@ export default function Pages(props) {
         >
           <Switch>
             {getRoutes(routes)}
-            <Redirect from="/authpage" to="/authpage/register" />
+            {query.auth === "register"?<Redirect from="/authpage" to="/authpage/register" />:<Redirect from="/authpage" to="/landing" />}
           </Switch>
-	{/*    <Footer white />*/}
         </div>
       </div>
     </div>
   );
 }
+
+))
+
+export default Pages;

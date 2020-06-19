@@ -3,7 +3,10 @@ import Board from "components/Board/Board.js"
 
 import axios from 'axios';
 
-export default function BoardTest(props) {
+import { observer, inject} from 'mobx-react'; // 6.x
+
+const BoardTest = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+//export default function BoardTest(props) {
 
     const [boardMode,setBoardMode] = useState("LIST");
     const [boardId,setBoardId] = useState();
@@ -17,7 +20,7 @@ export default function BoardTest(props) {
     }
 
     const getBoardList = () => {
-      axios.post("/api/getBoardList",{type:"main"}
+      axios.post("/api/getBoardList",{type:"main"}, {headers:{'Authorization':'Bearer '+userStore.token}}
           )
         .then(res => {setBoardList(res.data)
           console.log(res.data)
@@ -30,7 +33,7 @@ export default function BoardTest(props) {
     const getBoardDetail = (boardId) => {
       console.log('effect');
       //search
-      axios.post("/api/getBoardDetail", {type:"main",board_id:boardId}
+      axios.post("/api/getBoardDetail", {type:"main",board_id:boardId}, {headers:{'Authorization':'Bearer '+userStore.token}}
           )
         .then(res => {
           setBoardData(res.data[0]);
@@ -42,7 +45,7 @@ export default function BoardTest(props) {
 
     const deleteBoard = (boardId) => {
       //delete
-      axios.post("/com/deleteBoard",{ type:"main",board_id:boardId })
+      axios.post("/com/deleteBoard",{ type:"main",board_id:boardId }, {headers:{'Authorization':'Bearer '+userStore.token}})
         .then(res => {
               alert("삭제되었습니다."); 
               setBoardMode("LIST");
@@ -57,7 +60,7 @@ export default function BoardTest(props) {
     
     const saveBoard = (boardId, title, content) => {
       //save
-      axios.post("/com/saveBoard",{ type:"main",board_id:boardId, title:title, content:content})
+      axios.post("/com/saveBoard",{ type:"main",board_id:boardId, title:title, content:content}, {headers:{'Authorization':'Bearer '+userStore.token}})
         .then(res => {
             alert("게시글이 등록 되었습니다."); 
             setBoardMode("LIST")
@@ -83,3 +86,7 @@ export default function BoardTest(props) {
         ></Board>
     );
 }
+
+))
+
+export default BoardTest;

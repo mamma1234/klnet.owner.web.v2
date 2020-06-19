@@ -16,14 +16,14 @@ import MapSkin from './CustomMap';
 import IconButton from '@material-ui/core/IconButton';
 import FilterIcon from '@material-ui/icons/Filter';
 import Button from "components/CustomButtons/Button.js";
+import HighlightOff from '@material-ui/icons/HighlightOff';
 import {
     withScriptjs,
     withGoogleMap,
     GoogleMap,
     Marker,
     Polyline,
-    InfoWindow,
-    DirectionsRenderer
+    InfoWindow
   } from "react-google-maps";
 import { compose, withStateHandlers, withProps, withState, withHandlers, lifecycle } from "recompose";
 import dotenv from "dotenv";
@@ -59,6 +59,7 @@ dotenv.config();
 
 
 export default function TrackingMap(props) {
+	console.log(props);
     const classes = useStyles();
     const terminalPosition = props.setData;
     const portwgs84 = {lat: 36.431748, lng: 127.384496};
@@ -68,7 +69,7 @@ export default function TrackingMap(props) {
 
     useEffect(() => {
       console.log('호출....');
-      console.log(props)
+      console.log(props);
       //axios.post("/loc/getTrackingTerminal",{ie_type:ieGubun,req_seq:'20200327172402000063'},{headers:{'Authorization':'Bearer '+store}}).then(res => RoadMap(res.data));
       return () => {
         console.log('cleanup');
@@ -88,8 +89,7 @@ export default function TrackingMap(props) {
         isOpen: false,
         terminalPosition: terminalPosition,
         port: "",
-        centerPosition: portwgs84,
-        directions:[]
+        centerPosition: portwgs84
       }), 
       {
       onToggleOpen: ({ isOpen }) =>(portCode, positionX, positionY) => ({
@@ -179,28 +179,28 @@ export default function TrackingMap(props) {
         }),
         withScriptjs,
         withGoogleMap,
-        lifecycle({
-          componentDidMount() {
-            const DirectionService = new window.google.maps.DirectionsService();
-            console.log('DirectionService',DirectionService)
-              DirectionService.route({
-                origin:flightPlanCoordinates[0],
-                destination:flightPlanCoordinates[2],
-                travelMode:window.google.maps.TravelMode.TRANSIT,
-                transitOptions:{
-                  modes:['BUS']
-                }
+        // lifecycle({
+        //   componentDidMount() {
+        //     const DirectionService = new window.google.maps.DirectionsService();
+        //     console.log('DirectionService',DirectionService)
+        //       DirectionService.route({
+        //         origin:flightPlanCoordinates[0],
+        //         destination:flightPlanCoordinates[2],
+        //         travelMode:window.google.maps.TravelMode.TRANSIT,
+        //         transitOptions:{
+        //           modes:['BUS']
+        //         }
              
               
-              },(result,status)=>{
-                if(status === window.google.maps.DirectionsStatus.OK) {
-                  this.setState({directions:result})
-                }else {
-                  console.log('error', status,result);
-                }
-              })
-          }
-        })
+        //       },(result,status)=>{
+        //         if(status === window.google.maps.DirectionsStatus.OK) {
+        //           this.setState({directions:result})
+        //         }else {
+        //           console.log('error', status,result);
+        //         }
+        //       })
+        //   }
+        // })
       )
 
     (props =>
@@ -339,13 +339,14 @@ export default function TrackingMap(props) {
               repeat: '50px'}]
             }}
           />
-          {props.directions && <DirectionsRenderer directions={props.directions}/>}   
+          {/* {props.directions.length !== 0 && props.directions && <DirectionsRenderer directions={props.directions}/>}    */}
 
 
       </GoogleMap>
     )
       return (
       <div className={classes.root}>  
+      <HighlightOff onClick={()=>props.onClose()} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
         <Card>
           <CardBody style={{paddingBottom:'2px'}}>   
           <Map/>
