@@ -77,7 +77,13 @@ const styles = {
   },
 };
 
-const useStyles = makeStyles(styles);
+//const useStyles = makeStyles(styles);
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    height: '550px'
+  },
+}));
 
 export default function TableList(props) {
 //  const TableList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
@@ -114,6 +120,7 @@ export default function TableList(props) {
   }
   
   return (
+    <div className={classes.root}>
         <Card>
  		<CardHeader color="info" stats icon >
 		<CardIcon color="info" style={{height:'26px'}}>
@@ -132,6 +139,7 @@ export default function TableList(props) {
 				     </GridItem>
           </CardBody>
         </Card>
+        </div>
   );
 }
 //))

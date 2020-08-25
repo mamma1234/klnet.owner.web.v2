@@ -16,14 +16,19 @@ import GridItem from "components/Grid/GridItem.js";
 import Button from "components/CustomButtons/Button.js";
 import HeaderLinks from "components/Kit/Header/HeaderLinks.js";
 import Parallax from "components/Kit/Parallax/Parallax.js";
-
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
 import landingPageStyle from "assets/jss/material-kit-pro-react/views/landingPageStyle.js";
-
+import CardFooter from "components/Card/CardFooter.js";
 // Sections for this page
 import ProductSection from "./Sections/ProductSection.js";
 import SectionProduct from "./Sections/SectionProduct.js";
 import SectionTeam from "./Sections/SectionTeam.js";
 import SectionWork from "./Sections/SectionWork.js";
+import CommonSearch from "./Sections/SearchBar.js";
+
+//import Dashboard from "./Sections/Dashboard.js";
+
 import Board from "./Sections/Main_Board.js";
 // import Cookies from "js-cookie";
 import Dialog from '@material-ui/core/Dialog';
@@ -37,8 +42,7 @@ import { observer, inject } from 'mobx-react'; // 6.x
 
 const useStyles = makeStyles(landingPageStyle);
 
-
-
+let numCnt =1;
 // export default function LandingPage() {
 const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore}) => { 
 
@@ -47,6 +51,10 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [userData,setUserData] =React.useState([]);
   const [boardData,setBoardData] =React.useState([]);
+  const [totpage,setTotpage] = React.useState(0);
+  const [severity, setSeverity] = React.useState("");
+  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [errMessage, setErrmessage] = React.useState("");
 
   // console.log("userStore", userStore);
   // console.log("userStore", userStore.me);
@@ -59,6 +67,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
 */
   React.useEffect(() => {
 	 // console.log(">>>>>main userStore.token",userStore.token);
+	  document.body.style.overflow = "unset";
     if (userStore.token) {
       axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
         //.then(res => console.log("return:",res.data))
@@ -78,6 +87,23 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
         )
         .catch(err => {
         setIsAuthenticated(false);
+	        axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
+		    .then(res => {
+		        if (res.data.message){
+		        	alert(res.data.message);
+		        } else {
+		        	//localStorage.removeItem('plismplus');
+		        	//props.logOut();
+	                userStore.setUser('');
+	                userStore.setToken('');
+		        	props.history.push('/landing');
+		        }
+		        	//window.location.href = "/login"; //alert(res.data.userid + " �α��� ����");
+		    })
+		    .catch(err => {
+		        console.log(err);
+		        //window.location.href = "/Landing";
+		    })
       });    
 
     }
@@ -85,9 +111,10 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   
   React.useEffect(() => {
 	//board 
-	  axios.post("/api/getBoardList",{type:"main"})
+	  numCnt=1;
+	  axios.post("/api/getBoardList",{type:"main",num:numCnt})
 	  .then(setBoardData([]))
-      .then(res => setBoardData(res.data));
+      .then(res => {setBoardData(res.data);setTotpage(res.data[0].tot_page);});
 	  }, []);
 
   React.useEffect(() => {
@@ -95,6 +122,16 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
     document.body.scrollTop = 0;
   });
   const classes = useStyles();
+  
+  const handleAddRow = () => {
+
+	 if(numCnt != boardData[0].tot_page) {
+			//page ++
+		    numCnt=numCnt+1; 
+		    axios.post("/api/getBoardList",{type:"main",num:numCnt})
+				  .then(res => {setBoardData([...boardData,...res.data]);setTotpage(res.data[0].tot_page);} );
+	 }   
+  };
   
   const handleClickLoginPage = () => {
 	  setModalGb("login");
@@ -120,8 +157,28 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   const handleLogOut =() =>{
     setIsAuthenticated(false);
     userStore.logout();
-	  alert("로그아웃 되었습니다.");
+	  alertMessage('로그아웃 되었습니다.','success');
   }
+  
+	function Alert(props) {
+		return <MuiAlert elevation={6} variant="filled" {...props} />;
+	}
+
+	const handleAlertClose = (event, reason) => {
+		if(reason ==='clickaway') {
+			return;
+		}
+		setAlertOpen(false);
+	  }
+	
+	function  alertMessage (message,icon) {
+		setErrmessage(message);
+		setSeverity(icon);
+		setAlertOpen(true);
+	}
+	
+  
+  const logo = require("assets/img/pp_logo.gif");
 
   return (
     <div>
@@ -145,8 +202,8 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
             
       </Dialog>
       <Parallax image={require("assets/img/main.jpg")}>
-        <div className={classes.container} style={{textAlign:'-webkit-right'}}>
-            <GridItem xs={12} sm={6} md={6} >
+        <div className={classes.container} style={{textAlign:'-webkit-right', paddingTop:'10%'}}>
+            <GridItem xs={12} sm={6} md={5} >
               <h3 className={classes.title}>Welcome To Plism Plus.</h3>
               <h5>
                 Every landing page needs a small description after the big bold
@@ -154,29 +211,44 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
                 information that can make you or your product create the first
                 impression.
               </h5>
-             {/*   <br />
+                <br />
+               {!isAuthenticated?
              <Button
                 color="danger"
-                size="lg"
-                //href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ref=creativetim"
-                target="_blank"
+                size="sm"
+                onClick={()=>setOpen(true)}
               >
-                <i className="fas fa-play" />
                 Go Service
-              </Button> */}
+              </Button>:null}
             </GridItem>
+  {/*	      <div style={{opacity:'0.8',textAlign:'-webkit-center'}}>
+	      	<GridItem xs={12} sm={12} md={12} >
+				<CommonSearch/>
+			</GridItem>
+			</div>*/}
         </div>
+
       </Parallax>
+
       <div className={classNames(classes.main, classes.mainRaised)} style={{marginLeft:'19px',marginRight:'19px'}}>
         <div className={classes.container}>
-          <Board data={boardData}/>
+        <CommonSearch/>
 		  {/*<ProductSection />
           <SectionProduct />
-          <SectionTeam />
+          
           <SectionWork />*/}
+		  {/*{isAuthenticated?<Dashboard />:null}*/}
+          <Board data={boardData} tableRownum={numCnt} onClickHandle ={handleAddRow} totPage={totpage}/>
         </div>
       </div>
-      <Footer/>
+      <Footer store={userStore}/>
+	   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
+		<Alert 
+			onClose={handleAlertClose}
+			severity={severity}>
+				{errMessage}
+		</Alert>
+	</Snackbar>
     </div>
   );
 }

@@ -109,26 +109,20 @@ const getTestQueryAttibuteSample = (request, response) => {
 
 const getImpFlowSample = (request, response) => {
 
-    let sql = "SELECT SEQ,CNTR_NO,UNLOAD_DATE_TIME,UNLOAD_VESSEL_CODE,UNLOAD_TERMINAL_REF_NO," +
-    		"UNLOAD_TERMINAL,UNLOAD_CARRIER_CODE,UNLOAD_SEAL_NO,UNLOAD_BL_NO,UNLOAD_BOOKING_NO," +
-    		"UNLOAD_FULL_EMPTY,UNLOAD_VESSEL_NAME,UNLOAD_CARRIER_REF_NO,UNLOAD_POL,UNLOAD_POD," +
-    		"OUT_DATE_TIME,OUT_TERMINAL,OUT_FULL_EMPTY,OUT_BL_NO,OUT_CARRIER_CODE,OUT_SEAL_NO," +
-    		"OUT_CAR_NO,IN_DATE_TIME,IN_TERMINAL,IN_FULL_EMPTY,IN_BL_NO,IN_CARRIER_CODE,IN_SEAL_NO," +
-    		"IN_CAR_NO,MFCS_MRN,MFCS_ARV_DATE,MFCS_LINE_CODE,MFCS_BL_NO,MFCS_SEAL_NO,MFCS_POD,MFCS_POL," +
-    		"DISCHARGE_TERMINAL,UNLOAD_COARRI_THIS_IPM,OUT_CODECO_THIS_IPM,OUT_CODECO_KEY_ID," +
-    		"IN_CODECO_THIS_IPM,IN_CODECO_KEY_ID,REG_DATE,UPDATE_DATE,CLOSE_DATE,CARRIER_CODE," +
-    		"BL_NO,TYPE_SIZE,POD,POL,DELIVERY_ORDER_NO FROM mfedi.tcs_flow_import_tracking ";
-	if(request.body.cntrNo !="") {
+    let sql = "select *from (select FLOOR(count(*) over()/10+1) as tot_page,  \n";
+    sql += "FLOOR((ROWNUM-1)/10+1) as curpage, count(*) over() as tot_cnt,a.*,to_char(a.update_date,'YYYY-MM-DD hh24:mi') as update_date2,to_char(a.reg_date,'YYYY-MM-DD hh24:mi') as reg_date2 from mfedi.tcs_flow_import_tracking a \n";
+    if(request.body.cntrNo !="") {
 		sql +=  "where cntr_no='"+request.body.cntrNo+"'";
 	}
-console.log(">>>>",sql);
+    sql += "order by reg_Date desc) where curpage='"+request.body.num+"' \n";
+
     oraclePool.getConnection(function(err,conn,done) {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
         }
 
-        conn.execute(sql, (error, results) => {
+        conn.execute(sql,{},{outFormat:oraclePool.OBJECT}, (error, results) => {
             if (error) {
                 response.status(400).json({ "error": error.message });
                 return;
@@ -141,20 +135,22 @@ console.log(">>>>",sql);
 }
 
 const getExpFlowSample = (request, response) => {
-	let sql= "";
-	sql += "SELECT SEQ,CNTR_NO,OUT_DATE_TIME,OUT_TERMINAL,OUT_FULL_EMPTY,OUT_BKG_NO,OUT_BL_NO,OUT_CARRIER_CODE,OUT_SEAL_NO,OUT_CAR_NO,PRE_IN_DATE_TIME,PRE_IN_TERMINAL,PRE_IN_FULL_EMPTY,PRE_IN_BKG_NO,PRE_IN_BL_NO,PRE_IN_CARRIER_CODE,PRE_IN_SEAL_NO,PRE_IN_CAR_NO,POL,POL_IN_DATE_TIME,POL_IN_TERMINAL,POL_IN_FULL_EMPTY,POL_IN_BKG_NO,POL_IN_BL_NO ,POL_IN_CARRIER_CODE,POL_IN_SEAL_NO,POL_IN_CAR_NO,IN_DATE_TIME,IN_TERMINAL,IN_FULL_EMPTY,IN_BKG_NO,IN_BL_NO,IN_CARRIER_CODE,IN_SEAL_NO,IN_CAR_NO,RETURN_DATE,LOAD_DATE_TIME,LOAD_VESSEL_CODE,LOAD_TERMINAL_REF_NO,LOAD_TERMINAL,LOAD_CARRIER_CODE,LOAD_SEAL_NO,LOAD_BL_NO,LOAD_BOOKING_NO,LOAD_FULL_EMPTY,MFCS_MRN,MFCS_DPT_DATE,MFCS_LINE_CODE,MFCS_BL_NO,MFCS_SEAL_NO,CLL_SEQ,CLL_CARRIER_CODE,CLL_SOC,CLL_BL_NO,CLL_SEAL_NO,OUT_SCH_ETA,OUT_SCH_ETD,OUT_SCH_LINE_CODE,OUT_SCH_TERMINAL,OUT_SCH_VESSEL_CODE,OUT_SCH_TERMINAL_REF_NO,OUT_SCH_ROUTE_CODE,OUT_SCH_ETB,OUT_SCH_LINE_VSL,OUT_SCH_VOYAGE_NO,OUT_BKG_SHIPPER_ID,OUT_BKG_SHIPPER_NAME,IN_SCH_ETA,IN_SCH_ETD,IN_SCH_LINE_CODE,IN_SCH_TERMINAL,IN_SCH_VESSEL_CODE,IN_SCH_TERMINAL_REF_NO,IN_SCH_ROUTE_CODE,IN_SCH_ETB,IN_SCH_LINE_VSL,IN_SCH_VOYAGE_NO,IN_BKG_SHIPPER_ID,IN_BKG_SHIPPER_NAME,CLL_SCH_ETA,CLL_SCH_ETD,CLL_SCH_LINE_CODE,CLL_SCH_TERMINAL,CLL_SCH_VESSEL_CODE,CLL_SCH_TERMINAL_REF_NO,CLL_SCH_ROUTE_CODE,CLL_SCH_ETB,CLL_SCH_LINE_VSL,CLL_SCH_VOYAGE_NO,LOAD_SCH_ETA,LOAD_SCH_ETD,LOAD_SCH_LINE_CODE,LOAD_SCH_TERMINAL,LOAD_SCH_VESSEL_CODE,LOAD_SCH_TERMINAL_REF_NO,LOAD_SCH_ROUTE_CODE,LOAD_SCH_ETB,LOAD_SCH_LINE_VSL,LOAD_SCH_VOYAGE_NO,CHANGE_VESSEL_CODE,CHANGE_TERMINAL_REF_NO,CHANGE_LINE_VSL,CHANGE_VOYAGE_NO,CHANGE_ROUTE,CHANGE_TERMINAL,CHANGE_ETA,CHANGE_ETB,CHANGE_ETD,CHANGE_POL,OUT_CODECO_THIS_IPM,OUT_CODECO_KEY_ID,PRE_IN_CODECO_THIS_IPM,PRE_IN_CODECO_KEY_ID,POL_IN_CODECO_THIS_IPM,POL_IN_CODECO_KEY_ID,IN_CODECO_THIS_IPM,IN_CODECO_KEY_ID,LOAD_COARRI_THIS_IPM,OUT_BKG_SID,IN_BKG_SID ,OUT_SCH_VOYAGE_SID ,IN_SCH_VOYAGE_SID ,CLL_SCH_VOYAGE_SID,LOAD_SCH_VOYAGE_SID,REG_DATE,UPDATE_DATE,CLOSE_DATE, CARRIER_CODE,BL_NO,TYPE_SIZE FROM mfedi.tcs_flow_export_tracking \n";
-	if(request.body.cntrNo !="") {
+
+	let sql = "select *from (select FLOOR(count(*) over()/10+1) as tot_page,  \n";
+    sql += "FLOOR((ROWNUM-1)/10+1) as curpage, count(*) over() as tot_cnt,a.*,to_char(a.update_date,'YYYY-MM-DD hh24:mi') as update_date2,to_char(a.reg_date,'YYYY-MM-DD hh24:mi') as reg_date2 from mfedi.tcs_flow_export_tracking a \n";
+    if(request.body.cntrNo !="") {
 		sql +=  "where cntr_no='"+request.body.cntrNo+"'";
 	}
+    sql += "order by reg_Date desc) where curpage='"+request.body.num+"' \n";
+    
 
-	console.log(sql);
     oraclePool.getConnection(function(err,conn,done) {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
         }
 
-        conn.execute(sql, (error, results) => {
+        conn.execute(sql, {},{outFormat:oraclePool.OBJECT}, (error, results) => {
             if (error) {
                 response.status(400).json({ "error": error.message });
                 return;

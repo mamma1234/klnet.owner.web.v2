@@ -9,6 +9,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import Terms from 'views/Pages/TermsOfService.js';
 import Privacy from 'views/Pages/PrivacyPolicy.js';
+import Baltic from 'views/Pages/BalticDry.js';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -16,7 +17,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Paper from '@material-ui/core/Paper';
 import Draggable from 'react-draggable';
 import styles from "assets/jss/material-dashboard-pro-react/components/footerStyle.js";
-
+import Scfi from 'views/Pages/Scfipage';
+import TeuRank from 'views/Pages/teuRank';
 const useStyles = makeStyles(styles);
 
 export default function Footer(props) {
@@ -24,17 +26,18 @@ export default function Footer(props) {
   const { fluid, white, rtlActive } = props;
   const [open, setOpen] = React.useState(false);
   const [serviceText, setServiceText] = React.useState(""); //약관구분
-
+  const [dialogSize, setDialogSize] = React.useState("sm");
   function DialogComponet() {
   	  return (	  
   		<Dialog
   			open={open}
   		    onClose={handleClose}
   		    PaperComponent={PaperComponent}
-  		    aria-labelledby="draggable-dialog-title"
+          aria-labelledby="draggable-dialog-title"
+          maxWidth ={dialogSize}
   		>
   		<DialogContent>
-  			{serviceText === "T"?<Terms handleClose={handleClose}/>:<Privacy handleClose={handleClose} />}
+  			{serviceText === "T"?<Terms handleClose={handleClose}/>:serviceText ==="B"?(<Baltic handleClose={handleClose} param={props}/>):serviceText === "S"?<Scfi handleClose={handleClose} param={props}/>:serviceText === "U"?<TeuRank handleClose={handleClose} param={props}/>:<Privacy handleClose={handleClose} />}
   		</DialogContent>
   		</Dialog>
   	  );
@@ -46,7 +49,7 @@ export default function Footer(props) {
 
   function PaperComponent(props) {
   	  return (
-  			  <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'} >
+  			  <Draggable>
   			  	<Paper {...props} />
   			  </Draggable>
   			  );
@@ -68,10 +71,21 @@ export default function Footer(props) {
   const handleClickOpen = (event,name) => {
 	  
 	  if(name === "terms") {
-		  setServiceText("T");
-	  } else {
-		  setServiceText("P");
-	  }
+      setServiceText("T");
+      setDialogSize("sm");
+	  } else if(name === "privacy") {
+      setServiceText("P");
+      setDialogSize("sm");
+	  } else if(name === "baltic"){
+      setServiceText("B");
+      setDialogSize(false);
+	  } else if(name === "scfi") {
+      setServiceText("S");
+      setDialogSize(false);
+    } else if(name === "teu") {
+      setServiceText("U");
+      setDialogSize(false);
+    }
 	  setOpen(true);
   }
   
@@ -93,6 +107,18 @@ export default function Footer(props) {
             	<Link to="/svc/board">
             	{rtlActive ? "게시판": "Board"}
             	</Link>
+            </ListItem>
+            <ListItem className={classes.inlineBlock} >
+              <Link to="#" onClick={event => handleClickOpen(event,'baltic')}>
+                {rtlActive ? "BDIY" : "Baltic Dry"}</Link>
+            </ListItem> 
+            <ListItem className={classes.inlineBlock} >
+              <Link to="#" onClick={event => handleClickOpen(event,'scfi')}>
+                {rtlActive ? "SCFI" : "SCFI"}</Link>
+            </ListItem> 
+            <ListItem className={classes.inlineBlock} >
+              <Link to="#" onClick={event => handleClickOpen(event,'teu')}>
+                {rtlActive ? "TEU" : "TOP 100 CARRIERS"}</Link>
             </ListItem> 
           </List>
         </div>

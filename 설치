@@ -39,6 +39,9 @@ yarn add bcrypt
 
 
 /*
+sudo systemctl start docker
+sudo systemctl enable docker
+
 docker build -t klnet.owner.node .
 docker build -t klnet.owner.web .
 
@@ -65,3 +68,16 @@ sudo systemctl start firewalld.service
 systemctl status firewalld.service
 */
 
+
+
+
+/*
+portainer (admin/admin1234)
+http://172.25.1.89:9000/#/auth
+
+kibana
+http://172.25.1.89:5601/app/kibana
+
+elasticsearch
+http://172.25.1.89:9200/imo/_search
+*/

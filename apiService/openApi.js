@@ -1,8 +1,8 @@
 'use strict';
 
 const pgsqlPool = require("../database/pool.js").pgsqlPool
-
-
+const request = require('request');
+const config = require('./uniPassConfig');
 const apiScheduleInfo = (request, response) => {
     let authorization = request.headers['authorization'];
 
@@ -84,6 +84,161 @@ const apiScheduleInfo = (request, response) => {
 
 }
 
+const apiBaltic = (req, response) => {
+  try{
+    request({
+      url:  config.TRADING_URL,
+      method: 'GET'
+    }, (err, res, data) => {
+      if(err) {
+        console.log(err);
+        }else {
+          if(res.statusCode == 200) {
+            response.send(data);
+          }else {
+            response.send([])
+          }
+      }
+    })
+  }catch(e) {
+    response.send([]);
+    console.log(e);
+
+  }
+
+}
+
+const apiscfi = (req, response) => {
+  try{
+    request({
+      url:  config.SCFI_URL,
+      method: 'GET'
+    }, (err, res, data) => {
+      if(err) {
+        console.log(err);
+        }else {
+          console.log('res.statusCode',res.statusCode)
+          if(res.statusCode == 200) {
+            const obj = JSON.parse(data);
+            console.log('obj',obj);
+            response.send(obj);
+          }else {
+            response.send([])
+          }
+      }
+    })
+  }catch(e) {
+    response.send([]);
+    console.log(e);
+
+  }
+}
+
+
+const apiteuRank = (req,res) => {
+  const raw = [
+    {"action":"top100","method":"getTop100Table","data":null,"type":"rpc","tid":1}
+  ]
+  try {
+    request({
+      url: config.TEU_URL,
+      method: 'POST',
+      body: JSON.stringify(raw)
+    }, (error, response, data) => {
+      if(error) {
+        console.log('error : ', error);
+        res.send([]);
+      }else {
+        if(response.statusCode === 200) {
+          if(data.length != 0) {
+            const obj = JSON.parse(data);
+            res.send(obj);
+          }else {
+            res.send([]);
+          }
+        }else {
+          res.send([]);
+        }
+      }
+    })
+  }catch(e) {
+    res.send([])
+    console.log('error : ', e);
+  }
+
+}
+
+const seaventageShipSearch = (req,res) => {
+  console.log(req.body)
+
+  let searchUrl = config.SEAVENTAGE_URL + 'ship/search?keyword=' + encodeURIComponent(req.body.param);
+  try {
+    request({
+      url: searchUrl,
+      method: 'GET',
+      headers: {
+        'authorization' : config.SEAVENTAGE_KEY
+      }
+    }, (error, response, data) => {
+      if(error) {
+        console.log('error : ', error);
+        res.send([]);
+      }else {
+        if(response.statusCode === 200) {
+          if(data.length != 0) {
+            const obj = JSON.parse(data);
+            res.send(obj);
+          }else {
+            res.send([]);
+          }
+        }else {
+          res.send([]);
+        }
+      }
+    })
+  }catch(e) {
+    res.send([])
+    console.log('error : ', e);
+  }  
+} 
+
+const seaventageTrackSearch = (req,res) => {
+  let searchUrl = config.SEAVENTAGE_URL + 'ship/' + encodeURIComponent(req.body.ship) + '/pastTrack?endDateTime=' + encodeURIComponent(req.body.toD) + '&startDateTime='+encodeURIComponent(req.body.fromD);
+  console.log(searchUrl)
+  try {
+    request({
+      url: searchUrl,
+      method: 'GET',
+      headers: {
+        'authorization' : config.SEAVENTAGE_KEY
+      }
+    }, (error, response, data) => {
+      if(error) {
+        console.log('error : ', error);
+        res.send([]);
+      }else {
+        if(response.statusCode === 200) {
+          if(data.length != 0) {
+            const obj = JSON.parse(data);
+            res.send(obj);
+          }else {
+            res.send([]);
+          }
+        }else {
+          res.send([]);
+        }
+      }
+    })
+  }catch(e) {
+    res.send([])
+    console.log('error : ', e);
+  }  
+}
 module.exports = {
-	apiScheduleInfo
+  apiScheduleInfo,
+  apiBaltic,
+  apiscfi,
+  apiteuRank,
+  seaventageShipSearch,
+  seaventageTrackSearch
 }

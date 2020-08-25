@@ -14,7 +14,6 @@ import FirstPageIcon from "@material-ui/icons/FirstPage";
 import LastPageIcon from "@material-ui/icons/LastPage";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
-import { Icon,Popconfirm } from "antd";
 // core components
 import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
 
@@ -31,8 +30,6 @@ function TablePageinationActions(props) {
 	const classes = useStyles1();
 	const theme = useTheme();
 	const {count,page,rowsPerPage,onChangePage } =props;
-	
-	console.log(":"+count+":"+page+":"+rowsPerPage+":"+onChangePage);
 	
 	const handleFirstPageButtonClick = e => {
 		onChangePage(e,0);
@@ -98,8 +95,6 @@ export default function CustomTable(props) {
   const [page,setPage] = React.useState(0);
   const [rowsPerPage,setRowsPerPage] = React.useState(5);
   
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage,tableData.length - page * rowsPerPage);
-  
   const handleChagePage = (e,newPage) => {
 	  setPage(newPage);
   }
@@ -109,10 +104,6 @@ export default function CustomTable(props) {
 	  setPage(0);
   }
   
-  const handleDelete = () => {
-	  console.log(">>>>>>");
-  }
-  
   return (
     <div className={classes.tableResponsive}>
       <Table className={classes.table}>
@@ -120,7 +111,7 @@ export default function CustomTable(props) {
           <TableHead className={classes[tableHeaderColor + "TableHeader"]}>
             <TableRow className={classes.tableHeadRow}>
               {tableHead.map((prop, key) => {
-				if(prop == "I/E") {
+				if(prop === "I/E") {
 					return (
 						<TableCell
 							className={classes.tableCell + " " + classes.tableHeadCell}
@@ -199,5 +190,5 @@ CustomTable.propTypes = {
     "gray"
   ]),
   tableHead: PropTypes.arrayOf(PropTypes.string),
-  tableData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
+  tableData: PropTypes.array
 };

@@ -17,16 +17,19 @@ const useStyles = makeStyles(styles);
 export default function CustomTable(props) {
   const classes = useStyles();
   const { tableHead, tableData, tableHeaderColor } = props;
+  const handleClick=(event,value)=>{
+	  props.handleCntr(value);
+  }
   return (
     <div>
-      <Table className={classes.table}>
+      <Table className={classes.table} style={{borderTop:'2px solid silver', borderBottom:'2px solid silver'}}>
       {tableHead !== undefined ? (
               <TableHead className={classes[tableHeaderColor + "TableHeader"]}>
                 <TableRow style={{borderTop:'1px solid',borderColor:'#dddddd'}}>
                   {tableHead.map((prop, key) => {
                     return (
                       <TableCell
-                        className={classes.trackingtableCell + " " + classes.tableHeadCell} style={{textAlignLast:'center'}}
+                       style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd",borderRight:'1px solid silver',borderLeft:'1px solid silver'}}
                         key={key}
                       >
                         {prop}
@@ -38,18 +41,21 @@ export default function CustomTable(props) {
         ) : null}
         <TableBody>
         {tableData.length >=1?
-          tableData.map((prop, key) => {
+          tableData.map((prop,index,key) => {
             return (
-              <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}} >
-            	<TableCell className={classes.trackingtableCell} style={{textAlignLast:'center'}}>
-              	{prop.terminal_name}<a target="_blank" href={prop.terminal_url}><TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}}/></a>
+              <TableRow key={key+index} style={{borderBottom:'1px solid',borderColor:'#dddddd'}} >
+            	<TableCell style={{textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}}>
+              	{prop.terminal_name}<a target='blank' href={prop.terminal_url}><TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}}/></a>
               	</TableCell>
-              	<TableCell className={classes.trackingtableCell} style={{textAlignLast:'center'}}> {prop.activity}<ActListIcon style={{color:'#00acc1',verticalAlign:'bottom'}} onClick={props.handleCntr}/></TableCell>
+              	<TableCell style={{textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',borderRight:'1px solid silver'}}> 
+              	{prop.view_activity}
+              	<ActListIcon style={{color:'#00acc1',verticalAlign:'bottom'}} onClick={(event)=>handleClick(event,index)}/>
+              	</TableCell>
               </TableRow>
             );
           })
           :<TableRow style={{borderBottom:'1px solid',borderColor:'#dddddd'}} >
-          	<TableCell className={classes.trackingtableCell} style={{textAlignLast:'center'}} colSpan="2">NO DATA</TableCell>
+          	<TableCell style={{textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}} colSpan="2">NO DATA</TableCell>
           	</TableRow>
         	  }
         </TableBody>

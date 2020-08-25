@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import PropTypes from "prop-types";
 // import { Link,Redirect  } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link,Redirect} from "react-router-dom";
 // import { Manager, Target, Popper } from "react-popper";
 
 // @material-ui/core components
@@ -85,12 +85,17 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
 		        } else {
 		        	//localStorage.removeItem('plismplus');
 		        	//props.logOut();
-		        	props.history.push('/landing');
+	                userStore.setUser('');
+	                userStore.setToken('');
+		        	//props.history.push('/landing');
+	                console.log("log out!");
+	                props.history.replace('/');
 		        }
 		        	//window.location.href = "/login"; //alert(res.data.userid + " �α��� ����");
 		    })
 		    .catch(err => {
 		        console.log(err);
+		        console.log(">>>>err>");
 		        //window.location.href = "/Landing";
 		    })
 
@@ -98,51 +103,7 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
   
   return (
     <div className={wrapper}>
-      <CustomInput
-        rtlActive={rtlActive}
-        formControlProps={{
-          className: classes.top + " " + classes.search
-        }}
-        inputProps={{
-          placeholder: rtlActive ? "بحث" : "Search",
-          inputProps: {
-            "aria-label": rtlActive ? "بحث" : "Search",
-            className: classes.searchInput
-          }
-        }}
-      />
-      <Button
-        color="white"
-        aria-label="edit"
-        justIcon
-        round
-        className={searchButton}
-      >
-        <Search className={classes.headerLinksSvg + " " + classes.searchIcon} />
-      </Button>
-      <Button
-        color="transparent"
-        simple
-        aria-label="Dashboard"
-        justIcon
-        className={rtlActive ? classes.buttonLinkRTL : classes.buttonLink}
-        muiClasses={{
-          label: rtlActive ? classes.labelRTL : ""
-        }}
-      >
-        <Dashboard
-          className={
-            classes.headerLinksSvg +
-            " " +
-            (rtlActive ? classes.links + " " + classes.linksRTL : classes.links)
-          }
-        />
-        <Hidden mdUp implementation="css">
-          <span className={classes.linkText}>
-            {rtlActive ? "لوحة القيادة" : "Dashboard"}
-          </span>
-        </Hidden>
-      </Button>
+      
       <div className={managerClasses}>
         <Button
           color="transparent"

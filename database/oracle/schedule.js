@@ -14,22 +14,23 @@ const getCarrierInfo = (request, response) => {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
+        } else {
+
+            conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
+                if (error) {
+                    response.status(400).json({ "error": error.message });
+                    return;
+                } else {
+                    // console.log(results.json);
+                    // console.log(results);
+                    // response.send(results.rows);
+                    response.status(200).json(results.rows);
+                }
+                conn.close();                
+            });
+            // conn.release();
         }
 
-        conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
-            if (error) {
-                response.status(400).json({ "error": error.message });
-                return;
-            }
-
-            // console.log(results.json);
-            // console.log(results);
-            // response.send(results.rows);
-            response.status(200).json(results.rows);
-            conn.close();
-            
-        });
-        // conn.release();
     });
 }
 
@@ -69,21 +70,22 @@ const getScheduleList = (request, response) => {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
+        } else {
+            conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
+                if (error) {
+                    response.status(400).json({ "error": error.message });
+                    return;
+                } else {
+                    // console.log(results.json);
+                    // console.log(results);
+                    // response.send(results.rows);
+                    response.status(200).json(results.rows);
+                }
+                conn.close();
+            });
+            // conn.release();
         }
 
-        conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
-            if (error) {
-                response.status(400).json({ "error": error.message });
-                return;
-            }
-
-            // console.log(results.json);
-            // console.log(results);
-            // response.send(results.rows);
-            response.status(200).json(results.rows);
-            conn.close();
-        });
-        // conn.release();
     });
 }
 
@@ -111,22 +113,24 @@ const getScheduleDetailList = (request, response) => {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
+        } else {
+            conn.execute(sql,{},(error, results) => {
+                if (error) {
+                    response.status(400).json({ "error": error.message });
+                    return;
+                } else {
+                    // console.log(results.json);
+                    // console.log(results);
+                    // response.send(results.rows);
+                    response.status(200).json(results.rows);
+                }
+                conn.close();
+                
+            });
+            // conn.release();
+
         }
 
-        conn.execute(sql,{},(error, results) => {
-            if (error) {
-                response.status(400).json({ "error": error.message });
-                return;
-            }
-
-            // console.log(results.json);
-            // console.log(results);
-            // response.send(results.rows);
-            response.status(200).json(results.rows);
-            conn.close();
-            
-        });
-        // conn.release();
     });
 }
 
@@ -150,30 +154,34 @@ const getPortCodeInfo = (request, response) => {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
+        } else {
+
+            conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
+                if (error) {
+                    response.status(400).json({ "error": error.message });
+                    return;
+                } else {
+
+                    // console.log(results.json);
+                    // console.log(results.rows);
+                    // response.send(results.rows);
+            
+                    response.status(200).json(results.rows);
+                }
+    
+                conn.close();
+                
+            });
+            // conn.release();
         }
 
-        conn.execute(sql,{},{outFormat:oraclePool.OBJECT},(error, results) => {
-            if (error) {
-                response.status(400).json({ "error": error.message });
-                return;
-            }
-
-            // console.log(results.json);
-            // console.log(results.rows);
-            // response.send(results.rows);
-    
-            response.status(200).json(results.rows);
-            conn.close();
-            
-        });
-        // conn.release();
     });
 }
 
 
 module.exports = {
-	    getCarrierInfo,
-	    getScheduleList,
-	    getPortCodeInfo,
-	    getScheduleDetailList,
-	}
+    getCarrierInfo,
+    getScheduleList,
+    getPortCodeInfo,
+    getScheduleDetailList,
+}

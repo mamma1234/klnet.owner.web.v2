@@ -42,8 +42,6 @@ module.exports = (passport) => {
 					sUser.displayName = 'web',
 					sUser.email = sUser.email?sUser.email:result.rows[0].user_email;
 
-					// req.session.sUser = sUser;
-
 					conn.release();
 					return done(null,sUser);
 				} else {

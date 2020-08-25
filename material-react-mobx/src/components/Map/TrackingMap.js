@@ -1,21 +1,13 @@
 
 import PropTypes from 'prop-types';
-// import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
-import React,{ useState, useEffect, Component } from "react";
+import React,{ Component } from "react";
 // @material-ui/core components
 import { createPortal } from 'react-dom';
 import {MAP} from 'react-google-maps/lib/constants'
-// core components
-//import CardIcon from "components/Card/CardIcon.js";
-// other import
-//import moment from 'moment';
-import {TextField} from "@material-ui/core";
-import axios from 'axios';
 import MapSkin from './CustomMap';
 import IconButton from '@material-ui/core/IconButton';
 import FilterIcon from '@material-ui/icons/Filter';
-import Button from "components/CustomButtons/Button.js";
 import HighlightOff from '@material-ui/icons/HighlightOff';
 import {
     withScriptjs,
@@ -25,29 +17,10 @@ import {
     Polyline,
     InfoWindow
   } from "react-google-maps";
-import { compose, withStateHandlers, withProps, withState, withHandlers, lifecycle } from "recompose";
+import { compose, withStateHandlers, withProps, withState, withHandlers} from "recompose";
 import dotenv from "dotenv";
-import SearchIcon from '@material-ui/icons/Search';
-import { useCookies } from 'react-cookie'; 
-
-// @material-ui/core components
-// import Table from "components/Table/TablePaging.js";
 import Card from "components/Card/Card.js";
-import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-// core components
-///import Grid from '@material-ui/core/Grid';
-//import GridItem from "components/Grid/GridItem.js";
-//import GridContainer from "components/Grid/GridContainer.js";
-//import Table from "components/Table/Table.js";
-//import icon
-import Icon from "@material-ui/core/Icon";
-import CardIcon from "components/Card/CardIcon.js";
-import { observer, inject} from 'mobx-react';
-
-//import page
-
-
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -63,18 +36,8 @@ export default function TrackingMap(props) {
     const classes = useStyles();
     const terminalPosition = props.setData;
     const portwgs84 = {lat: 36.431748, lng: 127.384496};
-    const [store,setStore] = useState(props.store);
     const flightPlanCoordinates = props.polyRender;
-    const [ieGubun,setIeGubun] = useState(props.ieGubun);
 
-    useEffect(() => {
-      console.log('호출....');
-      console.log(props);
-      //axios.post("/loc/getTrackingTerminal",{ie_type:ieGubun,req_seq:'20200327172402000063'},{headers:{'Authorization':'Bearer '+store}}).then(res => RoadMap(res.data));
-      return () => {
-        console.log('cleanup');
-      };
-    },[]);
 
 
     const Map=compose(
@@ -179,28 +142,6 @@ export default function TrackingMap(props) {
         }),
         withScriptjs,
         withGoogleMap,
-        // lifecycle({
-        //   componentDidMount() {
-        //     const DirectionService = new window.google.maps.DirectionsService();
-        //     console.log('DirectionService',DirectionService)
-        //       DirectionService.route({
-        //         origin:flightPlanCoordinates[0],
-        //         destination:flightPlanCoordinates[2],
-        //         travelMode:window.google.maps.TravelMode.TRANSIT,
-        //         transitOptions:{
-        //           modes:['BUS']
-        //         }
-             
-              
-        //       },(result,status)=>{
-        //         if(status === window.google.maps.DirectionsStatus.OK) {
-        //           this.setState({directions:result})
-        //         }else {
-        //           console.log('error', status,result);
-        //         }
-        //       })
-        //   }
-        // })
       )
 
     (props =>
@@ -243,10 +184,10 @@ export default function TrackingMap(props) {
         onMouseMove={(e) => {props.onLocation(e.latLng.lat(),e.latLng.lng())}}>
 
           <MapControl position = {window.google.maps.ControlPosition.RIGHT_BOTTOM}>
-            <a>lat : {props.locationlat} , lng : {props.locationlng}</a>
+            <span>lat : {props.locationlat} , lng : {props.locationlng}</span>
           </MapControl>
           <MapControl position = {window.google.maps.ControlPosition.RIGHT_BOTTOM}>
-            <a>{"Zoom Level : " + props.zoom}</a>
+            <span>{"Zoom Level : " + props.zoom}</span>
           </MapControl>  
           <MapControl position = {window.google.maps.ControlPosition.RIGHT_TOP}>
             <div style={{backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px', float:'right'}}>
@@ -264,50 +205,26 @@ export default function TrackingMap(props) {
             </div>      
             <div style={{display:'inline-block', backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px'}}>
               <div style={{display:props.menuDisplay1}}>
-                <img style={{marginLeft:"20px"}} src={require("assets/img/googleMap/dark.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleDark)}/>
-                <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/aubergine.png")} onClick={() => props.onSetMapStyle(MapSkin.MapAubergine)}/>
-                <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/night.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleNight)}/>
-                <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/retro.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleRetro)}/>
-                <img style={{marginLeft:"5px"}} src={require("assets/img/googleMap/silver.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleSilver)}/>
-                <img style={{marginLeft:"5px",marginRight:"20px"}} src={require("assets/img/googleMap/normal.png")} onClick={() => props.onSetMapStyle([])}/>
+                <img style={{marginLeft:"20px"}} alt={"dark"} src={require("assets/img/googleMap/dark.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleDark)}/>
+                <img style={{marginLeft:"5px"}} alt={"aubergine"} src={require("assets/img/googleMap/aubergine.png")} onClick={() => props.onSetMapStyle(MapSkin.MapAubergine)}/>
+                <img style={{marginLeft:"5px"}} alt={"night"} src={require("assets/img/googleMap/night.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleNight)}/>
+                <img style={{marginLeft:"5px"}} alt={"retro"} src={require("assets/img/googleMap/retro.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleRetro)}/>
+                <img style={{marginLeft:"5px"}} alt={"silver"} src={require("assets/img/googleMap/silver.png")} onClick={() => props.onSetMapStyle(MapSkin.MapStyleSilver)}/>
+                <img style={{marginLeft:"5px",marginRight:"20px"}} alt={"normal"} src={require("assets/img/googleMap/normal.png")} onClick={() => props.onSetMapStyle([])}/>
               </div>
             </div>
           </MapControl>
 
-          {/* <MapControl position = {window.google.maps.ControlPosition.RIGHT_TOP}>
-            <div style={{backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'15px', float:'right'}}>
-              <IconButton
-                color="secondary"
-                onClick={() => {
-                  if (props.menuDisplay2 === "none") {
-                    props.onMenuDisplay(props.menuDisplay1,"block");
-                  }else {
-                    props.onMenuDisplay(props.menuDisplay1,"none");
-                  }
-                }}> 
-                <SearchIcon/>
-              </IconButton>
-            </div>      
-            <div style={{display:'inline-block', backgroundColor:"#ffffff", marginTop:"10px", marginRight:"5px", borderRadius:'10px'}}>
-              <div style={{display:props.menuDisplay2, marginTop:"10px", marginLeft:"15px", marginRight:"15px", marginBottom:"5px"}}>
-                <TextField
-                  id='CntrNBl'
-                  label='Cntr No & BL'
-                  variant='filled'
-                  color='primary'/>
-              </div>    
-            </div>
-          </MapControl> */}
           {props.terminalPosition.length !== 0 && (props.terminalPosition.map((data, index) => {
             return(
               <Marker 
-                key = {data.terminal + data.time}
+                key = {index}
                 draggable = {false} 
                 position={{lat:data.wgs84_y, lng:data.wgs84_x}} // 마커 위치 설정 {lat: ,lng: }   
                 icon={require("assets/img/marker.png")}
                 onMouseOver={() => {if(!props.isInfoOpen){props.onInfoCheck(true, data.terminal, data.time)}}}
                 onMouseOut={() => {if(props.isInfoOpen)props.onInfoCheck(false, data.terminal, data.time)}}>
-                {props.isInfoOpen && (data.terminal == props.terminal && data.time == props.time) && (
+                {props.isInfoOpen && (data.terminal === props.terminal && data.time === props.time) && (
                   <InfoWindow
                     position = {{lat:data.wgs84_y, lng:data.wgs84_x}}
                   >
@@ -367,10 +284,10 @@ class MapControl extends Component {
   }
 
   componentWillUnmount() {
-    const controlArray = this.map.controls[this.props.position].getArray()
-    for (let index in controlArray) {
-      if(controlArray[index] === this.controlDiv) {
-        this.map.controls[this.props.position].removeAt(index);
+    const controlArray = this.map.controls[this.props.position].getArray();
+    for (let i=0; i < controlArray.length; i++) {
+      if(controlArray[i] === this.controlDiv) {
+        this.map.controls[this.props.position].removeAt(i);
       }
     }
   }

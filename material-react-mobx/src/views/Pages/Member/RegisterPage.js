@@ -24,6 +24,8 @@ import LockOpen from "@material-ui/icons/LockOpenOutlined";
 // import LockOutline from "@material-ui/icons/LockOutline";
 //import Check from "@material-ui/icons/Check";
 import CardHeader from "components/Card/CardHeader.js";
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
 // core components
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
@@ -111,6 +113,10 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
    const [open1, setOpen1] = React.useState(false);
    const [serviceText, setServiceText] = React.useState(""); //약관구분
    
+   const [severity, setSeverity] = React.useState("");
+   const [alertOpen, setAlertOpen] = React.useState(false);
+   const [errMessage, setErrmessage] = React.useState("");
+   
    const kakaoUrl ="https://kauth.kakao.com/oauth/authorize?client_id="+process.env.REACT_APP_KAKAO_CLIENT_ID+"&redirect_uri=http://www.plismplus.com/auth/kakao/callback&response_type=code&state=12345";
    const googleUrl = "https://accounts.google.com/o/oauth2/v2/auth?client_id="+process.env.REACT_APP_GOOGLE_CLIENT_ID+"&redirect_uri=http://www.plismplus.com/auth/google/callback&response_type=code&scope=profile&state=12345";
    const facebookUrl = "https://www.facebook.com/v5.0/dialog/oauth?client_id="+process.env.REACT_APP_FACEBOOK_CLIENT_ID+"&redirect_uri=http://www.plismplus.com/auth/facebook/callback&response_type=code&state=12345"
@@ -132,10 +138,10 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 	
   function handleState (e) {
 		 if(e ==="success") {
-			 alert("회원가입에 성공하였습니다. 다시 로그인 하여 사용해주세요."); 
+			 alertMessage('회원가입에 성공하였습니다. 다시 로그인 하여 사용해주세요.','success');
 			 props.history.push("/landing");
 		 } else if (e ==="401") {
-			 alert("이미 등록된 아이디입니다."); 
+			 alertMessage('이미 등록된 아이디입니다.','error');
 		 } else {
 			 alert(e);
 		 }
@@ -203,10 +209,12 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
     	break;
       case "passwordConform":
     	  setRepassword(value);
-    	  if (value === password ) {
-			  setRepasswordCheck(false);
-    	  } else {
-    		  setRepasswordCheck(true);
+    	  if(value) {
+	    	  if (value === password ) {
+				  setRepasswordCheck(false);
+	    	  } else {
+	    		  setRepasswordCheck(true);
+	    	  }
     	  }
     	break;
       case "name":
@@ -232,52 +240,52 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 	  
 	 if(uid === undefined || uid === "") {
 		 setIdCheck(true);
-		 alert("아이디는 필수 입력 값입니다.");
+		 alertMessage('아이디는 필수 입력 값입니다.','error');
 		 return;	 
 	 } else if (idCheck){
 		 setIdCheck(true);
-		 alert("아이디를 확인해 주세요.");
+		 alertMessage('아이디를 확인해 주세요.','error');
 		 return;
 	 }
 
 	 if(password === undefined || password === "") {
 		 setPasswordCheck(true);
-		 alert("비밀번호는 필수 입력 값입니다.");
+		 alertMessage('비밀번호는 필수 입력 값입니다.','error');
 		 return;	
 	 } else if (passwordCheck){
 		 setPasswordCheck(true);
-		 alert("올바른 비밀번호를 입력해주세요.");
+		 alertMessage('올바른 비밀번호를 입력해주세요.','error');
 		 return;
 	 } else if (repassword === undefined || repassword === "") {
 		 setRepasswordCheck(true);
-		 alert("비밀번호 확인은 필수 입니다.");
+		 alertMessage('비밀번호 확인은 필수 입니다.','error');
 		 return;
 
 	 } else if (repasswordCheck){
 		 setRepasswordCheck(true);
-		 alert("비밀번호 확인은 필수 입니다.");
+		 alertMessage('비밀번호 확인은 필수 입니다.','error');
 		 return;
 	 }
 	 	 
 	 if(emailCheck) {
 		 setEmailCheck("error");
-		 alert("올바른 이메일 주소를 입력해주세요.");
+		 alertMessage('올바른 이메일 주소를 입력해주세요.','error');
 		 return;
 	 }
 	 
 	 if(!certifyStatus) {
 		 setCertifyCheck(true);
-		 alert("본인인증 은 필수 입니다.");
+		 alertMessage('본인인증 은 필수 입니다.','error');
 		 return;
 	 }
 	 
 	 if(!serviceChecked) {
-		  alert("이용약관 동의는 필수 입니다.");
+		  alertMessage('이용약관 동의는 필수 입니다.','error');
 		  return;
 	  }
 	  
 	  if(!polChecked) {
-		  alert("개인정보 처리 방침 동의는 필수 입니다.");
+		  alertMessage('개인정보 처리 방침 동의는 필수 입니다.','error');
 		  return;
 	  }
 
@@ -307,23 +315,28 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 					   name:userName,
 					   phone:phoneNum,
 					   email:email,
-					   kakaoid:userStoreValue.provider=='kakao'?userStoreValue.userid:'',
-					   tokenkakao:userStoreValue.provider=='kakao'?userStoreValue.accessToken:'',
-					   naverid:userStoreValue.provider=='naver'?userStoreValue.userid:'',
-					   tokennaver:userStoreValue.provider=='naver'?userStoreValue.accessToken:'',
-					   faceid:userStoreValue.provider=='facebook'?userStoreValue.userid:'',
-					   tokenface:userStoreValue.provider=='facebook'?userStoreValue.accessToken:'',
-					   googleid:userStoreValue.provider=='google'?userStoreValue.userid:'',
-					   tokengoogle:userStoreValue.provider=='google'?userStoreValue.accessToken:'',
+					   kakaoid:userStoreValue.provider==='kakao'?userStoreValue.userid:'',
+					   tokenkakao:userStoreValue.provider==='kakao'?userStoreValue.accessToken:'',
+					   naverid:userStoreValue.provider==='naver'?userStoreValue.userid:'',
+					   tokennaver:userStoreValue.provider==='naver'?userStoreValue.accessToken:'',
+					   faceid:userStoreValue.provider==='facebook'?userStoreValue.userid:'',
+					   tokenface:userStoreValue.provider==='facebook'?userStoreValue.accessToken:'',
+					   googleid:userStoreValue.provider==='google'?userStoreValue.userid:'',
+					   tokengoogle:userStoreValue.provider==='google'?userStoreValue.accessToken:'',
 					   linkyn:'Y'}
-			}).then(res=>{alert("소셜 계정 과 연동 하여 PLISM PLUS 가입되었습니다. 로그인 하여 서비스 사용이 가능합니다.");
+			}).then(res=>{
+						  alertMessage('소셜 계정 과 연동 하여 PLISM PLUS 가입되었습니다. 메인화면으로 이동됩니다.','success');
 						  userStore.setUser(res.data.user);
 				          userStore.setToken(res.data.token);
 						  props.history.push("/landing");
 			}
 			)
 			.catch(err => {
-				alert(err);
+				if(err.response != undefined) {
+					if(err.response.status == "500") {
+						alertMessage("[ERROR]"+err.response.data,'error');
+					}
+				}
 			});
 	  } else {
 		  return axios ({
@@ -336,12 +349,17 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 					   email:email,
 					   kakaoid:'',
 					   tokenkakao:'',naverid:'',tokennaver:'',faceid:'',tokenface:'',googleid:'',tokengoogle:'',linkyn:'N'}
-			}).then(res=>{alert("PLISM PLUS 서비스에 가입되었습니다. 로그인 하여 서비스 사용이 가능합니다.");
+			}).then(res=>{
+			              alertMessage('PLISM PLUS 서비스에 가입되었습니다. 로그인 하여 서비스 사용이 가능합니다.','success');
 						  props.history.push("/landing");
 			}
 			)
 			.catch(err => {
-				alert(err);
+				if(err.response != undefined) {
+					if(err.response.status == "500") {
+						alertMessage("[ERROR]"+err.response.data,'error');
+					}
+				}
 			});
 	  }
   }
@@ -472,7 +490,7 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 
 	  setOpen(false);
 	  if(!userStoreValue) {
-		  alert("[ERROR] SOCAIL INFO ERROR !!!");
+		  alertMessage('[ERROR] SOCAIL INFO ERROR !!!','error');
 	  } else {
 		  return axios ({
 				url:'/auth/join',
@@ -491,9 +509,10 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 					   tokengoogle:userStoreValue.provider=='google'?userStoreValue.accessToken:'', 
 					   linkyn:'Y'	   
 					   }
-			}).then(res=>{alert("PLISM PLUS 계정과 연동이 되었습니다.");
-			 				userStore.setUser(res.data.user);
-	         				userStore.setToken(res.data.token);
+			}).then(res=>{
+						  alertMessage('PLISM PLUS 계정과 연동이 되었습니다. 메인페이지로 이동됩니다.','success');
+			              userStore.setUser(res.data.user);
+	         			  userStore.setToken(res.data.token);
 						  props.history.push("/landing");
 			})
 			.catch(err => {
@@ -501,6 +520,23 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 			});
 	  }
   }
+  
+	function Alert(props) {
+		return <MuiAlert elevation={6} variant="filled" {...props} />;
+	}
+
+	const handleAlertClose = (event, reason) => {
+		if(reason ==='clickaway') {
+			return;
+		}
+		setAlertOpen(false);
+	  }
+	
+	function  alertMessage (message,icon) {
+		setErrmessage(message);
+		setSeverity(icon);
+		setAlertOpen(true);
+	}
 
   return (
     <div className={classes.container}>
@@ -818,6 +854,13 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
       </GridContainer>
       <DialogComponet text={agreeText} />
       <DialogComponet1 {...props}/>
+	   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
+		<Alert 
+			onClose={handleAlertClose}
+			severity={severity}>
+				{errMessage}
+		</Alert>
+	</Snackbar>
     </div>
   );
 }

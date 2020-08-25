@@ -6,6 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 //import Select from '@material-ui/core/Select';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+//import AppBar from '@material-ui/core/AppBar';
+//import Toolbar from '@material-ui/core/Toolbar';
 //import { Alert,AlertTitle } from '@material-ui/lab';
 
 // core components
@@ -30,8 +32,13 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
-//import StarIcon from '@material-ui/icons/StarBorder';
 
+import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined';
+import TodayOutlinedIcon from '@material-ui/icons/TodayOutlined';
+import ListAltOutlinedIcon from '@material-ui/icons/ListAltOutlined';
+//import StarIcon from '@material-ui/icons/StarBorder';
+import SearchIcon from '@material-ui/icons/Search';
+import Assignment from "@material-ui/icons/Assignment";
 // other import
 import axios from 'axios';
 import moment from 'moment';
@@ -39,7 +46,7 @@ import ScheduleToggleTable from "views/Pages/Schedule/ScheduleDetailTable.js";
 import SchLinePicPop from "views/Pages/Schedule/SchLinePicPop.js";
 
 
-import CustomTabs from "components/CustomTabs/CustomTabs2.js";
+import CustomTabs from "components/CustomTabs/CustomScheduleTabs.js";
 
 import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
 //import "views/Pages/Schedule/react-big-calendar.css";
@@ -49,7 +56,7 @@ import Popover from "@material-ui/core/Popover";
 
 import SchDetailPop from "views/Pages/Schedule/SchDetailPop.js";
 
-import Icon from "@material-ui/core/Icon";
+//import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 
 import Checkbox from '@material-ui/core/Checkbox';
@@ -240,7 +247,7 @@ export default function ScheduleList(props) {
 		    	axios.post("/sch/getPortCodeInfo",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
 			    .then(res => setPortData(res.data))
 			    .catch(err => {
-			        if(err.response.status == "403"||err.response.status == "401") {
+			        if(err.response.status === 403||err.response.status === 401) {
 			        	props.openLogin();
 					}
 			    });
@@ -314,7 +321,7 @@ export default function ScheduleList(props) {
 		  									},{headers:{'Authorization':'Bearer '+store.token}})
 			.then(setScheduleData([])).then(res => setScheduleData(res.data))
 		    .catch(err => {
-		        if(err.response.status == "403"||err.response.status == "401") {
+		        if(err.response.status === 403||err.response.status === 401) {
 		        	props.openLogin();
 				}
 		    });
@@ -338,7 +345,7 @@ export default function ScheduleList(props) {
 			headers:{'Authorization':'Bearer '+store.token}
 		  }).then(setTileData([])).then(res => setTileData(res.data))
 		  .catch(err => {
-			if(err.response.status == "403"||err.response.status == "401") {
+			if(err.response.status === 403||err.response.status === 401) {
 				props.openLogin();
 			}
 		});
@@ -383,10 +390,6 @@ export default function ScheduleList(props) {
 	console.log(moment(sDate).format('YYYYMMDD') + moment(eDate).format('YYYYMMDD'));
 	onSubmit(null,pDate,nDate,null);
   };
-
-  const testClick = () => {
-	  alert("111");
-  }
 
   const handleClick2 = (e,line_code) => {
 	  debugger;
@@ -450,15 +453,13 @@ export default function ScheduleList(props) {
             </p>
           </CardHeader> */}
         	<Card style={{marginBottom:'0px'}}>
-      			<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
-					<CardIcon color="info" style={{height:'26px'}}>
-						<Icon style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</Icon>
-				</CardIcon>
-		<h4 className={classes.cardTitleBlack}>FCL Sea Schedule</h4>
-	  		</CardHeader>
-          <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
-          	<Card>
-          		<CardHeader >
+  			<CardHeader color="info" icon style={{height:'10px'}}>
+			<CardIcon color="info" style={{padding:'0'}}>
+				<Assignment />
+			</CardIcon>
+			<h4 className={classes.cardTitleBlack}>FCL Sea Schedule</h4>				
+		</CardHeader>
+          <CardBody style={{marginTop:'10px',paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
 		          <GridItem xs={12}>
 			      	<GridContainer>
 			      		<GridItem xs={12} sm={9} md={10}>
@@ -502,8 +503,8 @@ export default function ScheduleList(props) {
 									<TextField id="vesselName" label="Vessel Name" onChange={event => setVesselName(event.target.value)} value={vesselName} fullWidth />
 					        	</GridItem> */}
 					        	<GridItem xs={12} sm={4}>
-								{tapNum != 2 && (<FormControl fullWidth>
-									<InputLabel ></InputLabel>
+								{tapNum != 2 && (<FormControl fullWidth >
+									<InputLabel></InputLabel>
 									<Select 
 									native
 									id = "portDateWeek"
@@ -511,6 +512,7 @@ export default function ScheduleList(props) {
 									value={eWeek}
 									label=""
 									onChange={handleEWeek}
+									style={{marginTop:'13px'}}
 									>
 									<option value="2 week">2 Weeks Out</option>
 									<option value="4 week">4 Weeks Out</option>
@@ -566,33 +568,45 @@ export default function ScheduleList(props) {
 								</GridItem>
 				        	 </GridContainer>
 			        	 </GridItem>
-			        	<GridItem xs={12} sm={2} md={2}>
-			        		<Button color="info" onClick = {onSubmit}fullWidth>Search</Button>
+			        	<GridItem xs={12} sm={2} md={'auto'}>
+			        		{/*<Button color="info" onClick = {onSubmit}fullWidth>Search</Button>*/}
+			        		<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}  >Search</Button>
+			        		
 			        	</GridItem>
 		        	</GridContainer>
 		          </GridItem>    	
-          		</CardHeader>
-          		<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
+
+					  <div>
+					<div style={{position:"absolute",zIndex:"1",right:"50px",top:"23px",display:"none"}}>
+				  <Button size="sm" color="linkedin" target="_blank" href={"https://new.portmis.go.kr/portmis/websquare/websquare.jsp?w2xPath=/portmis/w2/si/pmb/mbrp/info/UI-SI-MBRP-201-51.xml&menuCd=M9106&menuNm=%BC%B1%BB%E7%BA%B0%20%BF%EE%C0%D3%B0%F8%C7%A5%20%B8%AE%BD%BA%C6%AE&w2xHome=/portmis/w2/main/&w2xDocumentRoot="}>해양수산부 운임 공표 조회</Button>
+				  </div>
+				  <div style={{position:"relative",zIndex:"0"}}>
 					  <CustomTabs headerColor="info"
 					  handleTapsClick={handleTapsClick}
 					  tabs={[
 						  {
 							tabName: "List"
+							,tabIcon: (AssignmentOutlinedIcon)
 							,tabContent: (
+									<Card style={{marginTop:'10px',marginBottom:'10px'}}>
+									<CardBody style={{paddingTop:'0',paddingLeft:'0',paddingRight:'0'}}>
+									<div style={{textAlign: "end"}}><span style={{textAlign: "end",paddingBottom: '0px',color:"#000000", paddingRight:"10px", paddingTop:"0px"}}>Total:{scheduleData.length}건</span></div>
           			<GridContainer>
-						<h5 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',fontWeight:'bold',marginTop:'0px',marginBottom:'0px' }}>※ {scheduleData.length} 건 검색 완료</h5>
-          				<GridItem xs={12}>
+          			{/*<h5 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',fontWeight:'bold',marginTop:'0px',marginBottom:'0px' }}>※ {scheduleData.length} 건 검색 완료</h5>*/}
+						
+						<GridItem xs={12}>
           					<ScheduleToggleTable 
 		                        tableHeaderColor="info"
 		                        tableHead={["Carrier", "Vessel Name", "Voyage No", "Origin", "Destination", "T/Time", "T/S", "Booking"]}
 								tableData={scheduleData}
 		                     /> 
 		                </GridItem>
-					</GridContainer>
+					</GridContainer></CardBody></Card>
 							)
 							},{
 								tabName: "Calendar"
 								//,tabIcon: Face
+								,tabIcon: (TodayOutlinedIcon)
 								,tabContent: (
 									<GridContainer justify="center">
 									<GridItem xs={12}>
@@ -660,6 +674,7 @@ export default function ScheduleList(props) {
 					 },
 					 {
 						tabName: "Carrier List"
+						,tabIcon: (ListAltOutlinedIcon)
 						,tabContent: (
 				  <GridContainer>
 					  <GridItem xs={12}>
@@ -708,9 +723,10 @@ export default function ScheduleList(props) {
 						}
 					 ]}>   
 					</CustomTabs>
+					</div>
+					</div>
 					<h6 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',color:'red',fontWeight:'bold' }}>※ 상기 스케줄은 실제 운항 스케줄과 상이할수 있습니다. 업무 진행시 선사와 필히 확인하시기 바랍니다.</h6>
-				  </CardBody>
-          	</Card>
+
           </CardBody>
         </Card>
       </GridItem>

@@ -4,7 +4,7 @@ import React from "react";
 import PropTypes from "prop-types";
 // react components for routing our app without refresh
 import { Link,Redirect  } from "react-router-dom";
-
+import Button from "components/CustomButtons/Button.js";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -16,6 +16,12 @@ import Apps from "@material-ui/icons/Apps";
 //import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import ViewDay from "@material-ui/icons/ViewDay";
 import Dns from "@material-ui/icons/Dns";
+import Info from "@material-ui/icons/Info";
+import Public from "@material-ui/icons/Public";
+import LinkIcon from "@material-ui/icons/Link";
+import LocalShipping from "@material-ui/icons/LocalShipping";
+import ImportExport from "@material-ui/icons/ImportExport";
+
 //import Build from "@material-ui/icons/Build";
 //import ListIcon from "@material-ui/icons/List";
 //import People from "@material-ui/icons/People";
@@ -24,7 +30,6 @@ import Dns from "@material-ui/icons/Dns";
 //import Chat from "@material-ui/icons/Chat";
 //import Call from "@material-ui/icons/Call";
 //import ViewCarousel from "@material-ui/icons/ViewCarousel";
-//import AccountBalance from "@material-ui/icons/AccountBalance";
 //import ArtTrack from "@material-ui/icons/ArtTrack";
 //import ViewQuilt from "@material-ui/icons/ViewQuilt";
 //import LocationOn from "@material-ui/icons/LocationOn";
@@ -41,7 +46,7 @@ import axios from 'axios';
 // core components
 import CustomDropdown from "components/CustomDropdown/CustomKitDropdown.js";
 //import Button from "components/CustomButtons/Button.js";
-
+import InsertChartOutlinedOutlinedIcon  from '@material-ui/icons/InsertChartOutlinedOutlined';
 import styles from "assets/jss/material-kit-pro-react/components/headerLinksStyle.js";
 
 import { observer, inject} from 'mobx-react'; // 6.x
@@ -50,28 +55,29 @@ import { observer, inject} from 'mobx-react'; // 6.x
 
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 
-import DirectionsBoat from  "@material-ui/icons/DirectionsBoat";
-import Build from "@material-ui/icons/Build";
-import ListIcon from "@material-ui/icons/List";
-import People from "@material-ui/icons/People";
-import Assignment from "@material-ui/icons/Assignment";
-import MonetizationOn from "@material-ui/icons/MonetizationOn";
-import Chat from "@material-ui/icons/Chat";
-import Call from "@material-ui/icons/Call";
-import ViewCarousel from "@material-ui/icons/ViewCarousel";
-import AccountBalance from "@material-ui/icons/AccountBalance";
-import ArtTrack from "@material-ui/icons/ArtTrack";
-import ViewQuilt from "@material-ui/icons/ViewQuilt";
-import LocationOn from "@material-ui/icons/LocationOn";
+import DirectionsBoat from  "@material-ui/icons/DirectionsBoatOutlined";
+import Build from "@material-ui/icons/BuildOutlined";
+import ListIcon from "@material-ui/icons/ListOutlined";
+import People from "@material-ui/icons/PeopleOutlined";
+import Assignment from "@material-ui/icons/AssignmentOutlined";
+import MonetizationOn from "@material-ui/icons/MonetizationOnOutlined";
+import Chat from "@material-ui/icons/ChatOutlined";
+import Call from "@material-ui/icons/CallOutlined";
+import ViewCarousel from "@material-ui/icons/ViewCarouselOutlined";
+import Schedule from "@material-ui/icons/ScheduleOutlined";
+import AccountBalance from "@material-ui/icons/AccountBalanceOutlined";
+import ArtTrack from "@material-ui/icons/ArtTrackOutlined";
+import ViewQuilt from "@material-ui/icons/ViewQuiltOutlined";
+import LocationOn from "@material-ui/icons/LocationOnOutlined";
 
-import AttachMoney from "@material-ui/icons/AttachMoney";
-import Store from "@material-ui/icons/Store";
-import AccountCircle from "@material-ui/icons/AccountCircle";
+import AttachMoney from "@material-ui/icons/AttachMoneyOutlined";
+import Store from "@material-ui/icons/StoreOutlined";
+import AccountCircle from "@material-ui/icons/AccountCircleOutlined";
 
 
-import ShoppingBasket from "@material-ui/icons/ShoppingBasket";
+import ShoppingBasket from "@material-ui/icons/ShoppingBasketOutlined";
 
-import Error from "@material-ui/icons/Error";
+import Error from "@material-ui/icons/ErrorOutlined";
 
 const useStyles = makeStyles(styles);
 
@@ -166,7 +172,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           noLiPadding
           navDropdown
           hoverColor={dropdownHoverColor}
-          buttonText="Location"
+          buttonText="LOCATION"
           buttonProps={{
             className: classes.navLink,
             color: "transparent"
@@ -174,10 +180,34 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           buttonIcon={LocationOn}
           dropdownList={[
             <Link to="/svc/tracking" className={classes.dropdownLink} refresh="true">
-              <DirectionsBoat className={classes.dropdownIcons} /> Tracking
+              <DirectionsBoat className={classes.dropdownIcons} /> TRACKING
             </Link>,
-            <Link to="/svc/demdet" className={classes.dropdownLink}>
-              <Layers className={classes.dropdownIcons} /> Dem&Det
+            <Link to="/svc/flightinfo" className={classes.dropdownLink}>
+              <Layers className={classes.dropdownIcons} /> SHIP FLIGHT INFO
+            </Link>
+          ]}
+        />
+      </ListItem>
+        <ListItem className={classes.listItem}>
+        <CustomDropdown
+          noLiPadding
+          navDropdown
+          hoverColor={dropdownHoverColor}
+          buttonText="DEM/DET/OSC"
+          buttonProps={{
+            className: classes.navLink,
+            color: "transparent"
+          }}
+          buttonIcon={LocationOn}
+          dropdownList={[
+            <Link to="/svc/demDet/Import" className={classes.dropdownLink} refresh="true">
+              <DirectionsBoat className={classes.dropdownIcons} /> IMPORT
+            </Link>,
+            <Link to="/svc/demDet/Export" className={classes.dropdownLink}>
+              <Layers className={classes.dropdownIcons} /> EXPORT
+            </Link>,
+            <Link to="/svc/mapService" className={classes.dropdownLink}>
+              <Layers className={classes.dropdownIcons} /> SUMMARY
             </Link>
           ]}
         />
@@ -192,41 +222,104 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
             className: classes.navLink,
             color: "transparent"
           }}
-          buttonIcon={ViewDay}
+          buttonIcon={Schedule}
           dropdownList={[
             <Link
               to="/svc/fcl"
               className={classes.dropdownLink}
               onClick={e => smoothScroll(e, "headers")}
             >
-              <ShoppingBasket className={classes.dropdownIcons} /> FCL-Sea
+              <ShoppingBasket className={classes.dropdownIcons} /> FCL-SEA
             </Link>,
             <Link
             to="/svc/cal"
             className={classes.dropdownLink}
             onClick={e => smoothScroll(e, "headers")}
           >
-            <ShoppingBasket className={classes.dropdownIcons} /> TERMINAL
+            <LocalShipping className={classes.dropdownIcons} /> TERMINAL
           </Link>
           ]}
         />
       </ListItem>
-  
-
+        <ListItem className={classes.listItem}>
+        <CustomDropdown
+          noLiPadding
+          navDropdown
+          hoverColor={dropdownHoverColor}
+          buttonText="CUSTOM"
+          buttonProps={{
+            className: classes.navLink,
+            color: "transparent"
+          }}
+          buttonIcon={AccountBalance}
+          dropdownList={[
+            <Link
+              to="/svc/unipassapi"
+              className={classes.dropdownLink}
+              onClick={e => smoothScroll(e, "headers")}
+            >
+              <ImportExport className={classes.dropdownIcons} /> UNIPASS API SERVICE
+            </Link>
+          ]}
+        />
+      </ListItem>
+        <ListItem className={classes.listItem}>
+        <CustomDropdown
+          noLiPadding
+          navDropdown
+          hoverColor={dropdownHoverColor}
+          buttonText="COMMON"
+          buttonProps={{
+            className: classes.navLink,
+            color: "transparent"
+          }}
+          buttonIcon={AccountBalance}
+          dropdownList={[
+            <Link
+              to="#"
+              className={classes.dropdownLink}
+              onClick={e => smoothScroll(e, "headers")}
+            >
+              <ImportExport className={classes.dropdownIcons} /> HS CODE
+            </Link>,
+            <Link
+            to="#"
+            className={classes.dropdownLink}
+            onClick={e => smoothScroll(e, "headers")}
+          >
+            <Public className={classes.dropdownIcons} /> IMO
+          </Link>,
+          <Link
+          to="#"
+          className={classes.dropdownLink}
+          onClick={e => smoothScroll(e, "headers")}
+        >
+          <Public className={classes.dropdownIcons} /> 품명
+        </Link>,
+          <Link
+          to="#"
+          className={classes.dropdownLink}
+          onClick={e => smoothScroll(e, "headers")}
+        >
+          <Public className={classes.dropdownIcons} /> CRM 계산기
+        </Link>
+          ]}
+        />
+      </ListItem>
         
       {isAuthenticated==false?<div>
 	  <ListItem className={classes.listItem}>
 	     <Link to="#" 
 	    	 className={classes.dropdownLink}
 	     	onClick={props.onLoginOpen}>
-              <Fingerprint className={classes.dropdownIcons} /> Login
+              <Fingerprint className={classes.dropdownIcons} /> LOGIN
        </Link>
 	  </ListItem>
 	  <ListItem className={classes.listItem}>
 	   <Link to="/authpage/register" className={classes.dropdownLink}
 	   onClick={clean}
 	   >
-         <PersonAdd className={classes.dropdownIcons} /> Signup
+         <PersonAdd className={classes.dropdownIcons} /> SIGNUP
        </Link>
 	  </ListItem></div>
 	  :
@@ -236,7 +329,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           onClick={
             logout
           } className={classes.dropdownLink}>
-           <AccountCircle className={classes.dropdownIcons} /> LogOut
+           <AccountCircle className={classes.dropdownIcons} /> LOGOUT
            </Link>
 	  </ListItem>
         }

@@ -12,6 +12,7 @@ const BoardTest = inject('userStore', 'trackStore')(observer(({ userStore, track
     const [boardId,setBoardId] = useState();
     const [boardList,setBoardList] = useState([]);
     const [boardDetailData,setBoardData] = useState([]);
+    const [boardAttachData,setBoardAttachData] = useState([]);
     
 
     const changeDataHandler = (boardMode, boardId) => {
@@ -51,20 +52,66 @@ const BoardTest = inject('userStore', 'trackStore')(observer(({ userStore, track
               setBoardMode("LIST");
             })
         .catch(err => {
-          if(err.response.status == "403") {
+          if(err.response.status === 403) {
             alert('오류가 발생했습니다.');
           }
         });
     }
 
     
-    const saveBoard = (boardId, title, content) => {
+    const saveBoard = (boardId, title, content, author_name, files, fileStateList) => {
       //save
-      axios.post("/com/saveBoard",{ type:"main",board_id:boardId, title:title, content:content}, {headers:{'Authorization':'Bearer '+userStore.token}})
+      axios.post("/com/saveBoard",{ type:"main",board_id:boardId, title:title, content:content, author_name:author_name, files:files, fileStateList:fileStateList}
+            , {headers:{'Authorization':'Bearer '+userStore.token}})
         .then(res => {
-            alert("게시글이 등록 되었습니다."); 
-            setBoardMode("LIST")
-          })
+          if(res.data[0].board_id != undefined && files != undefined){
+            let formData = new FormData();
+            formData.append('menuType', 'main');
+            formData.append('boardId', res.data[0].board_id);
+            formData.append('fileStateList', JSON.stringify(fileStateList) );
+            files.map((file) => {
+              formData.append('files', file);
+            })
+            //props.saveAttach(formData);
+            axios.post("/com/saveAttach",formData, {headers:{'Authorization':'Bearer '+userStore.token, 'Content-Type':'multipart/form-data'}})
+              .then(res => {
+                alert("게시글이 등록 되었습니다."); 
+                setBoardMode("LIST")
+              })
+              .catch(err => {
+                alert('오류가 발생했습니다.');
+              });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          alert('오류가 발생했습니다.');
+        });
+    }
+
+    const getBoardAttach = (boardId) => {
+      //search
+      axios.post("/api/getBoardAttach", {type:"main",board_id:boardId}, {headers:{'Authorization':'Bearer '+userStore.token}}
+          )
+        .then(res => {
+          setBoardAttachData(res.data);
+        })
+        .catch(err => {
+          alert('오류가 발생했습니다.');
+        });
+    }
+
+    const boardAttachDown = (fileName, filePath) => {
+      //search
+      axios.post("/api/boardAttachDown", {fileName:fileName, filePath:filePath}, {headers:{'Authorization':'Bearer '+userStore.token}, responseType:'blob'})
+        .then(res => {
+          const url = window.URL.createObjectURL(new Blob([res.data], { type: res.headers['content-type'] }));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+        })
         .catch(err => {
           alert('오류가 발생했습니다.');
         });
@@ -75,6 +122,7 @@ const BoardTest = inject('userStore', 'trackStore')(observer(({ userStore, track
         	title ="공지사항"
             boardList = {boardList}
             boardData = {boardDetailData}
+            boardAttachData = {boardAttachData}
             boardMode = {boardMode}
             boardId = {boardId}
             onChangeData = {changeDataHandler}
@@ -82,6 +130,9 @@ const BoardTest = inject('userStore', 'trackStore')(observer(({ userStore, track
             getBoardDetail = {getBoardDetail}
             deleteBoard = {deleteBoard}
             saveBoard = {saveBoard}
+            getBoardAttach = {getBoardAttach}
+            boardAttachDown = {boardAttachDown}
+            store = {userStore}
         	returnUrl={"/svc/board"}
         ></Board>
     );

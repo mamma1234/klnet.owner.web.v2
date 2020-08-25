@@ -16,25 +16,31 @@ const getCarrierInfo = (request, response) => {
 
         console.log ("query:" +sql);
 
-        pgsqlPool.connect(function(err,conn,done) {
+        pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
+                release();
                 response.status(400).send(err);
+            } else {
+                console.log("sql : " + sql.text);
+                conn.query(sql, function(err,result){
+                    // done();
+                    if(err){
+                        console.log(err);
+                        release();
+                        response.status(400).send(err);
+                    } else {
+                        //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                        console.log(result);
+                        release();
+                        response.status(200).json(result.rows);
+                        // console.log(result.fields.map(f => f.name));
+
+                    }
+        
+                });
+
             }
-            console.log("sql : " + sql.text);
-            conn.query(sql, function(err,result){
-                done();
-                if(err){
-                    console.log(err);
-                    response.status(400).send(err);
-                }
-    
-                //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                console.log(result);
-                response.status(200).json(result.rows);
-                // console.log(result.fields.map(f => f.name));
-    
-            });
     
             // conn.release();
         });
@@ -62,7 +68,7 @@ const getScheduleList = (request, response) => {
     }
     sql = sql + "order by a.etd, a.line_Code, a.vsl_name, a.voyage_no, svc, b.eta" */
 
-    let sql = "select * from (select case when length(line_code) = 4 then (select line_code from own_code_cuship cus where id = sch.line_code limit 1) else line_code end, line_code as org_line_code, vsl_name,voyage_no,to_char(to_date(start_date,'YYYYMMDD'),'YYYY-MM-DD') as start_day, start_port_code as start_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = start_port_code) as start_port_name, \n "
+    let sql = "select * from (select case when length(line_code) = 4 then (select line_code from own_code_cuship cus where id = sch.line_code limit 1) else line_code end, line_code as org_line_code, vsl_name,voyage_no,to_char(to_date(start_date,'YYYYMMDD'),'YYYY-MM-DD') as start_day, to_char(to_date(start_date,'YYYYMMDD')-10,'YYYYMMDD') as map_start_day, start_port_code as start_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = start_port_code) as start_port_name, \n "
     + "to_char(to_date(end_date,'YYYYMMDD'),'YYYY-MM-DD') as end_day, end_port_code as end_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = end_port_code) as end_port_name, '[' || line_code || '] ' || vsl_name as title, to_date(start_date,'YYYYMMDD') as start, to_date(start_date,'YYYYMMDD') as end, \n"
     + "'true' as \"allDay\", (select image_yn from own_code_cuship cus where line_code = sch.line_code limit 1) as image_yn, (select url from own_code_cuship where line_code = sch.line_code limit 1) as line_url, coalesce((select nm_kor from own_code_cuship where line_code = sch.line_code limit 1),sch.line_code ) as line_nm, \n" 
     + "case when to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') in ('0','1') then to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Day' else to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Days' end as tt, \n" 
@@ -89,26 +95,31 @@ const getScheduleList = (request, response) => {
             
             console.log ("query:" +sql);
 
-            pgsqlPool.connect(function(err,conn,done) {
+            pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    console.log("sql : " + sql.text);
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                            console.log(result);
+                            release();
+                            response.status(200).json(result.rows);
+                            // console.log(result.fields.map(f => f.name));
+
+                        }
+            
+                    });
+
                 }
-                console.log("sql : " + sql.text);
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-        
-                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                    console.log(result);
-                    response.status(200).json(result.rows);
-                    // console.log(result.fields.map(f => f.name));
-        
-                });
-        
                 // conn.release();
             });
 }
@@ -163,26 +174,32 @@ const getScheduleDetailList = (request, response) => {
             
             console.log ("query:" +sql);
 
-            pgsqlPool.connect(function(err,conn,done) {
+            pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    console.log("sql : " + sql.text);
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                            console.log(result);
+                            release();
+                            response.status(200).json(result.rows);
+                            // console.log(result.fields.map(f => f.name));
+
+                        }
+            
+                    });
+            
+
                 }
-                console.log("sql : " + sql.text);
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-        
-                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                    console.log(result);
-                    response.status(200).json(result.rows);
-                    // console.log(result.fields.map(f => f.name));
-        
-                });
-        
                 // conn.release();
             });
 }
@@ -208,26 +225,31 @@ const getPortCodeInfo = (request, response) => {
 	    
 	    console.log("쿼리:"+sql);
 
-        pgsqlPool.connect(function(err,conn,done) {
+        pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
+                release();
                 response.status(400).send(err);
+            } else {
+                console.log("sql : " + sql.text);
+                conn.query(sql, function(err,result){
+                    // done();
+                    if(err){
+                        console.log(err);
+                        release();
+                        response.status(400).send(err);
+                    } else {
+                        //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                        console.log(result);
+                        release();
+                        response.status(200).json(result.rows);
+                        // console.log(result.fields.map(f => f.name));
+
+                    }
+        
+                });
+
             }
-            console.log("sql : " + sql.text);
-            conn.query(sql, function(err,result){
-                done();
-                if(err){
-                    console.log(err);
-                    response.status(400).send(err);
-                }
-    
-                //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                console.log(result);
-                response.status(200).json(result.rows);
-                // console.log(result.fields.map(f => f.name));
-    
-            });
-    
             // conn.release();
         });
 }
@@ -245,25 +267,31 @@ const getLinePicInfo = (request, response) => {
             
             console.log ("query:" +sql);
 
-            pgsqlPool.connect(function(err,conn,done) {
+            pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    console.log("sql : " + sql.text);
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                            console.log(result);
+                            release();
+                            response.status(200).json(result.rows);
+                            // console.log(result.fields.map(f => f.name));
+
+                        }
+            
+                    });
+
                 }
-                console.log("sql : " + sql.text);
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-        
-                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                    console.log(result);
-                    response.status(200).json(result.rows);
-                    // console.log(result.fields.map(f => f.name));
-        
-                });
         
                 // conn.release();
             });
@@ -285,26 +313,31 @@ const getServiceCarrierList = (request, response) => {
             
             console.log ("query:" +sql);
 
-            pgsqlPool.connect(function(err,conn,done) {
+            pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    console.log("sql : " + sql.text);
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                            console.log(result);
+                            release();
+                            response.status(200).json(result.rows);
+                            // console.log(result.fields.map(f => f.name));
+
+                        }
+            
+                    });
+
                 }
-                console.log("sql : " + sql.text);
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-        
-                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                    console.log(result);
-                    response.status(200).json(result.rows);
-                    // console.log(result.fields.map(f => f.name));
-        
-                });
-        
                 // conn.release();
             });
 }
@@ -324,7 +357,7 @@ const getTerminalScheduleList = (request, response) => {
     const sql = {
       text: "select distinct b.port_kname as port_name, (select cal_list_ter_nm from own_terminal_info where terminal = d.terminal ) as terminal_name, (select cal_ter_nm from own_terminal_info where terminal = d.terminal ) as f_terminal_name, a.vessel_name, "
       + " case when (a.im_voy is null or a.im_voy = '1') and (a.ex_voy is null or a.ex_voy = '1') then '' else coalesce((case when a.im_voy = '1' then null else a.im_voy end),' ') || ' / ' || coalesce((case when a.ex_voy = '1' then null else a.ex_voy end),' ') end as voyage_no, "
-      + " to_char(to_timestamp(a.load_begin_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24:MI') as atb, "
+      + " to_char(to_timestamp(a.load_begin_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24:MI') as atb, (select cal_url from own_terminal_info where terminal = d.terminal ) as terminal_url, "
       +" case when length(a.closing_time) = 6 and a.closing_time != '000000' " 
       + " then SUBSTR(LOAD_BEGIN_DATE, 1, 4) || '-' || substr(CLOSING_TIME,1,2) || '-' || substr(CLOSING_TIME,3,2) || ' ' || substr(CLOSING_TIME,5,2) || ':00'  else '' end AS CLOSING_TIME, "
       + " to_char(to_timestamp(a.load_end_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24:MI') atd, a.carrier_code, to_char(a.unload_container,'9,999') unload_container, to_char(a.load_container,'9,999') load_container, to_char(a.shifting_container,'9,999') shifting_container, "
@@ -350,21 +383,26 @@ const getTerminalScheduleList = (request, response) => {
     //seq == "" ? sql.text +="" : sql.text += " and port_code = " + seq
 
     console.log("query == ",sql);    
-    pgsqlPool.connect(function(err,client,done) {
+    pgsqlPool.connect(function(err,client,release) {
       if(err){
         console.log("err" + err);
+        release();
         response.status(400).send(err);
+      } else {
+          client.query(sql, function(err,result){
+            // done();
+            if(err){
+              console.log(err);
+              release();
+              response.status(400).send(err);
+            } else {
+                console.log(result.rows);
+                release();
+                response.status(200).send(result.rows);
+            }
+          });
+      
       }
-      client.query(sql, function(err,result){
-        done();
-        if(err){
-          console.log(err);
-          response.status(400).send(err);
-        }
-        console.log(result.rows);
-        response.status(200).send(result.rows);
-      });
-  
     });
   
   }  
@@ -384,25 +422,31 @@ const getTerminalScheduleList = (request, response) => {
             
             console.log ("query:" +sql);
 
-            pgsqlPool.connect(function(err,conn,done) {
+            pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    console.log("sql : " + sql.text);
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                            console.log(result);
+                            release();
+                            response.status(200).json(result.rows);
+                            // console.log(result.fields.map(f => f.name));
+
+                        }
+            
+                    });
+
                 }
-                console.log("sql : " + sql.text);
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-        
-                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                    console.log(result);
-                    response.status(200).json(result.rows);
-                    // console.log(result.fields.map(f => f.name));
-        
-                });
         
                 // conn.release();
             });
@@ -436,25 +480,33 @@ const getScheduleSample = (request, response) => {
 		sqlText +=")a where curpage ='"+request.body.num+"' \n";
 
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sqlText, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+    
+            });
+
         }
 
-        conn.query(sqlText, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-
-        });
 
         // conn.release();
     });
@@ -476,24 +528,32 @@ const getSchedulePortCodeList = (request, response) => {
 
     console.log( sql );
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-        });
 
     });
 }
@@ -510,25 +570,32 @@ const insertSchPortCode = ( request, response ) => {
 
     console.log('sql===',sql);
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-        });
     });
 }
 
@@ -551,24 +618,32 @@ const updateSchPortCode = (request, response) => {
             ],
     }
     console.log( sql )
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-        });
     });
 }
 
@@ -583,24 +658,398 @@ const deleteSchPortCode = (request, response) => {
             ,request.body.oldData.iso_port_code],
     }
     console.log( sql )
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-        });
+    });
+}
+
+const getTSCodeList = (request, response) => {
+    var sql = "select row_number() over (order by line_code, start_port_code, end_port_code) as num, line_code, start_port_code, end_port_code, ts"
+               +" from own_code_ts"
+               +" where 1 = 1";
+    
+    if(request.body.data != '' && request.body.data != undefined){
+        if(request.body.data.line_code != '' && request.body.data.line_code != undefined){
+            sql += " and line_code = upper('" + request.body.data.line_code + "') ";
+        }
+        if(request.body.data.start_port_code != '' && request.body.data.start_port_code != undefined){
+            sql += " and start_port_code = upper('" + request.body.data.start_port_code + "') ";
+        }
+        if(request.body.data.end_port_code != '' && request.body.data.end_port_code != undefined){
+            sql += " and end_port_code = upper('" + request.body.data.end_port_code + "') ";
+        }
+    }
+
+    console.log( sql );
+
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+
+    });
+}
+
+const insertTSCode = ( request, response ) => {
+    let dataRows = request.body.dataRows;
+    console.log('insertTSCode' , request.body)
+    const sql = {
+        text: " INSERT INTO own_code_ts (line_code, start_port_code, end_port_code, ts, insert_user, insert_date)"
+        +     " VALUES(upper($1), upper($2), upper($3), $4, $5, now()) ",
+        values: [request.body.newData.line_code, request.body.newData.start_port_code, 
+            request.body.newData.end_port_code, request.body.newData.ts, request.session.sUser.userno],
+    }
+
+
+    console.log('sql===',sql);
+
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+}
+
+const updateTSCode = (request, response) => {
+    console.log(request.body);
+    const sql = {
+        text: " update own_code_ts "
+        +" set line_code = upper($1) "
+        +" ,start_port_code = upper($2) "
+        +" ,end_port_code = upper($3) "
+        +" ,ts = upper($4), update_user = $5, update_date = now()"
+        +" where line_code = $6 "
+        +" and start_port_code =$7 "
+        +" and end_port_code = $8 ",
+        values: [request.body.newData.line_code,
+                request.body.newData.start_port_code,
+                request.body.newData.end_port_code,
+                request.body.newData.ts,
+                request.session.sUser.userno,
+                request.body.oldData.line_code,
+                request.body.oldData.start_port_code,
+                request.body.oldData.end_port_code
+            ],
+    }
+    console.log( sql )
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+}
+
+const deleteTSCode = (request, response) => {
+    const sql = {
+        text: " delete from own_code_ts "
+        +" where line_code = $1 "
+        +" and start_port_code =$2 "
+        +" and end_port_code = $3 ",
+        values: [request.body.oldData.line_code
+            ,request.body.oldData.start_port_code
+            ,request.body.oldData.end_port_code],
+    }
+    console.log( sql )
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+        }
+
+    });
+}
+
+const getPicCodeList = (request, response) => {
+    var sql = "select row_number() over (order by line_code, pic_area, pic_dept, pic_name) as num, line_code, pic_area, pic_dept, pic_name, pic_tel, pic_email, pic_cell, pic_remark"
+               +" from own_code_pic"
+               +" where 1 = 1";
+    
+    if(request.body.data != '' && request.body.data != undefined){
+        if(request.body.data.line_code != '' && request.body.data.line_code != undefined){
+            sql += " and line_code = upper('" + request.body.data.line_code + "') ";
+        }
+        if(request.body.data.area != '' && request.body.data.area != undefined){
+            sql += " and pic_area like '%" + request.body.data.area + "%'";
+        }
+        if(request.body.data.dept != '' && request.body.data.dept != undefined){
+            sql += " and pic_dept like '%" + request.body.data.dept + "%'";
+        }
+        if(request.body.data.name != '' && request.body.data.name != undefined){
+            sql += " and pic_name like '%" + request.body.data.name + "%'";
+        }
+    }
+
+    console.log( sql );
+
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+
+    });
+}
+
+const insertPicCode = ( request, response ) => {
+    let dataRows = request.body.dataRows;
+    console.log('insertPicCode' , request.body)
+    const sql = {
+        text: " INSERT INTO own_code_pic (line_code, pic_area, pic_dept, pic_name, pic_tel, pic_email, pic_cell, pic_remark, insert_user, insert_date)"
+        +     " VALUES(upper($1), $2, $3, $4, $5, $6, $7, $8, $9, now()) ",
+        values: [request.body.newData.line_code, request.body.newData.pic_area, 
+            request.body.newData.pic_dept, request.body.newData.pic_name, request.body.newData.pic_tel,
+            request.body.newData.pic_email, request.body.newData.pic_cell, request.body.newData.pic_remark, request.session.sUser.userno],
+    }
+
+
+    console.log('sql===',sql);
+
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+}
+
+const updatePicCode = (request, response) => {
+    console.log(request.body);
+    const sql = {
+        text: " update own_code_pic "
+        +" set line_code = upper($1) "
+        +" ,pic_area = $2 "
+        +" ,pic_dept = $3 "
+        +" ,pic_name = $4, pic_tel = $5, pic_email = $6, pic_cell = $7, pic_remark = $8, update_user = $9, update_date = now()"
+        +" where line_code = $10 "
+        +" and pic_area =$11 "
+        +" and pic_dept = $12 "
+        +" and pic_name = $13 ",
+        values: [request.body.newData.line_code,
+                request.body.newData.pic_area,
+                request.body.newData.pic_dept,
+                request.body.newData.pic_name,
+                request.body.newData.pic_tel,
+                request.body.newData.pic_email,
+                request.body.newData.pic_cell,
+                request.body.newData.pic_remark,
+                request.session.sUser.userno,
+                request.body.oldData.line_code,
+                request.body.oldData.pic_area,
+                request.body.oldData.pic_dept,
+                request.body.oldData.pic_name
+            ],
+    }
+    console.log( sql )
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
+        }
+
+    });
+}
+
+const deletePicCode = (request, response) => {
+    const sql = {
+        text: " delete from own_code_pic "
+        +" where line_code = $1 "
+        +" and pic_area =$2 "
+        +" and pic_dept = $3 "
+        +" and pic_name = $4 ",
+        values: [request.body.oldData.line_code
+            ,request.body.oldData.pic_area
+            ,request.body.oldData.pic_dept,request.body.oldData.pic_name],
+    }
+    console.log( sql )
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
     });
 }
 
@@ -617,5 +1066,13 @@ module.exports = {
         getLinePicInfo,
         getServiceCarrierList,
         getTerminalScheduleList,
-        getTerminalCodeList
+        getTerminalCodeList,
+        getTSCodeList,
+        insertTSCode,
+        updateTSCode,
+        deleteTSCode,
+        getPicCodeList,
+        insertPicCode,
+        updatePicCode,
+        deletePicCode
 	}

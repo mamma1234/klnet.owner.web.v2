@@ -7,8 +7,8 @@ const pgsqlPool = require("../database/pool.js").pgsqlPool
 module.exports = (passport) => {
     // Client Secret	= s94tuPZ0Go  5VoB2_ZRwUMHKM0JPuUM
     passport.use(new NaverStrategy({
-        clientID: '5VoB2_ZRwUMHKM0JPuUM', 
-        clientSecret: 'hni8LPrnpY',
+        clientID: '5vSPppBEGLWEwMT8p9kZ', 
+        clientSecret: 's94tuPZ0Go',
         callbackURL: '/auth/naver/callback',
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {

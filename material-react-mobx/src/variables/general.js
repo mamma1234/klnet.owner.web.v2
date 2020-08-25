@@ -261,6 +261,110 @@ const stories = [
   }
 ];
 
+
+const imports = [
+	  {
+	    // First story
+	    inverted: true,
+	    badgeColor: "danger",
+	    badgeIcon: CardTravel,
+	    title: "ESTIMATED DEPARTURE",
+	    titleColor: "danger",
+	    data: "5 B/L"
+	  },
+	  {
+	    // Second story
+		  inverted: true,  
+	    badgeColor: "success",
+	    badgeIcon: Extension,
+	    title: "SHIPPING",
+	    titleColor: "success",
+	    data: "20 B/L"
+	  },
+	  {
+	    // Third story
+	    inverted: true,
+	    badgeColor: "info",
+	    badgeIcon: Fingerprint,
+	    title: "ETA D-1",
+	    titleColor: "info",
+	    data: "10 B/L"
+	  },
+	  {
+	    // Fourth story
+		inverted: true,
+	    badgeColor: "warning",
+	    badgeIcon: FlightLand,
+	    title: "UNLOAD",
+	    titleColor: "warning",
+	    data: "890 CNTR",
+	    footer: (
+	    	<p>(BEFORE GATE OUT)</p>
+	    	    )
+	  },
+	  {
+		    // Fourth story
+			inverted: true,
+		    badgeColor: "warning",
+		    badgeIcon: FlightLand,
+		    title: "GATE OUT/EMPTY IN",
+		    titleColor: "warning",
+		    data: "120/80 CNTR",
+		    footer: (
+			    	<p>(LAST 7DAYS)</p>
+			    	    )
+		  }
+	];
+const exports = [
+	  {
+	    // First story
+	    inverted: true,
+	    badgeColor: "danger",
+	    badgeIcon: CardTravel,
+	    title: "EMPTY OUT",
+	    titleColor: "danger",
+	    data: "890 CNTR"
+	  },
+	  {
+	    // Second story
+		  inverted: true,  
+	    badgeColor: "success",
+	    badgeIcon: Extension,
+	    title: "FULL IN",
+	    titleColor: "success",
+	    data: "100 CNTR"
+	  },
+	  {
+	    // Third story
+	    inverted: true,
+	    badgeColor: "info",
+	    badgeIcon: Fingerprint,
+	    title: "LOAD",
+	    titleColor: "info",
+	    data: "56 CNTR"
+	  },
+	  {
+	    // Fourth story
+		inverted: true,
+	    badgeColor: "warning",
+	    badgeIcon: FlightLand,
+	    title: "SHIPPING",
+	    titleColor: "warning",
+	    data: "20 B/L"
+	  },
+	  {
+		    // Fourth story
+			inverted: true,
+		    badgeColor: "warning",
+		    badgeIcon: FlightLand,
+		    title: "POD ARRIVAL",
+		    titleColor: "warning",
+		    data: "5 B/L",
+		    footer: (
+			    	<p>(LAST 7 DAYS)</p>
+			    	    )
+		  }
+	];
 // ##############################
 // // // data for populating the calendar in Calendar view
 // #############################
@@ -431,5 +535,6 @@ export {
   rtlWebsite,
   rtlServer,
   // data for datatables.net in DataTables view
-  dataTable
+  dataTable,
+  imports
 };

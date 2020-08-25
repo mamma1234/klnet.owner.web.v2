@@ -67,7 +67,7 @@ export default function Header(props) {
   const logo = require("assets/img/pp_logo.gif");
   
   return (
-    <AppBar className={appBarClasses}>
+    <AppBar className={appBarClasses} style={{paddingBottom:'0'}}>
       <Toolbar className={classes.container}>
         <Button className={classes.title}>
           <Link to="/">{brand}<img src={logo} style={{width:'32px',marginBottom:'10px'}}/></Link>

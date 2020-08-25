@@ -112,7 +112,7 @@ const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, tr
 	    		{headers:{'Authorization':'Bearer '+userStore.token}})
 			  .then(res => setSchData([...schData,...res.data]))
 	   	      .catch(err => {
-	            if(err.response.status === "403" || err.response.status === "401") {
+	            if(err.response.status === 403 || err.response.status === 401) {
 		        	//setOpenJoin(true);
 		        	//props.openLogin();
 		        }

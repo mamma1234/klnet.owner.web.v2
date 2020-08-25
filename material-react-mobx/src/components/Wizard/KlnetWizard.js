@@ -243,7 +243,7 @@ class Wizard extends React.Component {
     				   }
     		}).then(res=>this.props.finishButtonClick("success"))
     		.catch(err => {
-    			if(err.response.status == "401" ){
+    			if(err.response.status === 401 ){
     				this.props.finishButtonClick("401");	
     			} else {
     				this.props.finishButtonClick(err);	

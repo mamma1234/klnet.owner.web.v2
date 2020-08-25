@@ -23,6 +23,7 @@ var ps;
 const useStyles = makeStyles(styles);
 
 export default function Dashboard(props) {
+  console.log('sample:', props)
   const { ...rest } = props;
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);

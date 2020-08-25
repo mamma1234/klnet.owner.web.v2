@@ -31,6 +31,7 @@ const app = express();
 passportConfig(passport);
 const swaggerRouter = require('./swagger/swaggerDoc'); //swagger 설정 정의
 const sUser = require('./models/sessionUser');
+const useragent = require('express-useragent');
 //console.log("sUser:",sUser);
 
 
@@ -38,7 +39,8 @@ const java = require('java');
 
 const jarFile = __dirname + path.sep +'lib'+path.sep+'OkCert3-java1.5-2.2.3.jar';
 java.classpath.push(jarFile);
-
+app.set('trust proxy',true);
+app.use(useragent.express());
 app.set('views', path.join(__dirname, 'views')); //템플리트 엔진을 사용 1
 app.set('view engine', 'pug'); //템플리트 엔진을 사용 2
 app.use(swaggerRouter);//swagger API
@@ -196,16 +198,33 @@ app.post("/loc/getDemdetDtlCurrent",dao.pgtracking.getDemdetDtlCurrent);
 app.post("/loc/getdemdetCurrent", dao.pgtracking.getdemdetCurrent);
 app.post("/loc/getDemdetCntrList", dao.pgtracking.getDemdetCntrList);
 app.post("/loc/getHotInfo", dao.tracking.getHotInfo);
-app.post("/loc/getDemDetList", dao.pgdemdet.getDemDetList);
+app.post("/loc/getImportDemDetList", dao.pgdemdet.getImportDemDetList);
+app.post("/loc/getExportDemDetList", dao.pgdemdet.getExportDemDetList);
 app.post("/loc/getTarrifList", dao.pgdemdet.getTarrifList);
 app.post("/loc/getScrapManageList", dao.pgtracking.getScrapManageList);
+app.post("/loc/getScrapLineCodeList", dao.pgtracking.getScrapLineCodeList);
+app.post("/loc/getLineScrapingResultData", dao.pgtracking.getLineScrapingResultData);
+app.post("/loc/getHeaderForLine", dao.pgtracking.getHeaderForLine);
 app.post("/loc/getImportTerminalActivity", dao.pgtracking.getImportTerminalActivity);
 app.post("/loc/getExportTerminalActivity", dao.pgtracking.getExportTerminalActivity);
 app.post("/loc/getDemDetPort", dao.pgdemdet.getDemDetPort);
 app.post("/loc/getDemDetInTerminal",dao.pgdemdet.getDemDetInTerminal);
 app.post("/loc/getDemDetOutTerminal",dao.pgdemdet.getDemDetOutTerminal);
-app.post("/loc/getTsTracking", dao.pgtracking.getTsTracking)
+app.post("/loc/getTsTracking", dao.pgtracking.getTsTracking);
+app.post("/loc/checkCntrNumber", dao.pgtracking.getTrackingDate);
+app.post("/loc/getContainerMovement", dao.pgtracking.getContainerMovement);
+
+
 //공통
+
+app.post("/com/getImportingList", dao.pgstat.getImportingList);
+app.post("/com/getExportingList", dao.pgstat.getExportingList);
+app.post("/com/getCarrierStatList", dao.pgstat.getCarrierStatList);
+app.post("/com/getCarrierStatInfo", dao.pgstat.getCarrierStatInfo);
+app.post("/com/getExportStatInfo", dao.pgstat.getExportStatInfo);
+app.post("/com/getImportStatInfo", dao.pgstat.getImportStatInfo);
+app.post("/com/getDemdetStatInfo", dao.pgstat.getDemdetStatInfo);
+app.post("/com/getStatInfo", dao.pgstat.getStatInfo);
 app.post("/com/getUserSetting", dao.pgtracking.getUserSetting);
 app.post("/com/getCarrierInfo", dao.pgtracking.getCarrierInfo);
 app.post("/com/setUserSetting", dao.pgtracking.setUserSetting);
@@ -221,13 +240,28 @@ app.post("/com/getBoardDetail", dao.pgboard.getBoardDetail);
 app.post("/com/saveBoard", dao.pgboard.saveBoard);
 app.post("/com/deleteBoard", dao.pgboard.deleteBoard);
 app.post("/com/getBoardDataList", dao.pgboard.getBoardDataList);
-app.post("/com/getExcelSchLogList", dao.postgresql.getExcelSchLogList);
-app.post("/com/getErrorLogList", dao.pgcodes.getErrorLogList)
-app.post("/com/getUserData", dao.pgcodes.getUserData)
-app.post("/com/getUserRequest", dao.pgcodes.getUserRequest);
-app.post("/com/getTerminalInfo", dao.pgcodes.getTerminalInfo)
-app.post("/com/getCodecuship", dao.pgcodes.getCodecuship)
+app.post("/com/saveAttach", dao.pgboard.saveAttach);
+app.post("/com/getBoardAttach", dao.pgboard.getBoardAttach);
+app.post("/com/boardAttachDown", function (req, res) {
+  if(req.body.fileName == undefined || req.body.filePath == undefined){
+    res.status(400).send("");
+  } else {
+    res.download("/OWNER" + "/" + req.body.filePath + "/" + req.body.fileName, req.body.fileName);
+  }
+});
+//코드
 
+app.post("/com/getExcelSchLogList", dao.postgresql.getExcelSchLogList);
+app.post("/com/getErrorLogList", dao.pgcodes.getErrorLogList);
+app.post("/com/getUserData", dao.pgcodes.getUserData);
+app.post("/com/getUserRequest", dao.pgcodes.getUserRequest);
+app.post("/com/getTerminalInfo", dao.pgcodes.getTerminalInfo);
+app.post("/com/getCodecuship", dao.pgcodes.getCodecuship);
+app.post("/com/getUserSettingSample", dao.pgusers.getUserSettingSample);
+app.post("/com/getPortLocation",dao.pgcodes.getPortLocation);
+app.post("/com/getVslTypeList", dao.pgcodes.getVslTypeList);
+app.post("/com/getVslInfoList", dao.pgcodes.getVslInfoList);
+app.post("/com/getNationName", dao.pgcodes.getNationInfo);
 //스케줄
 app.post("/sch/getScheduleSample", dao.schedule.getScheduleSample);
 app.post("/sch/getTestQueryAttibuteSample", dao.oracle.getTestQueryAttibuteSample);
@@ -246,27 +280,137 @@ app.post("/sch/deleteSchPortCode", dao.schedule.deleteSchPortCode);
 app.post("/sch/getServiceCarrierList", dao.schedule.getServiceCarrierList);
 app.post("/sch/getTerminalScheduleList", dao.schedule.getTerminalScheduleList);
 app.post("/sch/getTerminalCodeList", dao.schedule.getTerminalCodeList);
+app.post("/sch/getTSCodeList", dao.schedule.getTSCodeList);
+app.post("/sch/insertTSCode", dao.schedule.insertTSCode);
+app.post("/sch/updateTSCode", dao.schedule.updateTSCode);
+app.post("/sch/deleteTSCode", dao.schedule.deleteTSCode);
+app.post("/sch/getPicCodeList", dao.schedule.getPicCodeList);
+app.post("/sch/insertPicCode", dao.schedule.insertPicCode);
+app.post("/sch/updatePicCode", dao.schedule.updatePicCode);
+app.post("/sch/deletePicCode", dao.schedule.deletePicCode);
 
 
 //사용자 알림
 app.post("/com/getUserMessage", dao.pgusers.getUserMessage);
 app.post("/com/getUserNotice", dao.pgusers.getUserNotice);
+app.post("/com/getUserMoreNotice", dao.pgusers.getUserMoreNotice);
+app.post("/com/createApikey", dao.pgcodes.createApiKey);
+app.post("/com/duplicateCheck", dao.pgcodes.duplicateCheck);
+
+
 
 //외부 api
 app.get("/api/apiSchedule", apiService.apiScheduleInfo);
-
+app.post("/com/balticApi", apiService.apiBaltic);
+app.post("/com/scfiapi", apiService.apiscfi);
+app.post("/com/teuApi", apiService.apiteuRank);
+app.post("/com/searchship",apiService.seaventageShipSearch);
+app.post("/com/searchTrack",apiService.seaventageTrackSearch);
 // UNI PASS API 호출용 
 app.post("/com/uniPassApiExportAPI001", uniPassApiService.API001);
 app.post("/com/uniPassApiExportAPI002", uniPassApiService.API002);
+app.post("/com/uniPassXtrnUserReqApreBrkd",uniPassApiService.API003);
+app.post("/com/uniPassShedInfo", uniPassApiService.API005);
+app.post("/com/uniPassApiFrwrLst", uniPassApiService.API006);
+app.post("/com/uniPassApiFrwrBrkd", uniPassApiService.API007);
+app.post("/com/uniPassApiFlcoLst", uniPassApiService.API008);
+app.post("/com/uniPassApiFlcoBrkd", uniPassApiService.API009);
+//app.post("/com/uniPassApiretrieveFlcoBrkd", uniPassApiService.API009);
+app.post("/com/uniPassApiecmQry", uniPassApiService.API010);
+app.post("/com/uniPassOvrsSplrSgn", uniPassApiService.API011);
+app.post("/com/uniPassApiTrifFxrtInfo", uniPassApiService.API012);
+app.post("/com/uniPassRetrieveLca",uniPassApiService.API013);
+app.post("/com/uniPassRetrieveLcaDt",uniPassApiService.API014);
+app.post("/com/uniPassApiSimlXamrttQry", uniPassApiService.API015);
+app.post("/com/uniPassApiSimlFxamtQry", uniPassApiService.API016);
+app.post("/com/uniPassExpFfmnPridShrtTrgtPrlst",uniPassApiService.API017);
+app.post("/com/uniPassApiHsSgn",uniPassApiService.API018);
+app.post("/com/uniPassApiStatsSgnBrkd", uniPassApiService.API019);
+app.post("/com/uniPassCntrQry", uniPassApiService.API020);
+app.post("/com/uniPassEtprRprtLst", uniPassApiService.API021);
+app.post("/com/uniPassDclrCrfnVrfc", uniPassApiService.API022);
+app.post("/com/uniPassApiBtcoVhclQry", uniPassApiService.API023);
+app.post("/com/uniPassIoprRprtLst", uniPassApiService.API024);
+app.post("/com/uniPassApiapfmPrcsStusQry", uniPassApiService.API025);
+app.post("/com/uniPassApiShipCoLst", uniPassApiService.API026);
+app.post("/com/uniPassApiShipCoBrkdQry", uniPassApiService.API027);
+app.post("/com/uniPassPersEcms", uniPassApiService.API028);
+app.post("/com/uniPassApiCcctLworCd", uniPassApiService.API029);
 app.post("/com/uniPassApiSelectPassInfo", uniPassApiService.selectPassInfo);
 app.post("/com/uniPassApiSelectShedInfo", uniPassApiService.selectShedInfo);
 app.post("/com/uniPassApiSelectLcaInfo", uniPassApiService.selectLcaInfo);
 app.post("/com/uniPassApiSelectCntrInfo", uniPassApiService.selectCntrInfo);
 app.post("/com/uniPassApiSelectExpDclrInfo", uniPassApiService.selectExpDclrInfo);
-// 공지 게시판
-app.post("/api/getBoardList", dao.pgboard.getBoardList);
-app.post("/api/getBoardDetail", dao.pgboard.getBoardDetail);
 
+// app.post("/com/uniPassApiRetrieveTrrt", uniPassApiService.API030);
+// app.post("/com/uniPassApiPostNoPrCstmSgnQry", uniPassApiService.API031);
+// app.post("/com/uniPassApiAlspEntsCdQry", uniPassApiService.API033);
+
+// 공지 게시판
+app.post("/api/getBoardList", dao.pgboard.getBoardMainList);
+app.post("/api/getBoardDetail", dao.pgboard.getBoardDetail);
+app.post("/api/getBoardAttach", dao.pgboard.getBoardAttach);
+app.post("/api/boardAttachDown", function (req, res) {
+  if(req.body.fileName == undefined || req.body.filePath == undefined){
+    res.status(400).send("");
+  } else {
+    res.download("/OWNER" + "/" + req.body.filePath + "/" + req.body.fileName, req.body.fileName);
+  }
+});
+
+app.post("/api/elasticHsSearch",async (req,res,next)=> {
+	console.log("CONSLOE:",req.body.hs);
+	var elasticsearch = require('elasticsearch');
+	var client = new elasticsearch.Client({
+		host:'http://172.25.1.143:9200/hs_navi',
+	});
+	try {
+	const response = await client.search({
+		body:{
+		"size":1,
+		"query":{
+		"match":{
+		"satmntPrdlstNm":{
+		"query":req.body.hs
+		}
+		}
+		}
+		}});
+	if(response.hits.total > 0) {
+		return res.json(response.hits.hits[0]._source);
+	} else {
+		return res.send();
+	}
+	} catch(err) {
+		next(err);
+	}
+});
+app.post("/api/elasticImoSearch",async (req,res,next)=> {
+	console.log("CONSLOE:",req.body.imo);
+	var elasticsearch = require('elasticsearch');
+	var client = new elasticsearch.Client({
+		host:'http://172.25.1.89:9200/imo',
+	});
+	try {
+	const response = await client.search({
+		body:{
+		"size":1,
+		"query":{
+		"match":{
+		"name":req.body.imo
+		}
+		}
+		}
+		});
+		if(response.hits.total.value > 0) {
+			return res.json(response.hits.hits[0]._source);
+		} else {
+			return res.send();
+		}
+	} catch(err) {
+		next(err);
+	}
+});
 
 app.post("/auth/sertify", function (req,res) {
 	
@@ -300,19 +444,19 @@ app.post("/auth/sertify", function (req,res) {
 	console.log(okcert.getClassSync().getNameSync());
 	console.log('case1=', case1);*/
 
-	const originURL = req.headers['x-forwarded-proto']+"://"+req.headers['x-forwarded-host'];
+
 	const javaInstance = java.import('kcb.module.v3.OkCert')();
 	let aSvcName = "";
 	let case2;
 	let aReqStr;
-console.log("RETURN URL:",originURL);
+
 	if(req.body.mdltkn) {
 		aSvcName = "IDS_HS_POPUP_RESULT"; //서비스명 (고정값)
 		aReqStr ='{"MDL_TKN":'+req.body.mdltkn+'}';
 		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
 	} else {
 		aSvcName = "IDS_HS_POPUP_START"; //서비스명 (고정값)
-		aReqStr ='{"RETURN_URL":"http://www.plismplus.com/return_certify", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
+		aReqStr ='{"RETURN_URL":"https://www.plismplus.com/return_certify", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
 		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
 	}
 	//console.log('case2=', case2);

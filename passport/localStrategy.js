@@ -47,7 +47,7 @@ module.exports = (passport) => {
             	            if(result.rowCount > 0) {
             	            	conn.release();
             	            	console.log("이미 등록되어 있음.");
-            	            	done(null, false, { message: '[error] duk id error' });
+            	            	done(null, false, { message: 'Use Another user id Please.(Dup Check error)' });
             	            } else {
             	            	console.log("[success] no user data");
             	            	
@@ -95,11 +95,11 @@ module.exports = (passport) => {
          	               	                done(null, sUser);
                               	           } else {
                             	            	console.log("등록되어 있지 않음.");
-                            	            	done(null, sUser,{ message: '[error]databse error : user data check fail' });
+                            	            	done(null, sUser,{ message: 'Contact the administrator.(System error:No Data)' });
                               	           }
                      	            	 }); 
             	            		 } else {
-            	            			 done(null, sUser,{ message: '[error]databse error : user data insert fail' });
+            	            			 done(null, sUser,{ message: 'Contact the administrator.(System error:Data insert fail)' });
             	            		 }
             	            		 
             	            	 }); 
@@ -108,7 +108,7 @@ module.exports = (passport) => {
             	        });
             	    }); 
             	} else {
-            		done(null, false, { message: '아이디는 필수 입력값 입니다.' });
+            		done(null, false, { message: 'Missing ID Required.(Missing error : ID )' });
             	}
  
     		} else if (req.body.provider == "merge") {
@@ -433,6 +433,7 @@ module.exports = (passport) => {
     }, async (req, userid, password, done) => {
                 console.log('(localStrategy.js) userid:', userid, 'password:', password);
                 const inputpassword = crypto.pbkdf2Sync(password, 'salt', 100000, 64, 'sha512').toString('hex');
+                
             try {
 
 				// test용 pdk ship
@@ -461,22 +462,31 @@ module.exports = (passport) => {
             		if(userid.toUpperCase() == "admin".toUpperCase()) {
             			done(null, false, { message: 'ADMIN 아이디는 사용금지 아이디 입니다.' });
             		} else {
-		                pgsqlPool.connect(function(err,conn) { 
+						console.log("1.DB Connect");
+		                await pgsqlPool.connect(function(err,conn, release) { 
 		                    if(err){
 		                        console.log("err" + err);
+								if (conn)
+								{
+									release();
+								}
 		                    } else {
+                            console.log("2.DB Select");
 		                    conn.query("select  * from own_comp_user where upper(local_id) = upper('"+userid+"')", function(err,result) {
 		                        if(err){
+		                        	release();
 		                            console.log(err);
 		                        } else {
 			                        if(result.rows[0] != null) {
-				                           
+				                         console.log("3. select ok");  
 			                            const exUser = {userid, password}
 		
-			                            let resultSet = false; 
-			                                 if (inputpassword == result.rows[0].local_pw.toString()) resultSet = true;
+			                            //let resultSet = false; 
+			                                // if (inputpassword == result.rows[0].local_pw.toString()) resultSet = true;
 			                                 // console.log("result:"+result);
-			                                 if(resultSet) {
+			                                 if(inputpassword == result.rows[0].local_pw.toString()) {
+												console.log("4. pass check ok"); 
+
 			     	                            sUser.provider = 'local';
 			    	                            //sUser.userid = userid;
 			    	                            sUser.userno = result.rows[0].user_no;
@@ -485,14 +495,16 @@ module.exports = (passport) => {
 			    	                            sUser.email = result.rows[0].user_email;
 			    	                            sUser.usertype = result.rows[0].user_type;
 			                                	req.session.sUser = sUser;
-			                                	conn.release();
+			                                	release();
 			                                    done(null, sUser);
 			                                 } else {
 			                                    console.log('아이디 또는 비밀번호가 일치하지 않습니다.');
+			                                    release();
 			                                    done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
 			                                 }   
 			                        } else {
 			                            console.log('가입되지 않은 회원입니다.');
+			                            release();
 			                            done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
 			                        }
 		                        }
@@ -502,7 +514,9 @@ module.exports = (passport) => {
 		                });
             		}
 	                console.log(">>>>>end");
-            	}
+            	}else{
+					done(null, false, { message: '필수 입력값이 누락되었습니다.' });
+				}
 
             } catch(error) {
             	console.log(">>>>>error",error);

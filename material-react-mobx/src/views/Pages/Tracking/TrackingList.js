@@ -1,143 +1,84 @@
 import React,{ useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
-// @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
-//import Drawer from '@material-ui/core/Drawer';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
-//import BackupIcon from "@material-ui/icons/Backup";
-//import StarIcon from "@material-ui/icons/Stars";
-//import MapIcon from "@material-ui/icons/Map";
-//import SpeakerNotes from "@material-ui/icons/SpeakerNotes";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-//import FormControl from "@material-ui/core/FormControl";
-//import Icon from "@material-ui/core/Icon";
-//import Popover from  '@material-ui/core/Popover';
-// core components
-import GridItem from "components/Grid/GridItem.js";
-import GridContainer from "components/Grid/GridContainer.js";
-//import Table from "components/Table/Table.js";
+
+//@material-ui/core components
+import {Collapse,Grid,Snackbar,FormControl,InputLabel,Select,Tooltip,TextField} from '@material-ui/core';
+
+//@material-ui/lab components
+import {Autocomplete,Alert} from '@material-ui/lab';
+
+//Customs components
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
-//import CustomInput from "components/CustomInput/CustomInput.js";
-//import CustomSelect from "components/CustomInput/CustomSelect.js";
-//import CardIcon from "components/Card/CardIcon.js";
-
-// import page
-//import Login from "views/Pages/Login/LoginPage.js";
-//import Blupload from "views/Pages/Tracking/BLPage/UploadPage.js";
-//import HotSet from "views/Pages/Tracking/HotSet/HotSet.js";
-//import Map from "views/Pages/Tracking/Map/Map.js";
+import GridItem from "components/Grid/GridItem.js";
+import GridContainer from "components/Grid/GridContainer.js";
 import Table from "views/Pages/Tracking/TrackingDetail.js";
-// @material-ui/core icon
-//import Icon from "@material-ui/core/Icon";
-import CardIcon from "components/Card/CardIcon.js";
+
+//icon
+import SearchIcon from '@material-ui/icons/Search';
+import ExpandMore from "@material-ui/icons/ExpandMore";
+import ExpandLess from "@material-ui/icons/ExpandLess";
 import Assignment from "@material-ui/icons/Assignment";
+import CardIcon from "components/Card/CardIcon.js";
+
 // other import
 import axios from 'axios';
-//import moment from 'moment';
-//import Dialog from '@material-ui/core/Dialog';
-//import DialogContent from '@material-ui/core/DialogContent';
-//import LoginPage from 'views/Pages/Login/LoginPage.js';
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from '@material-ui/core/Select';
-import Tooltip from '@material-ui/core/Tooltip';
+import Moment from 'moment';
+import queryString from 'query-string';
 
-//import FixedPlugin from "views/Tracking/Setting/CustomFixedPlugin.js";
-//import Modal from '@material-ui/core/Modal';
-//import JoinPage from "components/Form/Common/JoinPage.js";
-
-//import clsx from 'clsx';
-//import IconButton from '@material-ui/core/IconButton';
-//import CardActions from '@material-ui/core/CardActions';
-//import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-//import CardContent from '@material-ui/core/CardContent';
-import Collapse from '@material-ui/core/Collapse';
-//import TestForm from "components/Form/Common/Search.js";
-import Grid from '@material-ui/core/Grid';
-import Moment from 'moment'
-//import { observer, inject} from 'mobx-react'; // 6.x
-
-const styles = {
-  cardCategoryWhite: {
-    "&,& a,& a:hover,& a:focus": {
-      color: "rgba(255,255,255,.62)",
-      fontSize: "14px",
-      marginTop: "0",
-      marginBottom: "0"
-    },
-    "& a,& a:hover,& a:focus": {
-      color: "#FFFFFF"
-    }
-  },
-  cardTitleWhite: {
-    color: "#FFFFFF",
-    minHeight: "auto",
-    fontWeight: "300",
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
-    textDecoration: "none",
-    "& small": {
-      color: "#777",
-      fontSize: "65%",
-      fontWeight: "400",
-      lineHeight: "1"
-    }
-  },
-  cardTitleBlack: {
-	    textAlign: "left",
-	    color: "#000000",
-	    minHeight: "auto",
-	    fontWeight: "300",
-	    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-	    marginBottom: "3px",
-	    textDecoration: "none",
-	    "& small": {
-	      color: "#777",
-	      fontSize: "65%",
-	      fontWeight: "400",
-	      lineHeight: "1"
-	    }
-	  },
-};
-
-const useStyles = makeStyles(styles);
 let numCnt =1;
+let initialValue = null;
+let updateCount = 0; // 수정이력
 
 export default function TrackingList(props) {
 
+  const query = queryString.parse(window.location.search);
+	
   const {store} =props;
   const setStartDate = new Date();
   const setEndDate = new Date();
-  const [dategb,setDategb] = useState("D");
+  const setStartDateOld = new Date();
+  const setEndDateOld = new Date();
+  const [dategb,setDategb] = useState(query.dategb?query.dategb:"D");
+  const [dategbOld,setDategbOld] = useState(query.dategb?query.dategb:"D");
   
-  const [ietype,setIetype] = useState("A");
+  const [ietype,setIetype] = useState(query.ietype?query.ietype:"A");
+  const [ietypeOld,setIetypeOld] = useState(query.ietype?query.ietype:"A");
   //const [labelName,setLabelName] = useState("BL & BK NO.");
   const [sPort,setSPort] = useState("");
   const [ePort,setEPort] = useState("");
+  const [sPortOld,setSPortOld] = useState("");
+  const [ePortOld,setEPortOld] = useState("");
   //const [vesselName,setVesselName] = useState("");
   const [searchKey,setSearchKey] = useState("");
-	const [lineCode,setLineCode] = useState([]);
-	const [carrierCode,setCarrierCode] = useState("");
+  const [searchKeyOld,setSearchKeyOld] = useState("");
+  const [lineCode,setLineCode] = useState([]);
+  const [carrierCode,setCarrierCode] = useState("");
+  const [carrierCodeOld,setCarrierCodeOld] = useState("");
   //const [selectData,setSelectData] = useState([]);
   const [portData,setPortData] = useState([]);
   const [trackingList,setTrackingList] = useState([]);
-  const [fromDate,setFromDate] = useState(setStartDate.setDate(setStartDate.getDate()-3));
-  const [toDate,setToDate] = useState(setEndDate.setDate(setEndDate.getDate()+3));
-  const [anchorE1, setAnchorE1] = useState(null);
+  const [fromDate,setFromDate] = useState(query.from === "T"?setStartDate:query.from === "7"?setStartDate.setDate(setStartDate.getDate()-7):query.from === "1"?setStartDate.setDate(setStartDate.getDate()-1):setStartDate.setDate(setStartDate.getDate()-3));
+  const [toDate,setToDate] = useState(query.to=== "T"?setEndDate:setEndDate.setDate(setEndDate.getDate()+3));
+  const [fromDateOld,setFromDateOld] = useState(query.from === "T"?setStartDate:query.from === "7"?setStartDate.setDate(setStartDate.getDate()-7):query.from === "1"?setStartDate.setDate(setStartDate.getDate()-1):setStartDateOld.setDate(setStartDateOld.getDate()-3));
+  const [toDateOld,setToDateOld] = useState(query.to === "T"?setEndDate:setEndDateOld.setDate(setEndDateOld.getDate()+3));
+/*  const [anchorE1, setAnchorE1] = useState(null);
   const [anchorE2, setAnchorE2] = useState(null);
-  const [anchorE3, setAnchorE3] = useState(null);
+  const [anchorE3, setAnchorE3] = useState(null);*/
+  const [totCnt,setTotCnt] = useState(0);
+  const [severity, setSeverity] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [errMessage, setErrmessage] = useState("");
+
   //const [fixedClasses, setFixedClasses] = React.useState("dropdown");
   //const [optionData,setOptionData] = useState([]);
  
   //const [openTest,setOpenTest] = useState(false);
 
-  let portCode = [];
+  //let portCode = [];
   
 
   /* const handleFixedClick = () => {
@@ -160,6 +101,9 @@ export default function TrackingList(props) {
   */
 
 useEffect(() => {
+	if(query.ietype) {
+		onSubmit();
+	}
 	   // console.log('Tracking effect');
 		//console.log('userStore',store);
     	//axios.get("/com/getPortCodeInfo")
@@ -190,16 +134,32 @@ useEffect(() => {
 	    }  
   }*/
 
-  
+	function AlertComponent(props) {
+		return <Alert elevation={6} variant="filled" {...props} />;
+	}
+
+	const handleAlertClose = (event, reason) => {
+		if(reason ==='clickaway') {
+			return;
+		}
+		setAlertOpen(false);
+	  }
+	
+	function  alertMessage (message,icon) {
+		setErrmessage(message);
+		setSeverity(icon);
+		setAlertOpen(true);
+	}
+
   const onPortSearchValue = (e) => {
 	    const values = e.target.value;
-	    if(values != undefined && values != "" && values.length >= 2) {
+	    if(values !== undefined && values !== "" && values.length >= 2) {
 	    	if(store.token) {
 		    	axios.post("/com/getTrackingPortCode",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
 		    	.then(setPortData([]))
 			    .then(res => setPortData(res.data))
 			    .catch(err => {
-			        if(err.response.status == "403"||err.response.status == "401") {
+			        if(err.response.status === 403||err.response.status === 401) {
 			        	props.openLogin();
 					}
 			    });
@@ -217,7 +177,7 @@ useEffect(() => {
 		    	.then(setLineCode([]))
 			    .then(res => setLineCode(res.data))
 			    .catch(err => {
-			        if(err.response.status == "403"||err.response.status == "401") {
+			        if(err.response.status === 403||err.response.status === 401) {
 			        	props.openLogin();
 					}
 			    });
@@ -229,8 +189,17 @@ useEffect(() => {
 
   
   const onSubmit = () => {
-
+		// 초기값 구분 initialValue
+		if(ietype === ietypeOld && dategb === dategbOld && fromDate === fromDateOld && toDate === toDateOld 
+				&& searchKey === searchKeyOld && sPort === sPortOld && ePort === ePortOld && carrierCode === carrierCodeOld && updateCount === 0) {
+			initialValue = "Y";
+		} else {
+			updateCount = updateCount++; // 변경 이력 카운트
+			initialValue = "N";
+		}
+	  
 	  if(store.token) {
+  
 	  //search
 	  numCnt=1;
 	  axios.post("/loc/getTrackingList",{
@@ -242,14 +211,32 @@ useEffect(() => {
 		  start:sPort,
 		  end:ePort,
 		  line:carrierCode,
+		  initial:initialValue,
 		  num:numCnt},{headers:{'Authorization':'Bearer '+store.token}}
 		  )
 		.then(setTrackingList([]))
-	    .then(res => setTrackingList(res.data))
+		.then(setTotCnt(0))
+	    .then(res => {
+	    				if(res.status === 200) {
+	    					setTrackingList(res.data);
+	    					setTotCnt(res.data[0].tot_cnt);
+	    				} else {
+	    					setTrackingList([]);
+	    					setTotCnt(0);	
+	    				}
+	    			})
 	    .catch(err => {
-	        if(err.response.status == "403"||err.response.status == "401") {
+	        if(err.response !== undefined ) {
+	        	if(err.response.status === 403||err.response.status === 401) {
 	        	props.openLogin();
+	        	}
+			} else {
+				console.log("errod ");
+				setTotCnt(0);
+				alertMessage('조회된 데이터가 존재 하지 않습니다.','error');
+				setTrackingList([]);		
 			}
+	        
 	    });
 	  } else {
 		  props.openLogin();
@@ -257,7 +244,14 @@ useEffect(() => {
   }
 
    const handleAddRow = () => {
-
+		// 초기값 구분 initialValue
+		if(ietype === ietypeOld && dategb === dategbOld && fromDate === fromDateOld && toDate === toDateOld 
+				&& searchKey === searchKeyOld && sPort === sPortOld && ePort === ePortOld && carrierCode === carrierCodeOld && updateCount === 0) {
+			initialValue = "Y";
+		} else {
+			initialValue = "N";
+		}
+		
 	  if(store.token) {
 		  if(numCnt != trackingList[0].tot_page) {
 			//page ++
@@ -271,10 +265,11 @@ useEffect(() => {
 					  start:sPort,
 					  end:ePort,
 					  line:carrierCode,
+					  initial:initialValue,
 					  num:numCnt},{headers:{'Authorization':'Bearer '+store.token}})
 				  .then(res => setTrackingList([...trackingList,...res.data]))
 		          .catch(err => {
-		            if(err.response.status == "403" || err.response.status == "401") {
+		            if(err.response.status === 403 || err.response.status === 401) {
 			        	//setOpenJoin(true);
 			        	props.openLogin();
 			        }
@@ -285,11 +280,11 @@ useEffect(() => {
 	  }     
   };
   
-  const handleClose = () => {
+/*  const handleClose = () => {
 	  setAnchorE1(null);
 	  setAnchorE2(null);
 	  setAnchorE3(null);
-  }
+  }*/
     
   const [expanded, setExpanded] = React.useState(false);
 
@@ -312,14 +307,24 @@ useEffect(() => {
 		  setToDate(null);
 	  } else {
 		  setDategb(event.target.value);
+		  setFromDate(setStartDate.setDate(setStartDate.getDate()-3));
+		  setToDate(setEndDate.setDate(setEndDate.getDate()+3));
 	  }
   }
   
+  const handleClick = (event) => {
+	  const anchor = document.querySelector('#scroll_top');
+	  if(anchor) {
+		  anchor.scrollIntoView();
+	  }
+  };
+  
+  //const classs = klnetStyles();
   return (
     <GridContainer>
-    	<GridItem xs={12} sm={12}>
+    	<GridItem xs={12} sm={12} style={{marginBottom:'5px'}}>
         	<Card style={{marginBottom:'0px'}}>
-      			<CardHeader color="info" icon style={{height:'10px'}}>
+      			<CardHeader color="info" icon >
 					<CardIcon color="info" style={{padding:'0'}}>
 						<Assignment />
 					</CardIcon>
@@ -327,12 +332,12 @@ useEffect(() => {
 	  		</CardHeader>
           	<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
           		<Grid item xs={12} sm={12}>
-		     	<Grid container spacing={1}>
-	     		<Grid item xs={12} sm={9}>
+		     	<Grid container spacing={3}>
+	     		<Grid item xs={12} sm={12} md ={9}>
 	      			<Grid container spacing={1}>
 	      			<Grid item xs={12} sm={12}>
-	    			<Grid container spacing={1}>
-	    				<Grid item xs={12} sm={2} md={2} >
+	    			<Grid container spacing={2}>
+	    				<Grid item xs={12} sm={12} md={2} >
 	    					<FormControl fullWidth>
 						        <InputLabel id = "ie_type" >IMPORT&EXPORT</InputLabel>
 						        <Select
@@ -348,29 +353,30 @@ useEffect(() => {
 						        </Select>
 						   </FormControl>
 	    				</Grid>
-	    				<Grid item xs={12} sm={3} md={3}>
+	    				<Grid item xs={12} sm={12} md={3}>
 	    					<TextField id="blbk" label="B/L & B/K No." onChange={event => setSearchKey(event.target.value)} value={searchKey} //variant="outlined" size="small" 
 	    						fullWidth />
 	    				</Grid>
-	    				<Grid item xs={12} sm={2} md={2} >
-    					<FormControl fullWidth>
-						        <InputLabel id = "ie_type" >Date</InputLabel>
-						        <Select
-						          native
-						          id = "start_end"
-						          value={dategb}
-						          label="Date"
-						           onChange={handelSelectDate}
-						        >
-						        <option value="D">ETD&ATD</option>
-						        <option value="A">ETA&ATA</option>
-						        <option value="X">No Period</option>
-						        </Select>
-						   </FormControl>
+	    				<Grid item xs={12} sm={12} md={2} >
+	    					<FormControl fullWidth>
+							        <InputLabel id = "ie_type" >Date</InputLabel>
+							        <Select
+							          native
+							          id = "start_end"
+							          value={dategb}
+							          label="Date"
+							           onChange={handelSelectDate}
+							        >
+							        <option value="D">ETD&ATD</option>
+							        <option value="A">ETA&ATA</option>
+							        <option value="X">No Period</option>
+									<option value="I">등록일자</option>
+							        </Select>
+							 </FormControl>
     				</Grid>
-	    				<Grid item xs={12} sm={6} md={5}>
+	    				<Grid item xs={12} sm={12} md={5}>
 	    					<Grid container spacing={1}>
-	    						<Grid item xs={12} sm={6}> 
+	    						<Grid item xs={12} sm={12} md ={6}> 
 	    							<CalendarBox
 	    								labelText ="From"
 	    								id="fromDate"
@@ -384,7 +390,7 @@ useEffect(() => {
 	    								formControlProps={{fullWidth: true}} 
 	    							/>
 	    						</Grid>
-	    						<Grid item xs={12} sm={6}>
+	    						<Grid item xs={12} sm={12} md ={6}>
 	    							<CalendarBox
 	    								labelText ="To"
 	    								id="toDate"
@@ -408,7 +414,7 @@ useEffect(() => {
 								<Grid container spacing={1}>
 									<Grid item xs={12} md={12} sm={12}>
 										<Grid container spacing={1}>
-											<Grid item xs={12} sm={4} style={{paddingLeft:'8px',paddingRight:'8px'}}>
+											<Grid item xs={12} sm={12} md={4}style={{paddingLeft:'8px',paddingRight:'8px'}}>
 												<Autocomplete
 													options = {portData}
 													getOptionLabel = { options => "["+options.port_code+"] "+options.port_name}
@@ -422,7 +428,7 @@ useEffect(() => {
 													)}
 												/>
 											</Grid>
-											<Grid item xs={12} sm={4} style={{paddingLeft:'8px',paddingRight:'8px'}}>
+											<Grid item xs={12} sm={12} md={4}style={{paddingLeft:'8px',paddingRight:'8px'}}>
 												<Autocomplete
 													options = {portData}
 													getOptionLabel = { options => "["+options.port_code+"] "+options.port_name}
@@ -436,7 +442,7 @@ useEffect(() => {
 													)}
 												/>
 											</Grid> 
-											<Grid item xs={12} sm={4} style={{paddingLeft:'8px',paddingRight:'8px'}}>	
+											<Grid item xs={12} sm={12} md={4}style={{paddingLeft:'8px',paddingRight:'8px'}}>	
 												<Autocomplete
 												options = {lineCode}
 												getOptionLabel = { option => option.id +' '+option.nm }
@@ -457,15 +463,15 @@ useEffect(() => {
 						
 		        		</Grid>
 	        		</Grid> 
-	        	<Grid item xs={12} sm={1} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end'}}>
+	        	<Grid item xs={12} sm={12} md={3} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end',textAlign:'center'}}>
 	        		<Tooltip title="B/L(B/K) Upload">
-	        			<Button color="info" //onClick={() => setAnchorE1(true)}  
-	        			component={Link} to="/svc/uploadbl"
-	        			fullWidth style={{paddingTop:'11px'}}><Assignment />B/L(B/K)</Button>
-	        		</Tooltip>
-				</Grid>
-				<Grid item xs={12} sm={2} md={2} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end'}}>
-					<Button color="info" onClick = {onSubmit}  fullWidth>Search</Button>							
+	        			<Button 
+	        				color="info" //onClick={() => setAnchorE1(true)}  
+	        				component={Link} to="/svc/uploadbl"
+	        				endIcon={<Assignment />}
+	        				style={{paddingTop:'11px',width:'35%'}}>B/L(B/K)</Button>
+	        		</Tooltip>&nbsp;&nbsp;&nbsp;
+					<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} style={{width:'55%'}} >Search</Button>							
 				</Grid>
 			</Grid>
 		  </Grid> 
@@ -478,7 +484,9 @@ useEffect(() => {
         </Card>
 	   </GridItem>
       <GridItem xs={12}>
+      	
 		    <Card style={{marginTop:'5px',marginBottom:'5px'}}>
+		    <span style={{textAlign: "end",color:"#000000", paddingRight:"20px", paddingTop:"5px"}}>[ Data Count: {trackingList.length}건 / {totCnt}건 ]</span>
 				<CardBody style={{padding:'0px'}}>
 					<Table
 						tableHeaderColor="info"
@@ -487,10 +495,26 @@ useEffect(() => {
 						onClickHandle ={handleAddRow}
 						onLoginPage ={handelLoginOpen}
 						store={store}
-		            /> 
+		            />
+		            {trackingList.length > 0?
+		            <div className={"fixed-plugin"} style={{top:'85%',width:'45px',right:'2%',borderRadius:'8px'}}>
+					    <div onClick={handleClick}>
+					    	<Tooltip title="Scroll Top">
+					    		<i className="fa fa-angle-double-up fa-3x" style={{color:'white'}}/>
+					    	</Tooltip>
+					    </div>
+					</div>:null
+		            }
 				</CardBody>
 			</Card>
 		</GridItem>
+		   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
+			<AlertComponent 
+				onClose={handleAlertClose}
+				severity={severity}>
+					{errMessage}
+			</AlertComponent>
+		</Snackbar>
     </GridContainer>
   );
 }

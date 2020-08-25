@@ -31,6 +31,28 @@ const timelineStyle = theme => ({
       marginLeft: "-1px"
     }
   },
+  timelineCustom: {
+    [theme.breakpoints.down("sm")]: {
+      "&:before": {
+        left: "7% !important"
+      }
+    },
+    listStyle: "none",
+    padding: "0",
+	marginTop:"0",
+	marginBottom:"0",
+    position: "relative",
+    "&:before": {
+      top: "50px",
+      bottom: "60px",
+      position: "absolute",
+      content: '" "',
+      width: "3px",
+      backgroundColor: grayColor[11],
+      left: "49%",
+      marginLeft: "-1px"
+    }
+  },
   timelineSimple: {
     marginTop: "30px",
     padding: "0 0 20px",
@@ -40,6 +62,16 @@ const timelineStyle = theme => ({
   },
   item: {
     marginBottom: "20px",
+    position: "relative",
+    "&:before,&:after": {
+      content: '" "',
+      display: "table"
+    },
+    "&:after": {
+      clear: "both"
+    }
+  },
+  itemCustom: {
     position: "relative",
     "&:before,&:after": {
       content: '" "',
@@ -69,6 +101,26 @@ const timelineStyle = theme => ({
     borderBottomRightRadius: "50%",
     borderBottomLeftRadius: "50%"
   },
+  timelineBadgeCustom: {
+	    [theme.breakpoints.down("sm")]: {
+	      left: "7% !important"
+	    },
+	    color: whiteColor,
+	    width: "50px",
+	    height: "50px",
+	    lineHeight: "51px",
+	    fontSize: "1.4em",
+	    textAlign: "center",
+	    position: "absolute",
+	    top: "16px",
+	    left: "49%",
+	    marginLeft: "-24px",
+	    zIndex: "100",
+	    borderTopRightRadius: "50%",
+	    borderTopLeftRadius: "50%",
+	    borderBottomRightRadius: "50%",
+	    borderBottomLeftRadius: "50%"
+	  },
   timelineSimpleBadge: {
     left: "5%"
   },
@@ -121,6 +173,9 @@ const timelineStyle = theme => ({
     width: "24px",
     height: "51px"
   },
+  badgeIconCustom: {
+    height: "51px"
+  },
   timelinePanel: {
     [theme.breakpoints.down("sm")]: {
       float: "right !important",
@@ -170,6 +225,46 @@ const timelineStyle = theme => ({
       content: '" "'
     }
   },
+ timelinePanelCustom: {
+    [theme.breakpoints.down("sm")]: {
+      float: "right !important",
+      width: "86% !important",
+      "&:before": {
+        borderLeftWidth: "0 !important",
+        borderRightWidth: "15px !important",
+        left: "-15px !important",
+        right: "auto !important"
+      },
+      "&:after": {
+        borderLeftWidth: "0 !important",
+        borderRightWidth: "14px !important",
+        left: "-14px !important",
+        right: "auto !important"
+      }
+    },
+    width: "42%",
+    float: "left",
+    paddingTop: "20px",
+	paddingBottom: "10px",
+	paddingLeft: "10px",
+    marginTop: "15px",
+    position: "relative",
+    borderRadius: "6px",
+    color: "rgba(" + hexToRgb(blackColor) + ", 0.87)",
+    background: whiteColor,
+   
+    "&:after": {
+      position: "absolute",
+      top: "27px",
+      right: "-14px",
+      display: "inline-block",
+      borderTop: "14px solid transparent",
+      borderLeft: "14px solid " + whiteColor,
+      borderRight: "0 solid " + whiteColor,
+      borderBottom: "14px solid transparent",
+      content: '" "'
+    }
+  },
   timelineSimplePanel: {
     width: "86%"
   },
@@ -202,6 +297,12 @@ const timelineStyle = theme => ({
     zIndex: "1000",
     position: "relative",
     float: "left"
+  },
+  timelineFooterCustom: {
+    zIndex: "1000",
+    position: "relative",
+    float: "left",
+	fontSize: "8px"
   },
   footerTitle: {
     color: grayColor[7],

@@ -17,7 +17,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createBrowserHistory } from "history";
-import { Router, Route, Switch, Redirect } from "react-router-dom";
+import { Router, Route, Switch } from "react-router-dom";
 
 import AuthLayout from "layouts/Auth.js";
 //import RtlLayout from "layouts/RTL.js";
@@ -44,18 +44,26 @@ const stores = { userStore, trackStore };
 
 const hist = createBrowserHistory();
 
+const NoMatch = (arg) => {
+  console.log(arg);
+  return (
+  <h3>Not Found Page</h3>
+  );
+}
+
 ReactDOM.render(
   // <Provider>
   // <Provider rootStore={rootStore}>
   <Provider { ...stores }>
     <Router history={hist}>
       <Switch>
+        <Route path="/" exact component={Landing} /> 
         <Route path="/authpage" component={AuthLayout} />
         <Route path="/admin" component={AdminLayout} />
         <Route path="/svc" component={ServiceLayout} />
         <Route path="/landing" component={Landing} />
         <Route path="/return_certify" component={Certify} />
-        <Redirect from="/" to="/landing" />
+        <Route component={NoMatch} />
       </Switch>
     </Router>
   </Provider>,

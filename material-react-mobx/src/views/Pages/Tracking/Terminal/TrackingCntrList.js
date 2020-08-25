@@ -69,15 +69,10 @@ const useStyles = makeStyles(styles);
 
 export default function TableList(props) {
   const classes = useStyles();
-
-  const {data,store} = props;
-  
-  //console.log(blNo);
-  
+  const {data,store,schData} = props;  
   const [cntrData,setCntrData] = useState([]);
-  const [headerData,setHeaderData] = useState([]);
   const [cospan,setCospan] = useState(1);
-  
+  console.log(schData);
  /* const onClickDelete = () => {
 	  confirm({description:'정말로 삭제 하시겠습니까?'}).then(()=>{});
 	  console.log(">>>>>");
@@ -91,14 +86,14 @@ export default function TableList(props) {
   useEffect(() => {
 	  //console.log("blbkg:"+data.bl_bkg+"ietype:"+data.ie_type);
 	   if (data.ie_type === "I") {
-		   setHeaderData(["no", "Container No", "SZ/TP","접안터미널","접안(예정)일시","양하일시","OSC D-DAY","반출기한","반출일시","반납기한","반납일시"]); 
 		   setCospan(10);
 	   } else {
-		   setHeaderData(["no", "Container No", "SZ/TP","반출지","반출기한","반출일시","반입지","반입기한","반입일시","OSC","선적지","선적지반입일시","선적일시"]);
-		   setCospan(13);
+		   setCospan(11);
 	   }
 	  
     let eta = '';
+    const act_terminal = schData.activity === "BERTHING"?schData.terminal:null;
+    const act_date = schData.activity === "BERTHING"?schData.activity_date:null;
     if ( null != props.data.end_day) {
       eta = props.data.end_day.replace(/\//gi, '');
     }
@@ -118,9 +113,11 @@ export default function TableList(props) {
             pod:props.data.pod,
             carrier_code:props.data.carrier_code,
             ie_type:props.data.ie_type,
-            bl_bkg:props.data.bl_bkg
+            bl_bkg:props.data.bl_bkg,
+            at_terminal:act_terminal,
+            at_date:act_date
           }
-	    		,{headers:{'Authorization':'Bearer '+store.token}}
+	    ,{headers:{'Authorization':'Bearer '+store.token}}
 	    )
 	    .then(res => setCntrData(res.data))
 	    //.then(res => console.log(JSON.stringify(res.data)));
@@ -137,7 +134,7 @@ export default function TableList(props) {
 		  <HighlightOff onClick={()=>props.onClose()} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
         <Card>
         	<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
-        		<CardIcon color="info">
+        		<CardIcon color="info" style={{padding:'0'}}>
         			<Icon>content_copy</Icon>
         		</CardIcon>
         		{/*<h4 className={classes.cardTitleBlack}>TERMINAL ACTIVITY HISTORY</h4>*/}
@@ -156,6 +153,7 @@ export default function TableList(props) {
             <Table
 	            tableHeaderColor="info"
 	            tableData={cntrData}
+                schData={schData}
             	colSpan={cospan}
             	{...props}
             />

@@ -15,7 +15,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import Button from "components/CustomButtons/Button.js";
 import Grid from '@material-ui/core/Grid';
 import MButton from '@material-ui/core/Button';
-
+import SearchIcon from '@material-ui/icons/Search';
 import Popover from  '@material-ui/core/Popover';
 import ExcelUpload from "views/Pages/DemDet/PopUp/ExcelUpload.js";
 
@@ -42,6 +42,8 @@ import MaterialTable from 'material-table';
 import { observer, inject} from 'mobx-react'; // 6.x
 import axios from 'axios';
 import { Link } from "react-router-dom";
+
+import queryString from 'query-string';
 
 //import {ExcelFile, ExcelSheet} from "react-export-excel";
 const styles = {
@@ -116,12 +118,13 @@ let numCnt =1;
 
 const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   
+  const query = queryString.parse(window.location.search);
   //조회조건
   const [store,setStore] = useState(props.store);
  
-  const [selectedEnabled, setSelectedEnabled] = React.useState("declare");
-  const [searchDclrNo,setSearchDclrNo] = useState("");
-  const [searchBlNo,setSearchBlNo] = useState("");
+  const [selectedEnabled, setSelectedEnabled] = React.useState(query.param&&query.gubun=="BL"?"bl":"declare");
+  const [searchDclrNo,setSearchDclrNo] = useState(query.param&&query.gubun=="DECLARE"?query.param:"");
+  const [searchBlNo,setSearchBlNo] = useState(query.param&&query.gubun=="BL"?query.param:"");
   
   const [infoData,setInfoData] = useState([]);
   const [detailDataList,setDetailDataList] = useState([]);
@@ -142,14 +145,7 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
 
 
   useEffect(() => {
-  
-    if(store.token){
-     
-    }
-    
-    return () => {
-        console.log('cleanup');
-      };
+    if(query.param) onSubmit();
   },[]);
 
   const onSubmit = () => {
@@ -233,10 +229,11 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
             alert("에러가 발생하였습니다.");
           }
         }
-		})
-	    .catch(err => {
-	        console.log(err);
-	    });
+		}).catch(err => {
+            if(err.response.status === 401) {
+	        	props.openLogin();
+	        }
+            });
 	}
 
   const classes = useStyles();  
@@ -328,11 +325,6 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
     <GridContainer>
       <GridItem xs={12} xm={12}>
         <Card style={{marginBottom:'0px'}}>
-          <CardHeader color="info" icon style={{height:'10px'}}>
-            <CardIcon color="info" style={{padding:'0'}}>
-              <Assignment />
-            </CardIcon>
-	        </CardHeader>
           <CardBody style={{paddingBottom: '0px',paddingTop: '0px', paddingLeft: '15px'}}>
             <Grid container>
             <Grid item xs={4} sm={4} md={4}>
@@ -435,7 +427,7 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
             </Grid>
             <Grid item xs={4} sm={4} md={4} style={{textAlignLast:'right', paddingTop:"20px"}}>
                 {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
-                <Button color="info" onClick = {onSubmit}  >SEARCH</Button>
+                <Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} >SEARCH</Button>
             </Grid>
               
             </Grid>

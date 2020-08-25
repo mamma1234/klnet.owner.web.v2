@@ -18,7 +18,6 @@ import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import Tooltip from '@material-ui/core/Tooltip';
 //import Popover from "@material-ui/core/Popover";
 //import Paper from "@material-ui/core/Paper";
-
 // core components
 import styles from "assets/jss/material-dashboard-react/components/tableStyle.js";
 //import { slideDown, slideUp } from "components/Slide/Slide.js";
@@ -146,14 +145,14 @@ TablePageinationActions.propTypes = {
   
   return (
     <div className={classes.tableResponsive}>
-      <Table className={classes.table} size="small" stickyHeader={true}>
+      <Table className={classes.table} size="small" stickyHeader={true} style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
         {tableHead !== undefined ? (
           <TableHead className={classes[tableHeaderColor + "TableHeader"]} >
             <TableRow className={classes.tableHeadRow}>
               {tableHead.map((prop, key) => {
                 return (
                   <TableCell 
-                    className={classes.tableCell + " " + classes.tableHeadCell} style={{fontWeight:'600'}} align="center"
+                  tyle={{paddingTop:'0',paddingBottom:'0',borderBottomWidth:'3px',fontWeight:'bold',fontWeight:'600',color:'#717172',borderBottom:'2px solid #00b1b7'}} align="center"
                     key={key}
                   >
                     {prop}
@@ -232,7 +231,7 @@ ToggleTable.propTypes = {
     return [
       <TableRow  key={this.props.index} >
         <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}>{this.props.data.port_name}</TableCell>
-        <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}><Tooltip title={this.props.data.f_terminal_name}><span>{this.props.data.terminal_name}</span></Tooltip></TableCell>
+        <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}><a style={{cursor: "pointer",color:"rgba(0, 0, 0, 0.87)",textDecoration:"underline"}} target="_blank" href={this.props.data.terminal_url}><Tooltip title={this.props.data.f_terminal_name}><span>{this.props.data.terminal_name}</span></Tooltip></a></TableCell>
         <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}>{this.props.data.vessel_name}</TableCell>
         <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}>{this.props.data.voyage_no}</TableCell>
         <TableCell onClick={this.toggleExpander} align="center" style={{fontSize:"13px"}}>{this.props.data.atb}</TableCell>

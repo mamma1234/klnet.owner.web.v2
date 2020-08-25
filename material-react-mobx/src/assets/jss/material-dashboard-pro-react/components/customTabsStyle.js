@@ -39,6 +39,22 @@ const customTabsStyle = {
       marginLeft: "0px"
     }
   },
+ tabRootButtonNew: {
+    minHeight: "unset !important",
+    minWidth: "unset !important",
+    width: "unset !important",
+    height: "unset !important",
+    maxWidth: "unset !important",
+    maxHeight: "unset !important",
+    padding: "0px 15px",
+    borderRadius: "3px",
+    lineHeight: "24px",
+    border: "0 !important",
+    marginLeft: "0px",
+    "&:last-child": {
+      marginLeft: "0px"
+    }
+  },
   tabLabelContainer: {
     padding: "0px"
   },

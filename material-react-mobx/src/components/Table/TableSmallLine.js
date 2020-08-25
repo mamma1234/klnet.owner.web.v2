@@ -25,14 +25,14 @@ export default function CustomTable(props) {
   const { tableHead, tableData, tableHeaderColor } = props;
   return (
     <div>
-      <Table className={classes.table}>
+      <Table className={classes.table} style={{borderTop:'2px solid silver', borderBottom:'2px solid silver'}}>
         {tableHead !== undefined ? (
           <TableHead className={classes[tableHeaderColor + "TableHeader"]}>
             <TableRow style={{borderTop:'1px solid',borderColor:'#dddddd'}}>
               {tableHead.map((prop, key) => {
                 return (
                   <TableCell
-                    className={classes.trackingtableCell + " " + classes.tableHeadCell} style={{textAlignLast:'center'}}
+                    style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd",borderRight:'1px solid silver',borderLeft:'1px solid silver'}}
                     key={key}
                   >
                     {prop}
@@ -45,13 +45,13 @@ export default function CustomTable(props) {
         <TableBody>
         {tableData.map((prop, key) => {
             if(tableData.length < 2 ) {
-              if (prop[2] == "(관세청 유니패스 바로가기)")
+              if (prop[1] == "관세청 유니패스 바로가기")
               {
                 return (
                   <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
-                    <TableCell className={classes.trackingtableCell} key={key+2} style={{textAlignLast:'center'}}>{prop[0]}</TableCell>
-                    <TableCell className={classes.trackingtableCell} key={key+5} style={{textAlignLast:'center'}}>{prop[1]}</TableCell>
-                    <TableCell className={classes.trackingtableCell} key={key+10} style={{textAlignLast:'center'}}><font color="blue">{prop[2]}</font></TableCell>
+                    <TableCell className={classes.trackingtableCell} key={key+2} style={{textAlignLast:'center',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}}>{prop[0]}</TableCell>
+                    <TableCell className={classes.trackingtableCell} key={key+5} style={{textAlignLast:'center', textDecoration:'underline',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver'}}><font color="blue"><a href="https://unipass.customs.go.kr" target="_blank">{prop[1]}</a></font></TableCell>
+                    <TableCell className={classes.trackingtableCell} key={key+10} style={{textAlignLast:'center',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver'}}>{prop[2]}</TableCell>
                   </TableRow>
                 );
               }
@@ -60,7 +60,7 @@ export default function CustomTable(props) {
                   <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
                     {prop.map((prop, key) => {
                       return (
-                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}}>
                           {prop}
                         </TableCell>
                       );
@@ -75,7 +75,7 @@ export default function CustomTable(props) {
                   <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
                     {prop.map((prop, key) => {
                       return (
-                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                        <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}}>
                           {prop}
                         </TableCell>
                       );
@@ -89,7 +89,7 @@ export default function CustomTable(props) {
                     <TableRow key={key} style={{borderBottom:'1px solid',borderColor:'#dddddd'}}>
                       {prop.map((prop, key) => {
                         return (
-                          <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center'}}>
+                          <TableCell className={classes.trackingtableCell} key={key} style={{textAlignLast:'center',paddingTop:'1px',paddingBottom:'1px',borderRight:'1px solid silver',borderLeft:'1px solid silver'}}>
                             {prop}
                             <Collapse in={expanded} timeout="auto" unmountOnExit style={{width:'100%'}}>
                             </Collapse>

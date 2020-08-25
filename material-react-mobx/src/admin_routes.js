@@ -40,8 +40,14 @@ import ExcelSchLog from "views/Pages/TestPage/ExcelSchLogPage.js";
 import ErrorLogPage from 'views/Pages/TestPage/ErrorLogList.js';
 import UserList from 'views/Pages/TestPage/UserList.js';
 import UserRequest from 'views/Pages/TestPage/UserRequest.js';
+import UserUiSetting from 'views/Pages/TestPage/UserUiSettingList.js';
+import TSCode from "views/Pages/TestPage/TSCodeList";
+import PicCode from "views/Pages/TestPage/PicCodeList";
+
 import TerminalInfo from 'views/Pages/TestPage/TerminalInfo.js';
 import LineCode from 'views/Pages/TestPage/LineCode.js';
+import VslType from 'views/Pages/TestPage/VesselType.js';
+import VslInfo from 'views/Pages/TestPage/VesselInfo.js';
 // @material-ui/icons
 import Apps from "@material-ui/icons/Apps";
 //import DashboardIcon from "@material-ui/icons/Dashboard";
@@ -52,42 +58,69 @@ import Image from "@material-ui/icons/Image";
 //import Timeline from "@material-ui/icons/Timeline";
 //import WidgetsIcon from "@material-ui/icons/Widgets";
 import Person from "@material-ui/icons/Person";
+
+
+import LinkedCameraOutlinedIcon from '@material-ui/icons/LinkedCameraOutlined';
+import DvrOutlined from '@material-ui/icons/DvrOutlined';
+import CodeOutlined from '@material-ui/icons/CodeOutlined';
+import BusinessCenterOutlinedIcon from '@material-ui/icons/BusinessCenterOutlined';
+import PeopleOutlined from '@material-ui/icons/PeopleOutlined';
+
 import ScrapIcon from '@material-ui/icons/Description';
 import TerminalIcon from "@material-ui/icons/LocalShippingOutlined";
 var dashRoutes = [
   {
     collapse: true,
-    name: "Excel Sch",
-    rtlName: "Excel Sch",
+    name: "EXCEL SCH",
+    rtlName: "EXCEL SCH",
     icon: ScrapIcon,
     state: "ExcelCollapse",
     // layout: "/admin"
     views: [
       {
       path: "/schedule",
-      name: "Excel Sch Row Data",
-      rtlName: "Excel Sch Row Data",
-      icon: TerminalIcon,
+      name: "EXCEL SCH ROW DATA",
+      rtlName: "EXCEL SCH ROW DATA",
+      mini: "ES",
+      rtlMini: "ES",
       component: SampleData,
       layout: "/admin"
       },
       {
         path: "/portcode",
-        name: "Excel Sch Port Code",
+        name: "EXCEL SCH PORT CODE",
         rtlName: "항구코드",
         mini: "PT",
         rtlMini: "PT",
         component: SchPortCode,
         layout: "/admin"
       },
+      {
+          path: "/tscode",
+          name: "T/S CODE",
+          rtlName: "T/S코드",
+          mini: "TS",
+          rtlMini: "TS",
+          component: TSCode,
+          layout: "/admin"
+        },
+        {
+            path: "/piccode",
+            name: "PIC CODE",
+            rtlName: "PIC코드",
+            mini: "PIC",
+            rtlMini: "PIC",
+            component: PicCode,
+            layout: "/admin"
+          },
      
     ]
   },
   {
     collapse: true,
-    name: "Web Scraping",
+    name: "WEB SCRAPING",
     rtlName: "Web Scraping",
-    icon: ScrapIcon,
+    icon: LinkedCameraOutlinedIcon,
     state: "ScrapingCollapse",
     // layout: "/admin"
     views: [
@@ -95,8 +128,8 @@ var dashRoutes = [
         path: "/lineManage",
         name: "LINE SCRAP MANAGE",
         rtlName: "선사별 스크랩 설정",
-        mini: "PT",
-        rtlMini: "PT",
+        mini: "LM",
+        rtlMini: "LM",
         component: Buttons,
         component: ScrapManage,
         layout: "/admin"
@@ -105,8 +138,8 @@ var dashRoutes = [
         path: "/lineScrap",
         name: "LINE SCRAP",
         rtlName: "선사별 스크랩 조회",
-        mini: "PT",
-        rtlMini: "PT",
+        mini: "LS",
+        rtlMini: "LS",
         component: ScrapResult,
         layout: "/admin"
       },
@@ -114,8 +147,8 @@ var dashRoutes = [
         path: "/linePort",
         name: "LINE PORT",
         rtlName: "선사별 스크랩 PORT",
-        mini: "PT",
-        rtlMini: "PT",
+        mini: "LP",
+        rtlMini: "LP",
         component: ScrapPort,
         layout: "/admin"
       },
@@ -123,18 +156,18 @@ var dashRoutes = [
   },
   {
     collapse: true,
-    name: "Monitoring",
+    name: "MONITORING",
     rtlName: "Monitoring",
-    mini:'Mo',
-    rtlMini:'Mo',
+    icon:DvrOutlined,
     state: "MonitoringCollapse",
     // layout: "/admin"
     views: [
       {
         path: "/excelSchLog",
-        name: "Excel Sch Log",
+        name: "EXCEL SCH LOG",
         rtlName: "Excel Sch Log",
-        icon: TerminalIcon,
+        mini: "ES",
+        rtlMini: "ES",
         component: ExcelSchLog,
         layout: "/admin"
       },
@@ -143,15 +176,17 @@ var dashRoutes = [
         name: "ERROR LOG PAGE",
         rtlName: "Error log page",
         component:ErrorLogPage,
-        icon: TerminalIcon,
+        mini: "EL",
+        rtlMini: "EL",
         layout: "/admin"
       },
       {
         path: "/own_thread_manage",
-        name: "ownthreadmanage",
+        name: "OWN THREAD MANAGE",
         rtlName: "ThreadManage",
         //component:
-        icon: TerminalIcon,
+        mini: "OT",
+        rtlMini: "OT",
         layout: "/admin"
       },
 
@@ -161,93 +196,91 @@ var dashRoutes = [
   },
   {
     collapse: true,
-    name: "Code",
+    name: "CODE",
     rtlName: "Code",
-    mini:'Co',
-    rtlMini:'Co',
+    icon:CodeOutlined,
     // layout: "/admin"
     state: "CodeCollapse",
     views: [
       {
-        path: "/cuship",
-        name: "Line Code",
-        rtlName: "LINE CODE",
-        icon: TerminalIcon,
+        path: "/codeline",
+        name: "LINE CODE",
+        rtlName: "line Code",
+        mini: "LC",
+        rtlMini: "LC",
         component: LineCode,
         layout: "/admin"
       },
       {
-        path: "/terminalinfo",
-        name: "Terminal Code",
-        rtlName: "Terminal code",
-        icon: TerminalIcon,
+        path: "/terminal",
+        name: "Terminal Info",
+        rtlName: "Terminal info",
+        mini: "TI",
+        rtlMini: "TI",
         component: TerminalInfo,
         layout: "/admin"
       },
       {
-        path: "/codeport",
-        name: "Port code",
-        rtlName: "Port Code",
-        icon: TerminalIcon,
-        //component: SampleData,
-        layout: "/admin"
-      },
-      {
         path: "/vslinfo",
-        name: "Vessel Code",
+        name: "VESSEL CODE",
         rtlName: "Vessel Code",
-        icon: TerminalIcon,
-        //component: SampleData,
+        mini: "VC",
+        rtlMini: "VC",
+        component: VslInfo,
         layout: "/admin"
       },
       {
         path: "/vsltype",
-        name: "Vessel Type Code",
+        name: "VESSEL TYPE CODE",
         rtlName: "Vessel Type Code",
-        icon: TerminalIcon,
-        //component: SampleData,
+        mini: "VT",
+        rtlMini: "VT",
+        component: VslType,
         layout: "/admin"
       },
     ]
   },  
   {
     collapse: true,
-    name: "Business",
+    name: "BUSINESS",
     rtlName: "Business",
-    mini:'Bs',
-    rtlMini:'Bs',
+    icon:BusinessCenterOutlinedIcon,
     state: "BusinessCollapse",
     // layout: "/admin"
     views: [
       {
         path: "/blList",
-        name: "User BL Data",
+        name: "USER BL DATA",
         rtlName: "UserBlData",
-        icon: TerminalIcon,
+        mini: "BL",
+        rtlMini: "BL",
         component: UserRequest,
         layout: "/admin"
       },
       {
         path: "/board",
-        name: "Board Data",
+        name: "BOARD DATA",
         rtlName: "Board Data",
-        icon: TerminalIcon,
+        mini: "BD",
+        rtlMini: "BD",
         //component: SampleData,
         layout: "/admin"
       },
       {
         path: "/demdetosc",
-        name: "DEM&DET&OSC Data",
+        name: "DEM&DET&OSC DATA",
         rtlName: "DEM&DET&OSC Data",
-        icon: TerminalIcon,
+        mini: "DD",
+        rtlMini: "DD",
         component: SampleData,
         layout: "/admin"
       },
         {
           path: "/sample",
-          name: "Inland Tracking",
+          name: "INLAND TRACKING",
           rtlName: "Inland Tracking",
-          icon: TerminalIcon,
+          mini: "IT",
+          rtlMini: "IT",
           component: SampleData,
           layout: "/admin"
         },
@@ -258,25 +291,26 @@ var dashRoutes = [
     collapse: true,
     name: "User",
     rtlName: "User",
-    mini:'Us',
-    rtlMini:'Us',
+    icon:PeopleOutlined,
     state: "UserCollapse",
     // layout: "/admin"
     views: [
       {
         path: "/userlist",
-        name: "User List Data",
+        name: "USER LIST DATA",
         rtlName: "User List Data",
-        icon: TerminalIcon,
+        mini: "UL",
+        rtlMini: "UL",
         component: UserList,
         layout: "/admin"
       },
       {
         path: "/useruisetting",
-        name: "User Ui Setting",
+        name: "USER UI SETTING",
         rtlName: "User Ui Setting",
-        icon: TerminalIcon,
-        //component: SampleData,
+        mini: "US",
+        rtlMini: "US",
+        component: UserUiSetting,
         layout: "/admin"
       },
     ]
@@ -290,7 +324,7 @@ var dashRoutes = [
     views: [
       {
         path: "/manage",
-        name: "manage Page",
+        name: "MANAGE PAGE",
         rtlName: "회원관리",
         mini: "MB",
         rtlMini: "MB",

@@ -61,7 +61,9 @@ console.log("props:",props);
   const [naver,setNaver] = useState("");
   const [facebook,setFacebook] = useState("");
   const [google,setGoogle] = useState("");
-  
+  const [apiKey, setApiKey] = useState("");
+  const [userNo, setUserNo] = useState("");
+  const [userId, setUserId] = useState("");
   useEffect(() => {
 	    console.log('useEffect 호출....');
 	    axios.post("/com/getUserInfo",{},{headers:{'Authorization':'Bearer '+store.token}})
@@ -76,7 +78,10 @@ console.log("props:",props);
 	    	setKakao(res.data[0].kakao_id?res.data[0].kakao_id:"");
 	    	setNaver(res.data[0].naver_id?res.data[0].naver_id:"");
 	    	setFacebook(res.data[0].face_id?res.data[0].face_id:"");
-	    	setGoogle(res.data[0].google_id?res.data[0].google_id:"");
+			setGoogle(res.data[0].google_id?res.data[0].google_id:"");
+			setUserNo(res.data[0].user_no?res.data[0].user_no:"");
+			setUserId(res.data[0].local_id?res.data[0].local_id:"");
+			setApiKey(res.data[0].api_service_key?res.data[0].api_service_key:"");
 	    })
 	    //.then(res => console.log(">>>>>>>>>>>>>>>>>>>>>>>>",JSON.stringify(res.data[0])))
 	    .catch(err => {
@@ -118,7 +123,29 @@ console.log("props:",props);
 		  setLinkStatus("연계 일자"); 
 	  }
   }
-  
+  const onCreateApikey = () => {
+	
+	axios.post('/com/duplicateCheck',{user:{id:userId, no:userNo}},{headers:{'Authorization':'Bearer '+store.token}}).then(
+		res => {
+			if(res.data[0].api_service_key == null) {
+				axios.post('/com/createApikey',{user:{id:userId, no:userNo, apiKey:apiKey}},{headers:{'Authorization':'Bearer '+store.token}}).then(
+					res => {
+						if(res.statusText === "OK") {
+							setApiKey(res.data);
+						}else {
+							alert('키 생성중 오류가 발생했습니다.');
+						}
+					}
+				)
+			}else {
+				alert('이미 등록된 키 정보가 있습니다. API KEY : '+res.data[0].api_service_key)
+			}
+		}
+	)
+	
+
+	
+  }
   const onSubmit = () => {
 	  alert("서비스 준비중입니다.");
   }
@@ -200,7 +227,22 @@ console.log("props:",props);
 	                  />
 	                </GridItem>
                 </GridContainer> 
-
+				<GridContainer>
+                	<GridItem xs={12} sm={2} md={2}>
+						<span>API KEY : </span>
+					</GridItem>
+					<GridItem xs={12} sm={6} md={6}>
+						<span>{apiKey}</span>
+					</GridItem>
+					<GridItem xs={12} sm={4} md={4}>
+						{apiKey !== ""?null:
+						<Button
+							onClick={() => onCreateApikey()}
+						>KEY 발급</Button>
+						}
+						
+					</GridItem>
+              	</GridContainer>
 	            <GridContainer>
 			         <GridItem xs={12} sm={12} md={4}>
 			         	<div>

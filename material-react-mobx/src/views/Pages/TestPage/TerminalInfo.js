@@ -3,14 +3,7 @@ import React,{useState,useEffect} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from 'moment';
 
-import TextField from '@material-ui/core/TextField';
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableFooter from "@material-ui/core/TableFooter";
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import {TextField,Table,TableHead,TableRow,TableBody,TableCell,TableFooter,Paper,Tooltip} from '@material-ui/core';
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -20,107 +13,69 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import CustomTable from "components/Table/TablePaging.js";
-import { Tooltip } from "@material-ui/core";
 //import CardIcon from "components/Card/CardIcon.js";
 // other import
 import axios from 'axios';
-//import moment from 'moment';
 
 import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 
 import Grid from '@material-ui/core/Grid';
-import CustomTabs from "components/CustomTabs/CustomTabs2.js";
-import ExcelSchLogTable from "components/Table/TablePaging.js";
-import CalendarBox from "components/CustomInput/CustomCalendar.js";
-import CustomSelect from "components/CustomInput/CustomSelect.js";
-const styles = {
-  cardCategoryWhite: {
-    "&,& a,& a:hover,& a:focus": {
-      color: "rgba(255,255,255,.62)",
-      fontSize: "14px",
-      marginTop: "0",
-      marginBottom: "0"
-    },
-    "& a,& a:hover,& a:focus": {
-      color: "#FFFFFF"
-    }
-  },
-  cardTitleWhite: {
-    color: "#FFFFFF",
-    minHeight: "auto",
-    fontWeight: "300",
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
-    textDecoration: "none",
-    "& small": {
-      color: "#777",
-      fontSize: "65%",
-      fontWeight: "400",
-      lineHeight: "1"
-    }
-  },
-  cardTitleBlack: {
-	    textAlign: "left",
-	    color: "#000000",
-	    minHeight: "auto",
-	    fontWeight: "300",
-	    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-	    marginBottom: "3px",
-	    textDecoration: "none",
-	    "& small": {
-	      color: "#777",
-	      fontSize: "65%",
-	      fontWeight: "400",
-	      lineHeight: "1"
-	    }
-    },
-    divStyle: {
-      overflowX: "auto",
-      overflowY: "scroll"
-    }
-};
 
-const useStyles = makeStyles(styles);
+const styles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+  },
+  paper: {
+    padding:'15px',
+    width: '100%',
+    height: '80vh',
+    marginBottom: theme.spacing(2),
+    overflow:'scroll'
+  },gridContainer: {
+    padding:'15px'
+  }
+}))
+
 
 
 export default function UserRequest(props) {
-  const classes = useStyles();
+  const classes = styles();
   const {store} = props;
   const [terminalInfo, setTerminalInfo] = useState([]);
   const [terminal, setTerminal] = useState("");
   const [Num,setNum] = useState(1);
-  const onSubmit = () => {
+  const onSubmit = (param) => {
       setNum(1);
 
       axios.post("/com/getTerminalInfo",{
         terminal:terminal,
-          num:Num
+          num:param
       },{headers:{'Authorization':'Bearer '+store.token}})
       .then(res => {setTerminalInfo(res.data)})
       .catch(err => {
-          if(err.response.status == "403" || err.response.status == "401") {
+          if(err.response.status === 403 || err.response.status === 401) {
             //  setOpenJoin(true);
           }
       });
 
 
   }
-  const onMore = () => {
+  const onMore = (param) => {
   if(Num != terminalInfo[0].tot_page) {
-  //page ++
-  setNum(Num+1);
+    //page ++
+    setNum(param);
 
-  axios.post("/com/getTerminalInfo",{
-      terminal:terminal,
-      num:Num
-  },{headers:{'Authorization':'Bearer '+store.token}})
-  .then(res => setTerminalInfo([...terminalInfo,...res.data]))
-  .catch(err => {
-      if(err.response.status == "403" || err.response.status == "401") {
-       //   setOpenJoin(true);
-      }
-  });
+    axios.post("/com/getTerminalInfo",{
+        terminal:terminal,
+        num:param
+    },{headers:{'Authorization':'Bearer '+store.token}})
+    .then(res => setTerminalInfo([...terminalInfo,...res.data]))
+    .catch(err => {
+        if(err.response.status === 403 || err.response.status === 401) {
+        //   setOpenJoin(true);
+        }
+    });
   }
 
   }
@@ -131,8 +86,8 @@ export default function UserRequest(props) {
   
   
   return (
-    <div className={classes.divStyle}>
-    <GridContainer>
+    <div>
+    <GridContainer className={classes.gridContainer}>
     	<GridItem xs={12} sm={12} md={12}>
         	<Card style={{marginBottom:'0px'}}>
       			<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
@@ -149,7 +104,7 @@ export default function UserRequest(props) {
 						 <TextField id="terminal" label="Terminal" onChange={event => setTerminal(event.target.value)} value={terminal} fullWidth />
 						 </Grid>
 						<Grid item xs={12} md={3} >
-							<Button color="info" onClick = {onSubmit}  
+							<Button color="info" onClick = {() => onSubmit(1)}  
 							fullWidth>Search</Button>							
 						</Grid>
 		      		</Grid>
@@ -157,9 +112,10 @@ export default function UserRequest(props) {
 		     </CardBody>
         </Card>
       </GridItem>
-
-      <Table className={classes.table}>
-                  <TableHead className={classes.table} style={{padding:'5px'}}>
+      </GridContainer>
+      <Paper className={classes.paper}>
+      <Table>
+                  <TableHead style={{padding:'5px'}}>
                       <TableRow>
                         <TableCell>TERMINAL</TableCell>
                         <TableCell>TERMINAL KNAME</TableCell>
@@ -233,10 +189,10 @@ export default function UserRequest(props) {
                        terminalInfo.length >= 10 ? (
                         <TableFooter >
                         <TableRow  >
-                        <TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={28}>
+                        <TableCell style={{textAlignLast:'left',paddingTop:'0',paddingBottom:'0'}} colSpan={28}>
                             <Button
                                 color="info"
-                                onClick={onMore}
+                                onClick={() => onMore(Num + 1)}
                                 style={{paddingLeft:'60px',paddingRight:'60px'}}
                             >MORE&nbsp;(&nbsp;{Num}&nbsp;/&nbsp;{terminalInfo[0].tot_page}&nbsp;)</Button>
                         </TableCell>
@@ -247,7 +203,8 @@ export default function UserRequest(props) {
                   }
               </Table>
        
-      </GridContainer>
+      
+      </Paper>
     </div>
   );
 }

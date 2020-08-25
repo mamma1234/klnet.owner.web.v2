@@ -94,57 +94,57 @@ TablePageinationActions.propTypes = {
 export default function CustomTable(props) {
 	
   const classes = useStyles();
-  const { tableHead, tableData, tableHeaderColor,colSpan,data,ietype } = props;
+  const { tableData, tableHeaderColor,colSpan,data,schData } = props;
   const [page,setPage] = React.useState(0);
-  const [rowsPerPage,setRowsPerPage] = React.useState(10);
+  const [rowsPerPage,setRowsPerPage] = React.useState(8);
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage,tableData.length - page * rowsPerPage);
+  //const emptyRows = rowsPerPage - Math.min(rowsPerPage,tableData.length - page * rowsPerPage);
   
   const handleChagePage = (e,newPage) => {
 	  setPage(newPage);
   }
   
   const handleChangeRowsPerPage = event => {
-	  setRowsPerPage(parseInt(event.target.value,10));
+	  setRowsPerPage(parseInt(event.target.value,8));
 	  setPage(0);
   }
 
   return (
     <div className={classes.tableResponsive}>
-      <Table className={classes.table}>
+      <Table className={classes.table} style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
           <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px',backgroundColor:'aliceblue'}}>
             {data.ie_type === "I"?<TableRow className={classes.tableHeadRow}>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>no</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>Container No</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>SZ/TP</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>접안터미널<br/>접안(예정)일시</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>양하지<br/>양하일시</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>OSC D-DAY</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반출기한</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반출지<br/>반출일시</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반납기한</TableCell>
-            	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반납지<br/>반납일시</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>no</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>Container No</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>SZ/TP</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>접안터미널<br/>접안(예정)일시</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>양하지<br/>양하일시</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>OSC D-DAY</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반출기한</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반출지<br/>반출일시</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반납기한</TableCell>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반납지<br/>반납일시</TableCell>
             	</TableRow>
             :
             	<TableRow className={classes.tableHeadRow}>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>no</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>Container No</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>SZ/TP</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반출기한</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반출지<br/>반출일시</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반입기한</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>반입지<br/>반입일시</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>OSC</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>선적지<br/>선적지반입일시</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>선적일시</TableCell>
-		        	<TableCell className={classes.tableCell + " " + classes.tableHeadCell}>출항일</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>no</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>Container No</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>SZ/TP</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반출기한</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반출지<br/>반출일시</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반입기한</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반입지<br/>반입일시</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>OSC</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>선적지<br/>선적지반입일시</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>선적일시</TableCell>
+		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>출항일</TableCell>
 		        </TableRow>}
           </TableHead>
         <TableBody>
         {tableData.length > 0?
         	(rowsPerPage > 0?tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :  tableData).map((prop, key) => {
         		return (data.ie_type === "I"?<ImportRows key={key} index={key + 1} data={prop} color={tableHeaderColor} />
-        		:<ExportRows key={key} index={key + 1} data={prop} color={tableHeaderColor} />
+        		:<ExportRows key={key} index={key + 1} data={prop} sch={schData} color={tableHeaderColor} />
                 );
                })
           :
@@ -153,11 +153,11 @@ export default function CustomTable(props) {
               </TableRow>
         }
         </TableBody>
-        {(tableData.length >= 5 ?
+        {(tableData.length >= 8 ?
         <TableFooter>
     	<TableRow>
     		<TablePagination 
-    			rowsPerPageOptions={10}
+    			rowsPerPageOptions={8}
     			colSpan={colSpan}
     			count={tableData.length}
     		    rowsPerPage={rowsPerPage}
@@ -179,7 +179,7 @@ export default function CustomTable(props) {
 
 class ImportRows extends React.Component {
 	  render() {
-	     const { data } = this.props;
+	     const { data} = this.props;
 	    return [
 	      <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{this.props.index}</TableCell>
@@ -198,7 +198,7 @@ class ImportRows extends React.Component {
 }
 class ExportRows extends React.Component {
 	  render() {
-	     const { data } = this.props;
+	     const { data,sch } = this.props;
 	    return [
 	      <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{this.props.index}</TableCell>
@@ -211,7 +211,7 @@ class ExportRows extends React.Component {
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.osc_date}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.pol_ingate_terminal}<br/>{data.pol_ingate_time}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.load_date}</TableCell>
-	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}></TableCell>
+	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{sch.activity==="DEPARTURE"?sch.activity_date:''}</TableCell>
 	      </TableRow>
 	    ];
 	  }

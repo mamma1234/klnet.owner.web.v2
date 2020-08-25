@@ -206,7 +206,7 @@ class Sidebar extends React.Component {
               />
             </NavLink>
             <Collapse in={this.state[prop.state]} unmountOnExit>
-              <List className={classes.list + " " + classes.collapseList}>
+              <List className={classes.list + " " + classes.collapseList} style={{paddingLeft:'10px'}}>
                 {this.createLinks(prop.views)}
               </List>
             </Collapse>

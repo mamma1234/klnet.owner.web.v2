@@ -58,7 +58,7 @@ exports.isVerifyToken = (req, res, next) => {
         }
 
         // console.log("req.headers", req.headers);
-        console.log("authorization", authorization);
+        //console.log("authorization", authorization);
 
         const re = /(\S+)\s+(\S+)/;
         const matches = authorization.match(re);

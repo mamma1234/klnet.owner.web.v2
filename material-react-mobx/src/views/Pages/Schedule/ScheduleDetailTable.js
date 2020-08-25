@@ -1,4 +1,5 @@
 import React,{ useState,useEffect } from "react";
+//import { Link } from 'react-router-dom';
 
 import PropTypes from "prop-types";
 // @material-ui/core components
@@ -17,17 +18,22 @@ import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import Tooltip from '@material-ui/core/Tooltip';
 import Popover from "@material-ui/core/Popover";
+import MapIcon from "@material-ui/icons/Map";
 //import Paper from "@material-ui/core/Paper";
 
 // core components
 import styles from "assets/jss/material-dashboard-react/components/tableStyle.js";
 import { slideDown, slideUp } from "components/Slide/Slide.js";
 import SchLinePicPop from "views/Pages/Schedule/SchLinePicPop.js";
+import TerminalSch from "views/Pages/Schedule/TerminalScheduleList.js";
+import ShipMap from "components/Map/ShipMap.js";
 
 
 import axios from 'axios';
 import TableList from "components/Table/TableSmallLine.js";
 import Button from "components/CustomButtons/Button.js";
+
+
 
 //import { useCookies } from 'react-cookie';
 import { observer, inject} from 'mobx-react'; // 6.x
@@ -151,15 +157,15 @@ TablePageinationActions.propTypes = {
   
   
   return (
-    <div className={classes.tableResponsive}>
-      <Table className={classes.table} size="small" stickyHeader={true}>
+    <div className={classes.tableResponsive} style={{marginTop:'0'}}>
+      <Table className={classes.table} size="small" stickyHeader={true} style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
         {tableHead !== undefined ? (
           <TableHead className={classes[tableHeaderColor + "TableHeader"]}>
-            <TableRow className={classes.tableHeadRow}>
+            <TableRow className={classes.tableHeadRow} >
               {tableHead.map((prop, key) => {
                 return (
                   <TableCell
-                    className={classes.tableCell + " " + classes.tableHeadCell}
+                  style={{borderBottomWidth:'3px',fontWeight:'bold',color:'#717172',borderBottom:'2px solid #00b1b7'}}
                     key={key}
                   >
                     {prop}
@@ -222,7 +228,7 @@ ToggleTable.propTypes = {
 
 
  class TableRows extends React.Component {
-  state = { expanded: false , port: [], pop:false};
+  state = { expanded: false , port: [], pop:false, pop2:false, openMap: false};
 
 
   handleClick = () => {
@@ -230,8 +236,17 @@ ToggleTable.propTypes = {
   };
 
   handleClose = () => {
-    this.setState({pop:false});
+    this.setState({pop:false,pop2:false,openMap:false});
   };
+
+  handleClick2 = () => {
+    this.setState({pop2:true});
+  };
+
+  handleClickMapOpen = () => {
+	  //console.log("map");
+	  this.setState({ openMap: true });
+  }
 
   componentDidMount() {
     console.log("componentDidMount");
@@ -297,14 +312,16 @@ ToggleTable.propTypes = {
       //console.log("render!!!!");
     }
      
-     console.log(">>> port : ",this.state.port) ;
-     console.log(">>> line_code : ",port) ;
+     //console.log(">>> port : ",this.state.port) ;
+     //console.log(">>> line_code : ",port) ;
+     //console.log("data : ",this.props.data);
     return [
       <TableRow  key={this.props.index}  >
         {/* <TableCell >{this.props.data.line_code}</TableCell> */}
         <TableCell onClick={this.handleClick} style={{cursor: "pointer"}}><Tooltip title={this.props.data.line_nm}>{this.props.data.image_yn=='Y'?<img width='40' height='40' src={require("assets/img/carrier/"+this.props.data.line_code+".gif")} />:<img width='40' height='40' src={require("assets/img/carrier/No-Image.gif")} />}</Tooltip>
         </TableCell>
-        <TableCell onClick={this.toggleExpander}>{this.props.data.vsl_name}</TableCell>
+        <TableCell><Tooltip title="Terminal Schedule" onClick={this.handleClick2} style={{cursor: "pointer",textDecoration:"underline"}}><span>{this.props.data.vsl_name}</span></Tooltip>&nbsp;
+        <Tooltip title="vessel map infomation"><MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px',cursor: "pointer"}} onClick={this.handleClickMapOpen} /></Tooltip></TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.voyage_no}</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.start_port_name} ({this.props.data.start_day})</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.end_port_name} ({this.props.data.end_day})</TableCell>
@@ -324,6 +341,34 @@ ToggleTable.propTypes = {
 											<SchLinePicPop
 												detailParam = {this.props.data} store={this.props.userStore}
 											/>
+
+                  </Popover>
+                  <Popover
+                    id="pop2"
+                    open={this.state.pop2}
+                    onClose={this.handleClose}
+                    anchorReference="anchorPosition"
+                    anchorPosition={{top:0,left:550}}
+                        anchorOrigin={{vertical:'bottom',horizontal:'center',}}
+                        transformOrigin={{vertical:'top',horizontal:'center',}}
+                  >
+											<TerminalSch
+												detailParam = {this.props.data} store={this.props.userStore}
+											/>
+
+                  </Popover>
+                  <Popover
+                    id="popover_map"
+                    open={this.state.openMap}
+                    onClose={this.handleClose}
+                      anchorReference="anchorPosition"
+                      anchorPosition={{top:80,left:550}}
+                    anchorOrigin={{vertical:'bottom',horizontal:'center',}}
+                    transformOrigin={{vertical:'top',horizontal:'center',}}>
+                    <ShipMap
+                    parameter={this.props.data} onClose={this.handleClose}
+                    store ={this.props.userStore}>
+                    </ShipMap>
                   </Popover>
       </TableRow>,
       this.state.expanded && (

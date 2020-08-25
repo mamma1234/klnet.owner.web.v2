@@ -10,10 +10,15 @@ import GridItem from "components/Grid/GridItem.js";
 import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 
+import FileUpload from "./FileUpload.js";
+
 export default function BoardWrite(props) {
   var board_id; 
   const [title,setTitle] = useState("");
+  const [author_name,setAuthor] = useState("");
   const [content,setContent] = useState("");
+  const [files,setFiles] = useState([]);
+  const [fileStateList,setFileStateList] = useState([]);
   if(props.board_id != undefined){
     board_id = props.board_id;
   }
@@ -22,6 +27,7 @@ export default function BoardWrite(props) {
     if( board_id != undefined ){
       setTitle(props.boardData['title']);
       setContent(props.boardData['content']);
+      setAuthor(props.boardData['author_name']);
     }
   }, []);
 
@@ -55,6 +61,30 @@ export default function BoardWrite(props) {
             </GridItem>
             <GridItem xs={12} sm={12} md={12}>
               <CustomInput
+                labelText="author name"
+                id="author_name"
+                formControlProps={{
+                  fullWidth: true
+                }}
+                inputProps={{
+                  value:author_name,
+                  onChange:({target:{value} }) => setAuthor(value)
+                }}
+              />
+            </GridItem>
+            <GridItem xs={12} sm={12} md={12}>
+                <FileUpload token={props.store}
+                            params={""}
+                            boardId={board_id}
+                            boardAttachData={props.boardAttachData}
+                            files={files}
+                            fileStateList={fileStateList}
+                            setFiles={setFiles}
+                            setFileStateList={setFileStateList}
+                />
+            </GridItem>
+            <GridItem xs={12} sm={12} md={12}>
+              <CustomInput
                 labelText="Content"
                 id="Content"
                 formControlProps={{
@@ -73,7 +103,8 @@ export default function BoardWrite(props) {
           <GridItem xs={12} sm={12} md={12} style={{textAlignLast:'right'}}>
             <Button color="primary" onClick = { () => { 
               if (chkData()) {
-                props.saveBoard(board_id, title, content);
+                console.log(fileStateList);
+                props.saveBoard(board_id, title, content, author_name, files, fileStateList);
               }
             }}>저장</Button>
             <Button color="primary" onClick = { () => { props.onChangeData("LIST"); } }>목록</Button>

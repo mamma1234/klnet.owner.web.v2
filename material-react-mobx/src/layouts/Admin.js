@@ -234,8 +234,8 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
             </Switch>
           </div>
         )}
-        {getRoute() ? <Footer fluid /> : null}
-        <FixedPlugin
+        {getRoute() ? <Footer fluid store={store}/> : null}
+       {/* <FixedPlugin
           handleImageClick={handleImageClick}
           handleColorClick={handleColorClick}
           handleBgColorClick={handleBgColorClick}
@@ -247,7 +247,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           sidebarMinimize={sidebarMinimize.bind(this)}
           miniActive={miniActive}
         />
-      </div>
+*/ }     </div>
         <Dialog
       	open={open}
         onClose={()=>setOpen(false)}

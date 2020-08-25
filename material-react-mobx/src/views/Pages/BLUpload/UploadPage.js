@@ -1,20 +1,18 @@
 
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles, useTheme } from '@material-ui/core/styles';
+import { lighten, makeStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
-import IconError from '@material-ui/icons/Error';
 import Tooltip from '@material-ui/core/Tooltip';
 import GridContainer from "components/Grid/GridContainer.js";
 import React,{useState,useEffect} from "react";
@@ -23,6 +21,7 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton'
+import TableFooter from "@material-ui/core/TableFooter";
 // @material-ui/core components
 // core components
 
@@ -34,7 +33,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
-import Button from "components/CustomButtons/Button.js";
+import Button from 'components/CustomButtons/Button.js';
 import Grid from '@material-ui/core/Grid';
 import BackupIcon from "@material-ui/icons/Backup";
 import StarIcon from "@material-ui/icons/Stars";
@@ -46,8 +45,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
-import CheckIcon from '@material-ui/icons/Check';
-import ClearIcon from '@material-ui/icons/Clear';
 import SearchIcon from '@material-ui/icons/Search';
 import RefreshIcon from '@material-ui/icons/Refresh';
 //import Modal from '@material-ui/core/Modal';
@@ -101,7 +98,7 @@ const headCells = [
 ];
 
 function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, onSelectAllClick, order, orderBy, numSelected, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -112,7 +109,7 @@ function EnhancedTableHead(props) {
 return (
     <TableHead>
       <TableRow>
-	  	<TableCell padding="checkbox">
+	  	<TableCell padding="checkbox" style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>
           <Checkbox
             indeterminate={numSelected > 0 }
             checked={numSelected > 0}
@@ -126,6 +123,7 @@ return (
             align={"left"}
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
+            style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -163,7 +161,8 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
   },
   paper: {
-    width: '100%',
+	width: '100%',
+	marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
   },
   table: {
@@ -253,6 +252,10 @@ const useStyles = makeStyles((theme) => ({
 	marginRight:"10px",
 	//padding: "20px",
   },
+  tablecontainer: {
+	  width:'100%',
+	  maxHeight:590
+  }
 
 }));
 
@@ -266,13 +269,11 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function EnhancedTable(props) {
-  const theme = useTheme();
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [num, setNum] = useState(1);
   //입력값
   const [insertIeType, setInsertIeType] = useState("I");
   const [insertCarrier,setInsertCarrier] = useState("");
@@ -282,10 +283,6 @@ export default function EnhancedTable(props) {
   const [insertCarriernm,setInsertCarriernm] =useState("");
 
   //에러메시지
-  const [blErrMessage,setBlErrMessage] = useState("");
-  const [carrierErrMessage,setCarrierErrMessage] = useState("");
-  const [bkErrMessage,setBkErrMessage] = useState("");
-  const [cntrErrMessage,setCntrMessage] = useState("");
   const [errMessage, setErrmessage] = useState("");
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -298,18 +295,15 @@ export default function EnhancedTable(props) {
   const [toDate,setToDate] = useState(new Date());
   const [ieGubun, setIeGubun] = useState('');
   const [lineCode,setLineCode] = useState([]);
-  const [labelName,setLabelName] = useState("B/L NO.");
   const [searchKey,setSearchKey] = useState("");
-  const [searchCount, setSearchCount] = useState(0);
-  const [store,setStore] = useState(props.store);
+  const [store] = useState(props.store);
   const [selectData,setSelectData] = useState([]);
 
   const [carrierCode,setCarrierCode] = useState("");
-  
+  const [totCnt, setTotCnt] = useState(0);
   const [anchorE, setAnchorE] = useState(null);
   const [anchorU, setAnchorU] = useState(null);
   const [anchorD, setAnchorD] = useState(null);  
-  const [openJoin, setOpenJoin] = useState(false);
   const [severity, setSeverity] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [bladdCard, setBladdCard] = useState(false);
@@ -317,11 +311,10 @@ export default function EnhancedTable(props) {
   useEffect(() => {
 	  axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}}
 	  ).then(res => setLineCode(res.data));
-	  // .then(res => console.log(JSON.stringify(res.data)));
 	  return () => {
-		  console.log('LINE CODE cleanup');
+		  
 	  };
-  }, []);
+  }, [store]);
 
   const carrier_open = Boolean(anchorE);
   const upload_open = Boolean(anchorU);
@@ -344,83 +337,46 @@ export default function EnhancedTable(props) {
   const handleBLaddCard = () => {
 	let check = bladdCard;
 	setBladdCard(!check);
-
-	let zero = 0;
-	
-	let valueCheck = check==true?"VALUE":zero==1?"1":"0";
-	console.log(valueCheck);
-
   }
   const handleIEGubun = (e) => {
-	  console.log("xx",e.target.value);
 	  setIeGubun(e.target.value);
-	  //e.target.value=="IMPORT"?setLabelName("BL No."):setLabelName("BK No.")
-	  
   }
-  
-
-
-
-
-
-const handleSelectAllClick = (event) => {
-	
-    if (event.target.checked) {
-
-
-
-	  const newSelecteds = []
-	  selectData.forEach(function(n,index) {
-		
-		if((page*rowsPerPage-1 < index) && (page*rowsPerPage+rowsPerPage > index)) {
-			newSelecteds.push(n);
-		
-		}else {
-			
-		}
-	  });
-
-	  console.log('newSelecteds',newSelecteds)
-      setSelected(newSelecteds);
-      return;
+  const handleSelectAllClick = (event) => {
+	if (event.target.checked) {
+		const newSelecteds = []
+	  		selectData.forEach(function(n,index) {
+				newSelecteds.push(n);
+			});
+		setSelected(newSelecteds);
+      	return;
 	}
-	
-    setSelected([]);
+	setSelected([]);
   };
-
   const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-	console.log(name,'name')
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex),selected.slice(selectedIndex + 1),
-      );
-    }
+	const selectedIndex = selected.indexOf(name);
+	let newSelected = [];
+	if (selectedIndex === -1) {
+		newSelected = newSelected.concat(selected, name);
+	} else if (selectedIndex === 0) {
+		newSelected = newSelected.concat(selected.slice(1));
+	} else if (selectedIndex === selected.length - 1) {
+		newSelected = newSelected.concat(selected.slice(0, -1));
+	} else if (selectedIndex > 0) {
+		newSelected = newSelected.concat(selected.slice(0, selectedIndex),selected.slice(selectedIndex + 1),
+		);
+	}
 
-    setSelected(newSelected);
+	setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   const onCarrierChange = (e,data) => {
 	if(data) {setCarrierCode(data.id);} else {setCarrierCode("");}
-	}
+  }
 
   const onInsertCarrierChange = (e,data) => {
-	  
+		
 	if(data) {
 		setInsertCarrier(data.id);
 		setInsertCarriernm(data.nm);
@@ -429,17 +385,43 @@ const handleSelectAllClick = (event) => {
 		setInsertCarriernm("");
 	}
 
-  }
-	
-  const isSelected = (name) => selected.indexOf(name) !== -1;
-  
+  }  
 
-  const searchBefore = () => {
-	setPage(0);
-	setSelected([]);
-  }
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+
 
   const onSubmit = () => {
+	setNum(1)
+	let fromYMD = fromDate.getFullYear()+leftPad((fromDate.getMonth()+1), 2, "0")+leftPad((fromDate.getDate()), 2, "0");
+	let toYMD = toDate.getFullYear()+leftPad((toDate.getMonth()+1), 2, "0")+leftPad((toDate.getDate()), 2, "0");
+	let typeGubun = "";
+	
+	if (ieGubun === "IMPORT") {
+		typeGubun = "I";
+	}else if (ieGubun === "EXPORT") {
+		typeGubun = "E";
+	}else {
+		typeGubun = "";
+	}
+	if( fromYMD > toYMD ) {
+		alert( "종료일자가 시작 일자보다 빠릅니다. 다시 확인하세요." );
+		return false;
+	}
+
+		//searchBefore();
+		axios.post("/loc/getMyBlList",{num:1, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
+		.then(res => {
+			setSelectData(res.data)
+			if(res.data.length > 0) {
+				setTotCnt(res.data[0].tot_cnt)
+			}else {
+				setTotCnt(0)
+			}
+		})
+  };
+  const onMore = (param) => {
+	setNum(param)
+
 
 	let fromYMD = fromDate.getFullYear()+leftPad((fromDate.getMonth()+1), 2, "0")+leftPad((fromDate.getDate()), 2, "0");
 	let toYMD = toDate.getFullYear()+leftPad((toDate.getMonth()+1), 2, "0")+leftPad((toDate.getDate()), 2, "0");
@@ -456,15 +438,16 @@ const handleSelectAllClick = (event) => {
 		alert( "종료일자가 시작 일자보다 빠릅니다. 다시 확인하세요." );
 		return false;
 	}
-	//searchBefore();
-	axios.post("/loc/getMyBlList",{ carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
-	.then(res => (setSelectData(res.data)));
-  };
+	if(num !== Number(selectData[0].tot_page)) {
+		
+		
+		axios.post("/loc/getMyBlList",{num:param, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
+		.then(res => (setSelectData([...selectData,...res.data])));
+	}
+}
+
+
 const initState = () => {
-	setBlErrMessage("");
-	setCarrierErrMessage("");
-	setBkErrMessage("");
-	setCntrMessage("")
 	setErrmessage("");
 	setSeverity("success");
 
@@ -475,8 +458,6 @@ const AlertMessage = (message,icon) => {
 	setAlertOpen(true);
 }
 const onRowReset = () => {
-	
-	console.log('insertCarrier',insertCarrier)
 	
 	initState();
 	setInsertIeType("I");
@@ -491,33 +472,33 @@ const onRowReset = () => {
 }
 const onRowAdd = () => {
 	initState();
-	if (insertCarrier == "") {
+	if (insertCarrier === "") {
 		AlertMessage('선사(CARRIER)를 선택해주세요.','error');
 		return;
 	}
-	if (insertBlNo == "" && insertBkNo == "") {
+	if (insertBlNo === "" && insertBkNo === "") {
 		AlertMessage('B/L No. 혹은 B/K No. 를 입력해주세요','error');
 		return;
 	}
-	if(insertBlNo != "" && insertBlNo.length > 16) {
+	if(insertBlNo !== "" && insertBlNo.length > 16) {
 		AlertMessage('B/L No.는 최대 16자리 입니다.','error');
 		return;
 	}
-	if(insertBkNo != "" && insertBkNo.length > 35) {
+	if(insertBkNo !== "" && insertBkNo.length > 35) {
 		AlertMessage('B/K No.는 최대 35자리 입니다.','error');
 		return;
 	}
-	if(insertCntrNo != "" && insertCntrNo.length > 20) {
+	if(insertCntrNo !== "" && insertCntrNo.length > 20) {
 		AlertMessage('Container No.는 최대 20자리입니다.','error');
 		return;
 	}
 	let bl_bkg = "";
 
-	if(insertBlNo != "" && insertBkNo != "") {
+	if(insertBlNo !== "" && insertBkNo !== "") {
 		bl_bkg = insertBlNo;
-	}else if(insertBkNo != "" && insertBlNo == "") {
+	}else if(insertBkNo !== "" && insertBlNo === "") {
 		bl_bkg = insertBkNo;
-	}else if(insertBlNo != "" && insertBkNo == "") {
+	}else if(insertBlNo !== "" && insertBkNo === "") {
 		bl_bkg = insertBlNo;
 	}
 	axios.post("/loc/getPkMyBlList",
@@ -541,11 +522,12 @@ const onRowAdd = () => {
 	}
 const rowDelete = () => {
 	const rowCount = selected.length;
-	if(selected.length == 0) {
+	if(selected.length === 0) {
 		AlertMessage('삭제할 행이 존재하지 않습니다.', 'error');
+		return;
 	}else {
 		
-		selected.map((element,key) => {
+		selected.forEach(element => {
 			axios.post("/loc/deleteMyBlNo",{ sendData:element},{headers:{'Authorization':'Bearer '+store.token}})
 										
 		})
@@ -556,26 +538,6 @@ const rowDelete = () => {
 	}
 	
 }
-
-const searchinit = (param) => {
-	console.log(param);
-	setIeGubun(param[0]);
-	setCarrierCode(param[1]);
-	if(param[2] != null && param[3] != null) {
-		setSearchKey(param[2]);
-	}else if( param[2] != null && param[3] == null) {
-		setSearchKey(param[2])
-	}else if( param[2] == null && param[3] != null) {
-		setSearchKey(param[3])
-	}
-	setTimeout(function() {
-		onSubmit();
-	},500)
-	
-	
-
-}
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, selectData.length - page * rowsPerPage);
 
 
   return (
@@ -596,7 +558,7 @@ const searchinit = (param) => {
 									labelText = "IMPORT&EXPORT"
 									setValue = {ieGubun}
 									option = {["ALL","IMPORT","EXPORT"]}
-									inputProps={{onChange:handleIEGubun, authWidth:true}}
+									inputProps={{onChange:handleIEGubun, fullWidth:true}}
 									
 									formControlProps={{fullWidth: true}} 
 								/>								
@@ -618,7 +580,7 @@ const searchinit = (param) => {
 									fullWidth />
 								
 							</Grid>
-							<Grid item xs={12} sm={12} md={2}>
+							<Grid item xs={6} sm={12} md={2}>
 							<CalendarBox
 								labelText ="Add Date From"
 								id="fromDate"
@@ -629,7 +591,7 @@ const searchinit = (param) => {
 								formControlProps={{fullWidth: true}} 
 							/>
 							</Grid>
-							<Grid item xs={12} sm={12} md={2}>
+							<Grid item xs={6} sm={12} md={2}>
 							<CalendarBox
 								labelText =" Add Date To"
 									id="toDate"
@@ -655,18 +617,19 @@ const searchinit = (param) => {
 		
 
 
-	  {bladdCard==true && selected.length == 0 &&(
+	  {bladdCard===true && selected.length === 0 &&(
 		<Grid>
 			<Toolbar className={clsx(classes.Toolbarroot, {[classes.Toolbarhighlight]: selected.length > 0,})}>
 			
-					<GridItem item xs={12} sm={12} md={10}>
+					<GridItem item xs={12} sm={12} md={12}>
 						<Grid style={{paddingTop:'10px'}}>
 							<Button
 								variant="contained"
 								color="info"
 								size="sm"
 								startIcon={<BackupIcon/>}
-								onClick={e=>handleBLaddCard()}>B/L Insert
+								style={{width:'30%'}}
+								onClick={e=>handleBLaddCard()}><span style={{fontSize:'1em'}}>B/L Insert</span>
 							</Button>&nbsp;&nbsp;
 							
 							<Button
@@ -674,14 +637,17 @@ const searchinit = (param) => {
 								color="info"
 								size="sm"
 								startIcon={<BackupIcon/>}
-								onClick={e=>setAnchorU(e.currentTarget)}>Excel Upload
+								style={{width:'30%'}}
+								onClick={e=>setAnchorU(e.currentTarget)}><span style={{fontSize:'1em'}}>Excel Upload</span>
 							</Button>&nbsp;&nbsp;
 							<Button
 								variant="contained"
 								color="info"
 								size="sm"
 								startIcon={<StarIcon/>}
-								onClick={e=>setAnchorE(e.currentTarget)}>Carrier Info
+								style={{width:'30%'}}
+
+								onClick={e=>setAnchorE(e.currentTarget)}><span style={{fontSize:'1em'}}>Carrier Info</span>
 							</Button>
 							<Popover
 							
@@ -695,7 +661,6 @@ const searchinit = (param) => {
 								transformOrigin={{vertical:'top',horizontal:'center',}}><Excel token={store}
 																								params={lineCode} />
 							</Popover>
-							
 							<Popover
 								id={carrier}
 								open={carrier_open}
@@ -706,28 +671,21 @@ const searchinit = (param) => {
 								anchorOrigin={{vertical:'bottom',horizontal:'center',}}
 								transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={store}/>
 							</Popover>
+							
 						</Grid>
 					</GridItem>
-					<GridItem item xs={12} sm={12} md={1}>
-
-					</GridItem>
-					{/* <GridItem item xs={12} sm={12} md={1}>
-						<Grid style={{paddingTop:'10px', textAlignLast:'right'}}>
-							<span>Total : {selectData.length}</span>
-						</Grid>
-					</GridItem> */}
+					
 				
 			</Toolbar>
 			<GridItem style={{backgroundColor:'#00acc126'}}>
 				<Grid container spacing={3}>
-					<Grid  item xs={12} sm={12} md={2}>
+					<Grid  item xs={12} sm={2} md={2}>
 						<FormControl style={{marginLeft:'20px', position:"center"}} component="div">
 							<RadioGroup row aria-label="position" name="position" defaultValue="I" value={insertIeType} >
 								<FormControlLabel
 									value="I"
 									control={<Radio color="primary" size="small" />}
 									label={<span style={{fontSize:'smaller', color:'#000000'}}>IMPORT</span>}
-									labelPlacement="left"
 									style={{marginTop:'10px'}}
 									onChange={(checked) => {if(checked){setInsertIeType('I')}}}
 									/>
@@ -735,9 +693,8 @@ const searchinit = (param) => {
 								<FormControlLabel
 									value="E"
 									style={{marginTop:'10px'}}
-									control={<Radio color="primary" size="small" fullWidth/>}
+									control={<Radio color="primary" size="small" />}
 									label={<span style={{fontSize:'smaller', color:'#000000'}}>EXPORT</span>}
-									labelPlacement="left"
 									onChange={(checked) => {if(checked){setInsertIeType('E')}}}
 									/>
 							</RadioGroup>
@@ -751,7 +708,6 @@ const searchinit = (param) => {
 							id="carrierCode"
 							value={{id:insertCarrier,nm:insertCarriernm}}
 							onChange={onInsertCarrierChange}
-							onInputChange ={(event,value) => console.log(event, value)}
 							renderInput={params => (
 								<TextField inputProps={{maxLength:4}} {...params} label={<span style={{color:'#000000'}}>Carrier</span>} fullWidth/>
 							)}/>
@@ -789,14 +745,18 @@ const searchinit = (param) => {
 							startIcon={<RefreshIcon/>}>
 						</Button>&nbsp;&nbsp; */}
 						<FormControl style={{textAlignLast:'right', marginRight:'50px'}} component="div" fullWidth>
-						<IconButton>
-							<RefreshIcon onClick = {() => onRowReset()}/>
-						</IconButton>
+							
+							<IconButton>
+								<Tooltip title={"초기화"} arrow>
+								<RefreshIcon onClick = {() => onRowReset()}/>
+								</Tooltip>
+							</IconButton>
 						</FormControl>
 					</Grid>
 					<Grid item xs={12} sm={12} md={1} >
 						<FormControl className={classes.marginRightForm} component="div" fullWidth>
 							<Button
+								
 								variant="contained"
 								color="info" 
 								onClick = {() => onRowAdd()}>
@@ -869,18 +829,20 @@ const searchinit = (param) => {
 		</Grid>
 		)}
 		{/* B/L Insert창 없이 초기화면 */}
-		{bladdCard==false && selected.length==0 &&(
+		{bladdCard===false && selected.length===0 &&(
 			<Grid>
 				<Toolbar className={clsx(classes.Toolbarroot, {[classes.Toolbarhighlight]: selected.length > 0,})}>
 				
-				<GridItem item xs={12} sm={12} md={11}>
+				<GridItem item xs={12} sm={12} md={12}>
+					
 					<Grid style={{paddingTop:'10px'}}>
 						<Button
 							variant="contained"
 							color="info"
 							size="sm"
 							startIcon={<BackupIcon/>}
-							onClick={e=>handleBLaddCard()}>B/L Insert
+							style={{width:'30%'}}
+							onClick={e=>handleBLaddCard()}><span style={{fontSize:'1em'}}>B/L Insert</span>
 						</Button>&nbsp;&nbsp;
 						
 						<Button
@@ -888,15 +850,18 @@ const searchinit = (param) => {
 							color="info"
 							size="sm"
 							startIcon={<BackupIcon/>}
-							onClick={e=>setAnchorU(e.currentTarget)}>Excel Upload
+							style={{width:'30%'}}
+							onClick={e=>setAnchorU(e.currentTarget)}><span style={{fontSize:'1em'}}>Excel Upload</span>
 						</Button>&nbsp;&nbsp;
 						<Button
 							variant="contained"
 							color="info"
 							size="sm"
 							startIcon={<StarIcon/>}
-							onClick={e=>setAnchorE(e.currentTarget)}>Carrier Info
+							style={{width:'30%'}}
+							onClick={e=>setAnchorE(e.currentTarget)}><span style={{fontSize:'1em'}}>Carrier Info</span>
 						</Button>
+						
 						<Popover
 						
 							id={upload}
@@ -906,13 +871,23 @@ const searchinit = (param) => {
 							anchorReference="anchorPosition"
 							anchorPosition={{top:10,left:550}}
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
-							transformOrigin={{vertical:'top',horizontal:'center',}}><Excel token={store}
-																							params={lineCode}
-																							returnFunction={() =>handleClose()}
-																							returnMessage={(message, state)=> AlertMessage(message, state)}
-																							returnState={()=>onSubmit()} 
-																							searchFunction={(param) => searchinit(param)}
-																							/>
+							transformOrigin={{vertical:'top',horizontal:'center',}}>
+							<Excel token={store}
+								params={lineCode}
+								returnFunction={() =>handleClose()}
+								returnMessage={(message, state)=> AlertMessage(message, state)}
+								returnState={()=>onSubmit()} 
+								searchFunction={(param) => {
+									setIeGubun(param[0]);
+									setCarrierCode(param[1]);
+									(param[2] !==null && param[3] !== null)?
+										setSearchKey(param[2]):
+										(param[2] !== null && param[3] === null)?
+											setSearchKey(param[2]):
+												setSearchKey(param[3])
+									
+												onSubmit();
+											}}/>
 						</Popover>
 						
 						<Popover
@@ -925,21 +900,27 @@ const searchinit = (param) => {
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
 							transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={store}/>
 						</Popover>
+						
 					</Grid>
+					
 				</GridItem>
-				<span style={{fontSize:'small'}}>Total : {selectData.length}</span>
-			
+				
 		</Toolbar>
 			
 		</Grid>
 		)}
-        <TableContainer>
+		</Paper>
+		<Paper>
+		<div style={{textAlignLast: "end"}}>
+			<span style={{paddingRight:"20px", paddingTop:"5px"}}>[ Data Count: {selectData.length}건 / {totCnt}건 ]</span>
+		</div>
+        <TableContainer className={classes.tablecontainer}>
           <Table
 		  	stickyHeader aria-label="sticky table"
             className={classes.table}
             aria-labelledby="tableTitle"
             size={'medium'}
-            aria-label="enhanced table"
+            style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}
           >
             <EnhancedTableHead
               classes={classes}
@@ -951,11 +932,11 @@ const searchinit = (param) => {
               rowCount={selectData.length}
             />
             <TableBody>
-              {stableSort(selectData, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
+			  {
+			  stableSort(selectData, getComparator(order, orderBy)).map((row, index) => {
                   const isItemSelected = isSelected(row);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-				
+				  const labelId = `enhanced-table-checkbox-${index}`;
+				  
 				  return (
                     <TableRow
                       hover
@@ -964,18 +945,14 @@ const searchinit = (param) => {
                       aria-checked={isItemSelected}
                       tabIndex={-1}
                       key={row.num}
-					  selected={isItemSelected}
-					  
-                    >
+					  selected={isItemSelected}>
 					  <TableCell padding="checkbox">
                         <Checkbox
                           checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
+                          inputProps={{ 'aria-labelledby': labelId }}/>
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">{row.num}</TableCell>
-				 
-                      <TableCell align="left">{row.ie_type=="I"?"IMPORT":"EXPORT"}</TableCell>
+                      <TableCell align="left">{row.ie_type==="I"?"IMPORT":"EXPORT"}</TableCell>
 					  <TableCell align="left"><Tooltip title={row.nm_kor} arrow><span>{row.carrier_code}</span></Tooltip></TableCell>
                       <TableCell align="left">{row.bl_no}</TableCell>
                       <TableCell align="left">{row.bkg_no}</TableCell>
@@ -985,18 +962,24 @@ const searchinit = (param) => {
                   );
                 })}
             </TableBody>
+			
+
+			{
+				selectData.length >= 10 ? Number(selectData[0].tot_page) !== num ? (
+					<TableFooter>
+                        <TableRow>
+							<TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={8}>
+								<Button
+									color="info"
+									onClick={() => onMore(num+1)}
+								>MORE&nbsp;(&nbsp;{num}&nbsp;/&nbsp;{selectData[0].tot_page}&nbsp;)</Button>
+							</TableCell>
+                        </TableRow>
+					</TableFooter>): null : null
+            }
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={selectData.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Paper>
+		</Paper>
 	<Snackbar open={alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
 		<Alert 
 			onClose={handleAlertClose}

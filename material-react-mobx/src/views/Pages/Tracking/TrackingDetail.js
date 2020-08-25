@@ -2,22 +2,19 @@ import React from "react";
 
 import PropTypes from "prop-types";
 // @material-ui/core components
+
+import {Table,Grid,TableHead,TableRow,TableBody,TableCell,TableContainer,TableFooter,Popover} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableFooter from "@material-ui/core/TableFooter";
+
 
 import ShipMap from "components/Map/ShipMap.js";
-import GridContainer from "components/Grid/GridContainer.js";
+//import GridContainer from "components/Grid/GridContainer.js";
 import TableList from "components/Table/TableSmallLine.js";
+import TablesUniPass from "components/Table/TablesUniPass.js";
 import GridItem from "components/Grid/GridItem.js";
-import Popover from  '@material-ui/core/Popover';
 import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
-
+import Draggable from 'react-draggable';
 //import Card from "components/Card/Card.js";
 //import Access from "@material-ui/icons/AccessAlarm";
 import Assign from "@material-ui/icons/AssignmentTurnedIn";
@@ -31,6 +28,7 @@ import TerminalIcon from "@material-ui/icons/LocalShippingOutlined";
 import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
 import { slideDown, slideUp } from "components/Slide/Slide.js";
 import TackingMap from "components/Map/TrackingMap.js"
+import DirectionsBoatIcon from '@material-ui/icons/DirectionsBoatOutlined';
 import CurrentList from "views/Pages/Tracking/Current/TrackingCurrent.js";
 import CntrListTable from "views/Pages/Tracking/Terminal/TrackingCntrList.js";
 //import Slider from "components/Slide/Slider.js";
@@ -44,32 +42,42 @@ import axios from 'axios';
 
 const useStyles = makeStyles(styles);
 
+const useStyles2 = makeStyles({
+	container: {
+		maxHeight:590,
+	}
+});
+
 
 export default function DetailTable(props) {
 
   const classes = useStyles();
+  const classess = useStyles2();
   const { tableData, tableHeaderColor, tableRownum,store } = props;
 
   const handleAddFunction = () => {
     props.onClickHandle();
   }
+  
+
 
   return (
-    <div className={classes.tableResponsive} style={{marginTop:'0px'}}>
-    	<Table className={classes.table}>
-          <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px'}}>
-            <TableRow className={classes.tableHeadRow} style={{borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
-                  <TableCell style={{borderBottomWidth:'3px',width:'15%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>(B/K NO.)<br/>B/L NO.</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'5%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>IMPORT(I)<br/>EXPORT(E)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'5%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>CARRIER</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'13%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>VESSEL<br/>/VOYAGE</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>LAST STATUS</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POL<br/><font color="orange">ETD</font>/<font color="blue">ATD</font>(<font color="red">TO</font>)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>POD<br/><font color="orange">ETA</font>/<font color="blue">ATA</font>(<font color="red">TO</font>)</TableCell>
-                  <TableCell style={{borderBottomWidth:'3px',width:'2%',fontWeight:'bold'}} className={classes.trackingtableCell + " " + classes.tableHeadCell}>MORE</TableCell>
+    <div  className={classes.tableResponsive} style={{marginTop:'0px'}}> 
+    <TableContainer className={classess.container} style={{overflow:'auto'}}>
+    	<Table stickyHeader className={classes.table} style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
+          <TableHead  className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px'}} id="scroll_top">
+            <TableRow >
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>(B/K NO.)<br/>B/L NO.</TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',width:'5%',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>IMPORT(I)<br/>EXPORT(E)</TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',width:'5%',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>CARRIER</TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>VESSEL/VOYAGE</TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>LAST STATUS</TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.tableHeadCell}><font color="#717172">POL<br/><font color="orange">ETD</font>/<font color="blue">ATD</font>(<font color="red">TO</font>)</font></TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',width:'12%',fontWeight:'bold'}} className={classes.tableHeadCell}><font color="#717172">POD<br/><font color="orange">ETA</font>/<font color="blue">ATA</font>(<font color="red">TO</font>)</font></TableCell>
+                  <TableCell style={{paddingTop:'8px',paddingBottom:'8px',borderBottomWidth:'3px',width:'2%',fontWeight:'bold',color:'#717172'}} className={classes.tableHeadCell}>MORE</TableCell>
             </TableRow>
           </TableHead>
-        <TableBody>
+        <TableBody >
            {
               tableData.map((prop, key) => {
                   return (
@@ -92,6 +100,7 @@ export default function DetailTable(props) {
         	</TableRow>
         </TableFooter>: null )}
       </Table>
+      </TableContainer> 
     </div>
   );
 }
@@ -122,12 +131,13 @@ DetailTable.propTypes = {
 	  openCurrent: false,
 	  bookmarkIcon:"N",
 	  iconstate:"add_circle",
-	  rowStyle:"borderTopStyle:'dashed'",
+	  borderBottomStyleValue:"3px solid #e0e0e0",
 	  importUniPassList:[],
 	  exportUniPassList:[],
 	  demdetlist:[],
 	  terminalPosition:[],
 	  polyRender:[],
+	  seq:0,
 	};
 
   componentDidMount() {
@@ -162,17 +172,17 @@ DetailTable.propTypes = {
 
   __makeDateFormatFromString = (params) => {
 	let message = ''
-	if( params == '' ) {
+	if( params === '' ) {
 		message = ''
 	} else {
-		if( params.length == 14 ) {
+		if( params.length === 14 ) {
 			let yyyy = params.substr(0,4);
 			let mm = params.substr(4,2);
 			let dd = params.substr(6,2);
 			let hh = params.substr(8,2);
 			let mi = params.substr(10,2);
 			message = yyyy+"-"+mm+"-"+dd+" "+hh+":"+mi;
-		} else if (params.length == 8 ) {
+		} else if (params.length === 8 ) {
 			let yyyy = params.substr(0,4);
 			let mm = params.substr(4,2);
 			let dd = params.substr(6,2);
@@ -187,14 +197,14 @@ DetailTable.propTypes = {
     if (!this.state.expanded) {
       this.setState({ expanded: true ,iconstate:"remove_circle"}, () => {
         if (this.refs.expanderBody) {
-			if( "E" == this.props.data.ie_type ) {
+			if( "E" === this.props.data.ie_type ) {
 				// 수출
 				//console.log( '수출', this.props.data.ie_type, this.props.data.bl_yy);
 				this.__getUniPassExport(this.props);
 				this.__getTrackingGoogleMap(this.props);
 				this.__getExportTerminalActivity( this.props );
 
-			} else if( "I" == this.props.data.ie_type ) {
+			} else if( "I" === this.props.data.ie_type ) {
 				// 수입
 				//console.log('수입', this.props.data.ie_type, this.props.data.bl_yy);
 				this.__getUniPassImport(this.props);
@@ -202,12 +212,13 @@ DetailTable.propTypes = {
 				this.__getImportTerminalActivity( this.props );
 			}
           slideDown(this.refs.expanderBody);
+          this.setState( {borderBottomStyleValue:"3px dotted #e0e0e0"} );
         }
       });
     } else {
       slideUp(this.refs.expanderBody, {
         onComplete: () => {
-          this.setState({ expanded: false , iconstate:"add_circle" });
+          this.setState({ expanded: false , iconstate:"add_circle" ,borderBottomStyleValue:"3px solid #e0e0e0"});
         }
       });
     }
@@ -223,7 +234,7 @@ DetailTable.propTypes = {
   }
   //즐겨찾기
   handleStarClick = () => {
-	  this.state.bookmarkIcon == "Y"?this.setState({bookmarkIcon:"N"}):this.setState({bookmarkIcon:"Y"})	  
+	  this.state.bookmarkIcon === "Y"?this.setState({bookmarkIcon:"N"}):this.setState({bookmarkIcon:"Y"})	  
 	  return axios ({
 			url:'/loc/setUserBLUpdate',
 			method:'POST',
@@ -231,23 +242,23 @@ DetailTable.propTypes = {
 			data: {blbk : this.props.data.bl_bkg,
 				   reqseq: this.props.data.req_seq,
 				   ietype: this.props.data.ie_type,
-				   bookmark : this.state.bookmarkIcon=="Y"?"N":"Y"
+				   bookmark : this.state.bookmarkIcon === "Y"?"N":"Y"
 				   }
 		});
   }
   //컨테이너 이동 현황
-  handleCntrClick = () => {
-	  console.log("cntrList");
-	  this.setState({ openPopup: true });
+  handleCntrClick = (event) => {
+	  //console.log("cntrList",event);
+	  this.setState({ openPopup: true , seq: event});
   }
   //선박 추적 맵
   handleClickMapOpen = () => {
-	  console.log("map");
+	  //console.log("map");
 	  this.setState({ openMap: true });
   }
   //국내 화물 트래킹 맵
   handleClickTrackingMap = () => {
-	  console.log("TrackingMap");
+	  //console.log("TrackingMap");
 	  this.setState({ openTrackingMap : true})
   }
   //국내 화물 트래킹 데이터 수집 
@@ -264,21 +275,21 @@ DetailTable.propTypes = {
 			let terminalPosition = [];
 			let polyRender = [];
 			if( params.length > 0){
-				if (this.props.data.ie_type == "I") {
-				  if(params[0].unload_terminal != null) {
+				if (this.props.data.ie_type === "I") {
+				  if(params[0].unload_terminal !== null) {
 					terminalPosition.push({time:params[0].unload_date,terminal:params[0].unload_terminal, wgs84_x:params[0].unload_terminal_x, wgs84_y: params[0].unload_terminal_y,work_name:'양하'});
 		
-					if(params[0].full_outgate_terminal != null && params[0].mt_outgate_terminal == null) {
+					if(params[0].full_outgate_terminal !== null && params[0].mt_outgate_terminal === null) {
 					  terminalPosition.push({time:params[0].full_outgate_date,terminal:params[0].full_outgate_terminal, wgs84_x:params[0].full_outgate_terminal_x, wgs84_y: params[0].full_outgate_terminal_y, work_name:'풀컨테이너 반출'});
 		
-					  if(params[0].mt_ingate_terminal != null) {
+					  if(params[0].mt_ingate_terminal !== null) {
 						terminalPosition.push({time:params[0].mt_ingate_date, terminal:params[0].mt_ingate_terminal, wgs84_x:params[0].mt_ingate_terminal_x, wgs84_y: params[0].mt_ingate_terminal_y, work_name:'공컨테이너 반입'});
 						
 					  }
 		
-					}else if(params[0].full_outgate_terminal == null && params[0].mt_outgate_terminal !=null) {
+					}else if(params[0].full_outgate_terminal === null && params[0].mt_outgate_terminal !==null) {
 					  terminalPosition.push({time:params[0].mt_outgate_date, terminal:params[0].mt_outgate_terminal, wgs84_x:params[0].mt_outgate_terminal_x, wgs84_y: params[0].mt_outgate_terminal_y, work_name:'공컨테이너 반출'});
-					  if(params[0].mt_ingate_terminal != null) {
+					  if(params[0].mt_ingate_terminal !== null) {
 						terminalPosition.push({time:params[0].mt_ingate_date, terminal:params[0].mt_ingate_terminal, wgs84_x:params[0].mt_ingate_terminal_x, wgs84_y: params[0].mt_ingate_terminal_y, work_name:'공컨테이너 반입'});
 						
 					  }
@@ -287,14 +298,14 @@ DetailTable.propTypes = {
 					}
 				  }
 		
-				}else if(this.props.data.ie_type == "E") {
+				}else if(this.props.data.ie_type === "E") {
 				  if(params[0].mt_outgate_terminal != null) {
 					terminalPosition.push({time:params[0].mt_outgate_date,terminal:params[0].mt_outgate_terminal, wgs84_x:params[0].mt_outgate_terminal_x, wgs84_y: params[0].mt_outgate_terminal_y, work_name:'공컨테이너 반출'});
-					if(params[0].full_ingate_terminal != null && params[0].mt_ingate_terminal == null) {
+					if(params[0].full_ingate_terminal !== null && params[0].mt_ingate_terminal === null) {
 					  terminalPosition.push({time:params[0].full_ingate_date,terminal:params[0].full_ingate_terminal, wgs84_x:params[0].full_ingate_terminal_x, wgs84_y: params[0].full_ingate_terminal_y, work_name:'풀컨테이너 반입'}); 
-					}else if(params[0].full_ingate_terminal == null && params[0].mt_ingate_terminal != null) {
+					}else if(params[0].full_ingate_terminal === null && params[0].mt_ingate_terminal !== null) {
 					  terminalPosition.push({time:params[0].mt_ingate_date,terminal:params[0].mt_ingate_terminal, wgs84_x:params[0].mt_ingate_terminal_x, wgs84_y: params[0].mt_ingate_terminal_y, work_name:'공컨테이너 반입'}); 
-					}else if(params[0].full_ingate_terminal != null && params[0].mt_ingate_terminal != null) {
+					}else if(params[0].full_ingate_terminal !== null && params[0].mt_ingate_terminal !== null) {
 					  terminalPosition.push({time:params[0].full_ingate_date,terminal:params[0].full_ingate_terminal, wgs84_x:params[0].full_ingate_terminal_x, wgs84_y: params[0].full_ingate_terminal_y, work_name:'풀컨테이너 반입'});             
 					}else {
 		
@@ -303,7 +314,7 @@ DetailTable.propTypes = {
 				  }else {
 		
 				  }
-				  if(params[0].load_terminal != null) {
+				  if(params[0].load_terminal !== null) {
 					terminalPosition.push({time:params[0].load_date,terminal:params[0].load_terminal, wgs84_x:params[0].load_terminal_x, wgs84_y: params[0].load_terminal_y,work_name:'선적'});             
 				  }else {
 		
@@ -337,14 +348,20 @@ DetailTable.propTypes = {
 			let returnList = [];
 			res.data.forEach( element => {
 				let returnValue = [];
-				if( 'NO_DATA' == element.message ) {
-					returnValue.push( 'SIMPLE B/L만 조회 가능합니다' );
-					returnValue.push( 'H-B/L이 발행된 경우 유니패스에서 확인하세요' );
-					returnValue.push( '(관세청 유니패스 바로가기)' );
+				if( 'NO_DATA' === element.message ) {
+					returnValue.push( '' );
+					returnValue.push( '관세청 유니패스 바로가기' );
+					returnValue.push( '' );
 				} else {
 					returnValue.push( element.exp_dclr_no);
 					returnValue.push( this.__makeDateFormatFromString(element.tkof_dt));
 					returnValue.push( element.shpm_cmpl_yn);
+					// 3번째 MBL(M), HBL(H), DECLARE(D)
+					// 4번째 MBLNO or HBL NO
+					returnValue.push( "DECLARE");
+					returnValue.push( element.exp_dclr_no);
+					// 5번째 수출(/svc/customsExp) 수입("/svc/customImp") 구분
+					returnValue.push( "/svc/unipassapi?tabvalue=1" );
 				}
 				returnList.push(returnValue);
 			});
@@ -374,17 +391,31 @@ DetailTable.propTypes = {
 				// console.log( element );
 				let returnValue = [];
 				if( 'NO_DATA' == element.message ){
-					returnValue.push( 'SIMPLE B/L만 조회 가능합니다' );
-					returnValue.push( 'H-B/L이 발행된 경우 유니패스에서 확인하세요' );
-					returnValue.push( '(관세청 유니패스 바로가기)' );
+					returnValue.push( '' );
+					returnValue.push( '관세청 유니패스 바로가기' );
+					returnValue.push( '' );
 				} else {
-					if( element.hbl_no == undefined || element.hbl_no == 'undefined' ){
+					// 0번째 MBL번호 HBL 번호 조합
+					if( element.hbl_no === undefined || element.hbl_no === 'undefined' ){
 						returnValue.push( element.mbl_no);
 					} else {
 						returnValue.push( element.mbl_no+ "-"+element.hbl_no);
 					}
+					// 1번째 DATE
 					returnValue.push( element.clearance+"("+this.__makeDateFormatFromString(element.clearance_date)+")");
+					// 2번째
 					returnValue.push( element.mt_trgt_carg_yn_nm);
+					// 3번째 MBL(M), HBL(H)
+					// 4번째 MBLNO or HBL NO
+					if( element.hbl_no === undefined || element.hbl_no === 'undefined' ){
+						returnValue.push( "MBL");
+						returnValue.push( element.mbl_no);
+					} else {
+						returnValue.push( "HBL");
+						returnValue.push( element.hbl_no);
+					}
+					// 5번째 수출(/svc/customsExp) 수입("/svc/customsImp") 구분
+					returnValue.push( "/svc/unipassapi?tabvalue=0" );
 				}
 				returnList.push(returnValue);
 			});
@@ -412,14 +443,14 @@ DetailTable.propTypes = {
 				vsl_name :props.data.vsl_name,
 				voyage_no:props.data.voyage,
 				eta:eta,
-				pod:props.data.pod,
+				pod:props.data.pod_cd,
 				carrier_code:props.data.carrier_code,
 				ie_type:props.data.ie_type,
 				bl_bkg:props.data.bl_bkg
 			}
 		})
 		.then(res => {
-			console.log(res.data);
+			//console.log(res.data);
 			this.setState({demdetlist:res.data }) 
 		})
 	    .catch(err => {
@@ -442,14 +473,14 @@ DetailTable.propTypes = {
 				vsl_name :props.data.vsl_name,
 				voyage_no:props.data.voyage,
 				etd:etd,
-				pol:props.data.pol,
+				pol:props.data.pol_cd,
 				carrier_code:props.data.carrier_code,
 				ie_type:props.data.ie_type,
 				bl_bkg:props.data.bl_bkg
 			}
 		})
 		.then(res => {
-			console.log(res.data);
+			//console.log(res.data);
 			this.setState({demdetlist:res.data }) 
 		})
 	    .catch(err => {
@@ -458,38 +489,39 @@ DetailTable.propTypes = {
 
 	}
 
-
-
   render() {
      const { data } = this.props;
 
-     const startColor = this.props.data.start_db =="E"?"orange":"BLUE";
-     const endColor = this.props.data.end_db =="E"?"orange":"BLUE";
+     const startColor = this.props.data.start_db ==="E"?"orange":"BLUE";
+     const endColor = this.props.data.end_db ==="E"?"orange":"BLUE";
+     const borderStyle = this.state.borderBottomStyleValue;
+     
     return [
-      <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
-        <TableCell style={{padding:'8px ',textAlignLast:'left',borderBottomWidth:'3px'}}>{data.view_bl_bkg}
+      <TableRow key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',textAlignLast:'left',borderBottom:borderStyle}}>{data.view_bl_bkg}
         	{this.state.bookmarkIcon == 'Y'?<Tooltip title="BookMark"><StarIcon onClick={this.handleStarClick} style={{color:'#00acc1',verticalAlign:'bottom'}} /></Tooltip>:
         	<Tooltip title="BookMark"><StarBorderIcon onClick={this.handleStarClick} style={{color:'#00acc1',verticalAlign:'bottom'}} /></Tooltip>}</TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>{data.ie_type}</TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}>{data.ie_type}</TableCell>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}>
         	<Tooltip title={data.line_nm}>
             	<a target="_blank" href={data.line_url}>
-        			{data.image_yn=='Y'?<img src={require("assets/img/carrier/"+data.line_code+".gif")} />:<img src={require("assets/img/carrier/No-Image.gif")} />}
+        			{data.image_yn=='Y'?<img src={require("assets/img/carrier/"+data.line_code+".gif")} alt={data.line_code} style={{backgroundColor:'silver'}}/>:data.line_nm}
         		</a>
         	</Tooltip>
         </TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}>
         	{data.vsl_name}<br/>{data.voyage?"/"+data.voyage:""}
-        	<Tooltip title="vessel map infomation"><MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickMapOpen} /></Tooltip></TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}} onClick={this.handleClickOpen}>
-        {/*{data.last_current.length>18?data.last_current.substring(0,15)+" ...":data.last_current}*/}{data.last_status}<br/>{data.last_status_time}
+        	{data.vsl_name?<Tooltip title="vessel map infomation"><DirectionsBoatIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickMapOpen} /></Tooltip>
+        	:null}</TableCell>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}} onClick={this.handleClickOpen}>
+         { data.last_status? data.last_status+" ["+data.last_location+"]":null}<br/>{data.last_status_time}
         </TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}>
         	{data.pol}<br/>
         	<font color={startColor}>{data.start_day}</font>
         	{data.start_day?<font color="red">({data.start_cnt})</font>:""}</TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}>{data.pod}<br/><font color={endColor}>{data.end_day}</font>{data.end_day?<font color="red">({data.end_cnt})</font>:""}</TableCell>
-        <TableCell style={{padding:'8px',borderBottomWidth:'3px'}}><Tooltip title="Detail infomation"><Icon style={{color:'#00acc1',paddingTop:'2px'}} onClick={this.toggleExpander}>{this.state.iconstate}</Icon></Tooltip></TableCell>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}>{data.pod}<br/><font color={endColor}>{data.end_day}</font>{data.end_day?<font color="red">({data.end_cnt})</font>:""}</TableCell>
+        <TableCell style={{paddingTop:'0',paddingBottom:'0',borderBottom:borderStyle}}><Tooltip title="Detail infomation"><Icon style={{color:'#00acc1',paddingTop:'2px'}} onClick={this.toggleExpander}>{this.state.iconstate}</Icon></Tooltip></TableCell>
         {/*Tracking current detail */}
         <Popover
 	      	id="popover"
@@ -516,8 +548,10 @@ DetailTable.propTypes = {
 	     > 
         	<CntrListTable 
         		data={data}
+        	    schData={this.state.demdetlist[this.state.seq]}
         		store ={this.props.store} onClose={this.handleClickClose} />
         </Popover>
+		<Draggable>
         <Popover
         	id="popover_map"
         	open={this.state.openMap}
@@ -531,6 +565,7 @@ DetailTable.propTypes = {
 				  store ={this.props.store}>
 			</ShipMap>
           </Popover>
+		  </Draggable>
 		  <Popover
         	id="popover_trackingmap"
         	open={this.state.openTrackingMap}
@@ -550,13 +585,13 @@ DetailTable.propTypes = {
           </Popover>
       </TableRow>,
       this.state.expanded && (
-        <TableRow key = {this.props.index+1} style={{marginTop:'5px',marginBottom:'5px',borderTopStyle:'double',borderTopColor:'whitesmoke',borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
+        <TableRow key = {this.props.index+1} style={{marginTop:'5px',marginBottom:'5px',borderTopColor:'whitesmoke',borderBottomStyle:'solid',borderBottomColor:'#ececec'}}>
           <TableCell colSpan={8} style={{padding:'10px'}}>
             <div ref="expanderBody">
-            {data.ie_type=="I"?
+            {data.ie_type==="I"?
 	          	<GridItem xs={12}>
-		          	<GridContainer>
-		          		<GridItem xs={12} sm={5} md={5}>
+		          	<Grid container spacing={1} justify="space-between">
+		          		<Grid item xs={12} sm={12} md={4}>
 		          		<div>
 		          			<TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />TERMINAL(ARRIVAL)　　　TRACKING MAP
 							<MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickTrackingMap} />
@@ -565,12 +600,11 @@ DetailTable.propTypes = {
 					                tableHeaderColor={this.props.color}
 					                tableHead={["TERMINAL", "ACTIVITY"]}
 									tableData={this.state.demdetlist}
-					          	    //tableData={[]}
 					          	    handleCntr={this.handleCntrClick}
 					          	/>
 
-			          	</GridItem>
-			          	<GridItem xs={12} sm={3} md={2}>
+			          	</Grid>
+			          	<Grid item xs={12} sm={12} md={2}>
 			          		<div><Assign style={{color:'#00acc1',verticalAlign:'bottom'}} />컨테이너 현황</div>
 
 					          	<TableList
@@ -579,21 +613,21 @@ DetailTable.propTypes = {
 									tableData={[[data.full_out+"/"+data.totalcnt , data.mt_in+"/"+data.totalcnt]]}
 					          	/>
 	          
-			          	</GridItem>
-			          	<GridItem xs={12} sm={4} md={5}>
+			          	</Grid>
+			          	<Grid item xs={12} sm={12} md={6}>
 		          		<div><CustomIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />CUSTOM</div>
-						  <TableList
+						  <TablesUniPass
 							  tableHeaderColor={this.props.color}
 							  tableHead={["B/L번호","CLEARLANCE", "관리대상"]}
 							  tableData={this.state.importUniPassList}/>
 		          
-		          	</GridItem>
-			          	</GridContainer>
+		          	</Grid>
+			          	</Grid>
 			          </GridItem>
 			          :
 			        <GridItem xs={12}>
-			          	<GridContainer>
-			          		<GridItem xs={12} sm={4} md={5}>
+			          	<Grid container spacing={1} justify="space-between">
+			          		<Grid item xs={12} sm={12} md={4}>
 			          		<div>
 			          			<TerminalIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />TERMINAL(DEPARTURE)　　　TRACKING MAP
 								<MapIcon size="20" style={{verticalAlign:'bottom',color:'#00acc1',width:'20px',height:'20px'}} onClick={this.handleClickTrackingMap} />
@@ -602,12 +636,12 @@ DetailTable.propTypes = {
 						          	<TerminalExp
 						                tableHeaderColor={this.props.color}
 						                tableHead={["TERMINAL", "ACTIVITY"]}
-											tableData={this.state.demdetlist}
+										tableData={this.state.demdetlist}
 						          		handleCntr={this.handleCntrClick}
 						          	/>
 					
-				          	</GridItem>
-				          	<GridItem xs={12} sm={2} md={2}>
+				          	</Grid>
+				          	<Grid item xs={12} sm={12} md={2}>
 				          		<div><Assign style={{color:'#00acc1',verticalAlign:'bottom'}} />컨테이너 현황</div>
 					          	
 						          	<TableList
@@ -616,16 +650,16 @@ DetailTable.propTypes = {
 						          		tableData={[[data.mt_out+"/"+data.totalcnt , data.full_in+"/"+data.totalcnt]]}
 						          	/>
 						          
-				          	</GridItem>
-				          	<GridItem xs={12} sm={5} md={5}>
+				          	</Grid>
+				          	<Grid item xs={12} sm={12} md={6}>
 			          		<div><CustomIcon style={{color:'#00acc1',verticalAlign:'bottom'}} />CUSTOM</div>
-							  <TableList
+							  <TablesUniPass
 					                tableHeaderColor={this.props.color}
 									tableHead={["EXPORT LICENSE","CLEARLANCE", "INSPECT"]}
 									tableData={this.state.exportUniPassList}
 								/>
-			          	</GridItem>
-				          	</GridContainer>
+			          	</Grid>
+				          	</Grid>
 				          </GridItem>}
             </div>
           </TableCell>

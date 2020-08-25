@@ -57,6 +57,7 @@ export default function Board(props) {
     content = <BoardView
                 board_id={props.boardId}
                 boardData={props.boardData}
+                boardAttachData={props.boardAttachData}
                 onChangeData={
                   (boardMode, board_id) => {
                     props.onChangeData(boardMode, board_id);
@@ -69,18 +70,28 @@ export default function Board(props) {
                   (board_id) => {
                     props.deleteBoard(board_id);
                 }}
+                getBoardAttach={
+                  (board_id) => {
+                    props.getBoardAttach(board_id);
+                }}
+                boardAttachDown={
+                  (fileName, filePath) => {
+                    props.boardAttachDown(fileName, filePath);
+                }}
               ></BoardView>;
   } else if (props.boardMode == "WRITE"){
     content = <BoardWrite
                 board_id={props.boardId}
                 boardData={props.boardData}
+                boardAttachData={props.boardAttachData}
+                store={props.store}
                 onChangeData={
                   (boardMode, board_id) => {
                     props.onChangeData(boardMode, board_id);
                 }}
                 saveBoard={
-                  (board_id, title, content) => {
-                    props.saveBoard(board_id, title, content);
+                  (board_id, title, content, author_name, files, fileStateList) => {
+                    props.saveBoard(board_id, title, content, author_name, files, fileStateList);
                 }}
               ></BoardWrite>;
   } else { // LIST

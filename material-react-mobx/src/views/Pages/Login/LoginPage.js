@@ -32,7 +32,8 @@ import CardFooter from "components/Card/CardFooter.js";
 import dotenv from "dotenv";
 import styles from "assets/jss/material-dashboard-pro-react/views/loginPageStyle.js";
 import axios from 'axios';
-
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
 import { observer, inject } from 'mobx-react'; // 6.x
 //import { useCookies  } from 'react-cookie';
 
@@ -58,11 +59,32 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
   const [email,setEmail] = React.useState();
   const [password,setPassword] = React.useState();
   const [checked,setChecked] = React.useState();
+  const [severity, setSeverity] = React.useState("");
+  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [errMessage, setErrmessage] = React.useState("");
  // const { from } = location.state || { from: { pathname: "/" } };
   //console.log("login props:",props);
+  
+	function Alert(props) {
+		return <MuiAlert elevation={6} variant="filled" {...props} />;
+	}
+
+	const handleAlertClose = (event, reason) => {
+		if(reason ==='clickaway') {
+			return;
+		}
+		setAlertOpen(false);
+	  }
+	
+	function  alertMessage (message,icon) {
+		setErrmessage(message);
+		setSeverity(icon);
+		setAlertOpen(true);
+	}
 
   const submit = () => {
-	   if(email !== "" && password !== "") {
+
+	   if(email !== undefined && password !== undefined) {
 		   axios.post("/auth/login", {id : email, pw : password,})
 		    .then(res => {
 		        if (res.data.message) {
@@ -95,8 +117,10 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
             }
 		    })
 	   } else {
-		   if(email === "") {
-			   alert("�ъ�⑹�� email 二쇱���� ���� ���κ� ������.");
+		   if(email === undefined) {
+			   alertMessage('아이디는 필수 입력값 입니다.','error');
+		   } else {
+			   alertMessage('비밀번호는 필수 입력값 입니다.','error');
 		   }
 		   
 	   }
@@ -108,7 +132,14 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
   }
   
   const socialReady=() => {
-	  alert("서비스 준비중입니다.");
+	  alertMessage('서비스 준비중입니다.','info');
+  }
+  
+  const onKeyDownEnter = (event) => {
+	  if(event.key === 'Enter') {
+		  submit();
+		  return;
+	  }
   }
   
   return (
@@ -121,7 +152,7 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
               		<TextField id="email" label={<font size="2">아이디</font>} onChange={event => setEmail(event.target.value)} variant="outlined" size="small" fullWidth />
                 </div>
                 <div style={{marginBottom:'5px'}}>
-                	<TextField id="password" label={<font size="2">비밀번호</font>} onChange={event => setPassword(event.target.value)} variant="outlined" size="small" type="password" fullWidth />
+                	<TextField id="password" label={<font size="2">비밀번호</font>} onChange={event => setPassword(event.target.value)} onKeyPress={onKeyDownEnter} variant="outlined" size="small" type="password" fullWidth />
                 </div>
 				<div style={{textAlignLast:'start',marginBottom:'5px'}}>
 	                <Checkbox
@@ -136,13 +167,13 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
 				</CardFooter>
                 <CardFooter className={classes.justifyContentCenter} style={{marginLeft:'0px',marginRight:'0px',marginBottom:'10px',paddingTop:'0px'}}>
                 	<MaterialButton  size="small" style={{lineHeight:'initial',fontWeight:'blod',paddingLeft:'20px',paddingRight:'20px'}} >
-                		<Link to="/authpage/register" className={classes.dropdownLink} onClick={clean} style={{color:'black'}}>회원가입</Link>
+                		<Link to="/authpage/register" onClick={clean} style={{color:'black',textDecoration:'underline'}} >회원가입</Link>
                     </MaterialButton>|
                 	<MaterialButton  size="small" style={{lineHeight:'initial',fontWeight:'blod',paddingLeft:'20px',paddingRight:'20px'}} >
-                    	<Link to="#" className={classes.dropdownLink} style={{color:'black'}} onClick={socialReady}>아이디찾기</Link>
+                    	<Link to="/authpage/findinfo?code=0"  style={{color:'black',textDecoration:'underline'}} {...props}>아이디찾기</Link>
                     </MaterialButton>|
                 	<MaterialButton  size="small" style={{lineHeight:'initial',fontWeight:'blod',paddingLeft:'20px',paddingRight:'15px'}} >
-                    	<Link to="#" className={classes.dropdownLink} style={{color:'black'}} onClick={socialReady}>비밀번호찾기</Link>
+                    	<Link to="/authpage/findinfo?code=1"  style={{color:'black',textDecoration:'underline'}} {...props}>비밀번호찾기</Link>
                     </MaterialButton>
                 </CardFooter>
 
@@ -190,6 +221,13 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
 		      </Button>
               </GridItem>
               </CardBody>
+       	   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
+   		<Alert 
+   			onClose={handleAlertClose}
+   			severity={severity}>
+   				{errMessage}
+   		</Alert>
+   	</Snackbar>
     </div>
   );
 }

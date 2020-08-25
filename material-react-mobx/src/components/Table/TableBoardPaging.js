@@ -112,13 +112,13 @@ export default function CustomTable(props) {
     <div className={classes.tableResponsive}>
       <Table className={classes.table}>
         {tableHead !== undefined ? (
-          <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px',backgroundColor:'aliceblue'}}>
-            <TableRow className={classes.tableHeadRow}>
-            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%'}}>no</TableCell>
-            <TableCell className={classes.tableCell + " " + classes.tableHeadCell}>title</TableCell>
-            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>inser_name</TableCell>
-            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%'}}>search_cnt</TableCell>
-            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>insert_date</TableCell>
+          <TableHead className={classes[tableHeaderColor + "TableHeader"]} style={{padding:'5px',backgroundColor:'#f2fefd'}}>
+            <TableRow style={{borderBottomStyle:'solid',borderBottomColor:'#00bcd4'}}>
+	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%',color:'#717172'}}>no</TableCell>
+	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell}>title</TableCell>
+	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>inser_name</TableCell>
+	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%'}}>search_cnt</TableCell>
+	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>insert_date</TableCell>
             </TableRow>
           </TableHead>
         ) : null}
@@ -135,9 +135,9 @@ export default function CustomTable(props) {
             );
           })}
         </TableBody>
-        {(tableData.length >= 10 ?
+        {(tableData.length >= 3 ?
         <TableFooter>
-    	<TableRow>
+    	<TableRow style={{borderBottomStyle:'solid',borderBottomColor:'#00bcd4'}}>
     		<TablePagination 
     			rowsPerPageOptions={[6]}
     			colSpan={5}

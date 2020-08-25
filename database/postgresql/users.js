@@ -5,38 +5,46 @@ const basicauth = require("basic-auth");
 
 const getUserInfo = (request, response) => {
     const sql = {
-        text: "select user_type,user_email,to_char(insert_Date,'YYYY/MM/DD hh24:mi:ss') as insert_date, \n" +
+        text: "select user_no, local_id ,user_type,user_email,to_char(insert_Date,'YYYY/MM/DD hh24:mi:ss') as insert_date, \n" +
         	  " user_phone,user_name,social_link_yn,to_char(social_link_date,'YYYY/MM/DD hh24:mi:ss') as social_link_date, \n"+
         	  " kakao_id,to_char(kakao_login_date,'YYYY/MM/DD hh24:mi:ss') as kakao_login_date,naver_id, \n" +
         	  " to_char(naver_login_date,'YYYY/MM/DD hh24:mi:ss') as naver_login_date,face_id, to_char(face_login_date,'YYYY/MM/DD hh24:mi:ss') as face_login_date, \n"+
-        	  "  google_id,to_char(google_login_date,'YYYY/MM/DD hh24:mi:ss') as google_login_date \n"+
+        	  "  google_id,to_char(google_login_date,'YYYY/MM/DD hh24:mi:ss') as google_login_date, api_service_key \n"+
         	  "  from own_comp_user where user_no = $1 limit 1",
         values: [request.session.sUser.userno],
         //rowMode: 'array',
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    console.log(result);
+                    
+                    if(result != null) {
+                        console.log(result.rows[0]);
+                        release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+    
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            console.log(result);
-            
-            if(result != null) {
-            	console.log(result.rows[0]);
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-
-        });
 
         // conn.release();
     });
@@ -93,20 +101,23 @@ if(provider == "kakao") {
 }
 
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
 
         if(err){
             console.log("err" + err);
-        }
+        } else {            
+                    conn.query(sql, function(err,result){
+                        //  done();
+                        if(err){
+                            console.log(err);
+                            
+                        } 
+                        release();
+                        console.log(">>>",result);
+                        return result;
+                    });
 
-        conn.query(sql, function(err,result){
-             done();
-            if(err){
-                console.log(err);
-            }
-            console.log(">>>",result);
-            return result;
-        });
+        }
     });
 }
 
@@ -119,20 +130,23 @@ const sql = {
     }
 
 console.log("db token insert:",sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
 
         if(err){
             console.log("err" + err);
+        } else {
+
+            conn.query(sql, function(err,result){
+                //  done();
+                if(err){
+                    console.log(err);
+                }
+               // console.log(">>>",result);
+                release();
+                return "ok";
+            });
         }
 
-        conn.query(sql, function(err,result){
-             done();
-            if(err){
-                console.log(err);
-            }
-           // console.log(">>>",result);
-            return "ok";
-        });
     });
 }
 
@@ -146,11 +160,12 @@ const setUser = (email,inputpassword,phone,name,company,kakaoid,tokenkakao,naver
                   "$1,$2,now(),$3,$4,'Y','N',$5,$6,$7,$8,$9,$10,$11,$12,$13)",
             values: [email,inputpassword,phone,name,company,kakaoid,tokenkakao,naverid,tokennaver,faceid,tokenface,googleid,tokengoogle]
        }
-	 pgsqlPool.connect(function(err,conn) {
+	 pgsqlPool.connect(function(err,conn,release) {
 		 if(err){
 	            console.log("err" + err);
 	        }
       conn.query(setsql);
+      release();
 	 });
 	}
 
@@ -163,11 +178,12 @@ const setLocalUser = (id,password,phone,name,email,kakaoid,tokenkakao,naverid,to
                   "$1,$2,now(),$3,$4,'Y','N',upper($5),$6,$7,$8,$9,$10,$11,$12,$13,$14)",
             values: [email,password,phone,name,id,kakaoid,tokenkakao,naverid,tokennaver,faceid,tokenface,googleid,tokengoogle,linkyn]
        }
-	 pgsqlPool.connect(function(err,conn) {
+	 pgsqlPool.connect(function(err,conn,release) {
 		 if(err){
 	            console.log("err" + err);
 	        }
       conn.query(setsql);
+      release();
 	 });
 	}
 
@@ -179,25 +195,27 @@ const setUpdateSocailUser = (kakaoid,tokenkakao,naverid,tokennaver,faceid,tokenf
 	        rowMode: 'array',
 	    }
 
-	    pgsqlPool.connect(function(err,conn,done) {
+	    pgsqlPool.connect(function(err,conn,release) {
 
 	        if(err){
 	            console.log("err" + err);
-	        }
+	        } else {
+                conn.query(sql, function(err,result){
+                    //  done();
+                    if(err){
+                        console.log(err);
+                    }
+                    release();
+                    return "ok";
+                });
+            }
 
-	        conn.query(sql, function(err,result){
-	             done();
-	            if(err){
-	                console.log(err);
-	            }
-	            return "ok";
-	        });
 	    });
 }
 
 
 const getUserNotice = (request, response) => {
-
+    console.log("getUserNotice==========>", request.session.sUser);
     let sql = "select coalesce(count(*),0) as noti_cnt \n";
         sql += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
         sql += "and read_yn = 'N' \n";
@@ -205,28 +223,36 @@ const getUserNotice = (request, response) => {
     
     
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    // console.log(result);
+                     
+                     if(result != null) {
+                         console.log("data",result.rows[0]);
+                         release();
+                         response.status(200).json(result.rows);
+                     } else {
+                    	 release();
+                         response.status(200).json([]);
+                     }
+
+                }
+    
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-           // console.log(result);
-            
-            if(result != null) {
-            	console.log("data",result.rows[0]);
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-
-        });
 
         // conn.release();
     });
@@ -237,89 +263,233 @@ const getUserMessage = (request, response) => {
 	
 	const selectSql1 = "select 1 from own_user_notice where  user_no = '"+request.session.sUser.userno+"' and message_type ='W' and read_yn='N' \n";
 
-	let selectSql2 = "select user_no,message_type,message_seq,read_yn,read_Date,message,message_insert_date \n";
+	let selectSql2 = "select user_no,message_type,message_seq,read_yn,read_Date,message_from,message,to_char(message_insert_date,'YYYY-MM-DD HH24:mi:ss') as message_insert_date \n";
 	selectSql2 += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
-	selectSql2 += " order by message_insert_date desc \n";
+	selectSql2 += " order by message_insert_date desc limit 5\n";
     
     const updateSql = "update own_user_notice set read_yn='Y', read_date=now() where  user_no = '"+request.session.sUser.userno+"' and message_type ='W' and read_yn='N' \n";
 
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(selectSql1, function(err,result){
+               
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+               // console.log(result);
+                
+                    if(result.rowCount > 0) {
+                        console.log("select success");
+                        
+                        conn.query(updateSql, function(err,result){
+                            if(err){
+                                console.log(err);
+                                release();
+                                response.status(400).send(err);
+                            } else {
+                                // console.log(result);
+                                
+                                if(result.rowCount > 0) {
+                                    console.log("update success");
+                                    conn.query(selectSql2, function(err,result){
+                                        // done();
+                                        if(err){
+                                            console.log(err);
+                                            release();
+                                            response.status(400).send(err);
+                                        } else {
+                                            // console.log(result);
+                                            
+                                            if(result != null) {
+                                                console.log("data",result.rows);
+                                                release();
+                                                response.status(200).send(result.rows);
+                                            } else {
+                                            	release();
+                                                response.status(200).send([]);
+                                            }
+                                        }
+    
+                                    });
+            
+                                } else { 
+                                    console.log("update failed");
+                                    release();
+                                    response.status(200).send([]);
+                                }
+
+                            }
+
+                        });
+                
+                    } else {
+                        console.log("no select");
+                        conn.query(selectSql2, function(err,result){
+                        // done();
+                            if(err){
+                                console.log(err);
+                                release();
+                                response.status(400).send(err);
+                            } else {
+                            // console.log(result);
+                                
+                                if(result != null) {
+                                    console.log("data",result.rows);
+                                    release();
+                                    response.status(200).send(result.rows);
+                                } else {
+                                	release();
+                                    response.status(200).send([]);
+                                }
+
+                            }
+
+                        });
+                    }
+                }
+
+    
+            });
+
         }
 
-        conn.query(selectSql1, function(err,result){
-           
-            if(err){
-                console.log(err);
-                conn.release();
-                response.status(400).send(err);
-            }
-           // console.log(result);
-            
-            if(result.rowCount > 0) {
-            	console.log("select success");
-            	
-            	  conn.query(updateSql, function(err,result){
-                      if(err){
-                          console.log(err);
-                          response.status(400).send(err);
-                      }
-                     // console.log(result);
-                      
-                      if(result.rowCount > 0) {
-                    	  console.log("update success");
-                          conn.query(selectSql2, function(err,result){
-                              done();
-                              if(err){
-                                  console.log(err);
-                                  response.status(400).send(err);
-                              }
-                             // console.log(result);
-                              
-                              if(result != null) {
-                              	console.log("data",result.rows);
-                                  response.status(200).send(result.rows);
-                              } else {
-                                  response.status(200).send([]);
-                              }
-
-                          });
-  
-                      } else { 
-                          console.log("update failed");
-                          response.status(200).send([]);
-                      }
-
-                  });
-     	
-            } else {
-            	console.log("no select");
-                conn.query(selectSql2, function(err,result){
-                done();
-                        if(err){
-                            console.log(err);
-                            response.status(400).send(err);
-                        }
-                       // console.log(result);
-                        
-                        if(result != null) {
-                        	console.log("data",result.rows);
-                            response.status(200).send(result.rows);
-                        } else {
-                            response.status(200).send([]);
-                        }
-
-                    });
-            }
-
-        });
 
         // conn.release();
     });
 }
+
+
+
+const getUserMoreNotice = (request, response) => {
+
+    let sql = "select (row_number()over(order by message_insert_date desc) )as rownum,message,message_from,to_char(message_insert_date,'YYYY-MM-DD HH24:mi:ss')as message_insert_date \n";
+        sql += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
+        sql += "order by read_yn,message_insert_date desc \n";
+    
+    
+    
+    console.log(sql);
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    // console.log(result);
+                     
+                     if(result != null) {
+                         console.log("data",result.rows[0]);
+                         release();
+                         response.status(200).json(result.rows);
+                     } else {
+                    	 release();
+                         response.status(200).json([]);
+                     }
+
+                }
+    
+            });
+
+        }
+
+
+        // conn.release();
+    });
+}
+
+const getUserSettingSample = (request, response) => {
+
+    let sql = "select  *from ( \n";
+    sql += "  select count(*) over()/10+1 as tot_page,count(*) over() as tot_cnt, floor(((row_number() over()) -1) /10 +1) as curpage, a.*, case when a.setting_gb='T' then 'Tracking' else 'DemDet' end as service_gb  \n";
+    sql += "  from own_user_setting a ,  own_comp_user b  where a.user_no = b.user_no \n";
+    if(request.body.id !="") {
+    	sql += " and b.local_id = '"+request.body.id+"' \n";
+    }
+    sql += ")a where curpage ='"+request.body.num+"'";
+    
+    
+    
+    console.log(sql);
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    // console.log(result);
+                     
+                     if(result.rowCount > 0) {
+                    	 release();
+                         response.status(200).json(result.rows);
+                     } else {
+                    	 release();
+                         response.status(404).json([]);
+                     }
+
+                }
+    
+            });
+
+        }
+
+
+        // conn.release();
+    });
+}
+
+const setLoginHistory = (userno,inout_type, useragent,ip) => {
+
+	console.log(">>>>history");
+	const sql = {
+	        text: "insert into own_login_history(history_Seq,user_no,inout_type,device_type,os_name,browser_name,browser_version,ip_addr)values(to_char(now(),'YYYYMMDDHH24miss')||nextval('own_history_seq'),$1,$2,$3,$4,$5,$6,replace($7,'::ffff:',''))",
+	        values: [userno,inout_type,useragent.isMobile?'M':'P',useragent.os,useragent.browser,useragent.version,ip],
+	        rowMode: 'array',
+	    }
+
+	console.log("db token insert:",sql);
+	    pgsqlPool.connect(function(err,conn,release) {
+
+	        if(err){
+	            console.log("err" + err);
+	            release();
+	        } else {
+                conn.query(sql, function(err,result){
+                    //  done();
+                    if(err){
+                        console.log(err);
+                        
+                    }
+                   // console.log(">>>",result);
+                    release();
+                    return "ok";
+                });
+
+            }
+
+	    });
+	}
+
 
 module.exports = {
     getUserInfo,
@@ -329,5 +499,8 @@ module.exports = {
     setSocialLoginInfo,
     setUpdateSocailUser,
     getUserMessage,
-    getUserNotice
+    getUserNotice,
+    getUserMoreNotice,
+    getUserSettingSample,
+    setLoginHistory
 }

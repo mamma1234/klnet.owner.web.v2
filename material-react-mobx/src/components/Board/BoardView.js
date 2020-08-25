@@ -9,7 +9,6 @@ import GridItem from "components/Grid/GridItem.js";
 import Button from "components/CustomButtons/Button.js";
 import { Table, TableCell, TableBody, TableRow } from '@material-ui/core';
 
-
 export default function BoardView(props) {
   var board_id;
   var board_content = "";
@@ -22,6 +21,7 @@ export default function BoardView(props) {
 
   useEffect(() => {
     props.getBoardDetail(board_id);
+    props.getBoardAttach(board_id);
   }, []);
 
   return (
@@ -38,6 +38,18 @@ export default function BoardView(props) {
             <TableCell>{props.boardData['insert_date']}</TableCell>
             <TableCell style={{width:'100px'}}>조회수</TableCell>
             <TableCell>{props.boardData['hit_count']}</TableCell>
+          </TableRow>
+          <TableRow>
+            {
+              props.boardAttachData.length>0?(
+                <TableCell colSpan="6">{
+                  props.boardAttachData.map( (prop, index) => {
+                    return (<span key={index} onClick={() => {props.boardAttachDown(prop.file_name, prop.file_path)}} style={{textDecoration:"underline", cursor:"Pointer"}}>
+                      {prop.file_name}<br/></span>)
+                  })
+                }</TableCell>
+              ):null
+            }
           </TableRow>
           <TableRow>
             <TableCell colSpan="6">{

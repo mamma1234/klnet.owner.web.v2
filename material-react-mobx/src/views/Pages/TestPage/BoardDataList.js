@@ -104,7 +104,7 @@ const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, track
 		    		{headers:{'Authorization':'Bearer '+userStore.token}})
 				  .then(res => setBoardData([...boardData,...res.data]))
 		   	      .catch(err => {
-		            if(err.response.status === "403" || err.response.status === "401") {
+		            if(err.response.status === 403 || err.response.status === 401) {
 			        	//setOpenJoin(true);
 			        	//props.openLogin();
 			        }

@@ -107,7 +107,7 @@ const Pages = inject('userStore', 'trackStore')(observer(({ userStore, trackStor
       <div className={classes.wrapper} ref={wrapper}>
         <div
           className={classes.fullPage}
-          style={{ backgroundImage: "url(" + getBgImage() + ")" }}
+          style={{ backgroundImage: "url(" + getBgImage() + ")"}}
         >
           <Switch>
             {getRoutes(routes)}

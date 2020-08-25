@@ -17,7 +17,7 @@ import Popover from  '@material-ui/core/Popover';
 import CardIcon from "components/Card/CardIcon.js";
 import ImpPassDetailTable from "./ImpPassDetailTable.js";
 import Assignment from "@material-ui/icons/Assignment";
-
+import SearchIcon from '@material-ui/icons/Search';
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import FiberManualRecord from "@material-ui/icons/FiberManualRecord";
@@ -211,11 +211,11 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
         } else {
           alert(res.data.errMsg);
         }
-		})
-	    .catch(err => {
-        alert("에러가 발생하였습니다. 관리자에게 문의하시기 바랍니다.");
-	        console.log(err);
-	    });
+		}).catch(err => {
+            if(err.response.status === 401) {
+	        	props.openLogin();
+	        }
+            });
 	}
 
 
@@ -297,11 +297,6 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
     <GridContainer>
       <GridItem xs={12} xm={12}>
         <Card style={{marginBottom:'0px'}}>
-          <CardHeader color="info" icon style={{height:'10px'}}>
-            <CardIcon color="info" style={{padding:'0'}}>
-              <Assignment />
-            </CardIcon>
-	        </CardHeader>
           <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
             <Grid container>
               <Grid item xs={2} sm={2} md={2}>
@@ -387,7 +382,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
               </Grid>
               <Grid item xs={2} sm={2} md={2} style={{textAlignLast:'right', paddingTop:"20px"}}>
                 {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
-                <Button color="info" onClick = {onSubmit}  >SEARCH</Button>
+                <Button color="info" onClick = {onSubmit}  endIcon={<SearchIcon/>}>SEARCH</Button>
               </Grid>
             </Grid>
           </CardBody>
@@ -396,7 +391,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
       {hblContent}
       <GridItem xs={12}>
         <Card>
-          <CardHeader color="info" icon style={{height:'10px'}}>
+          <CardHeader color="info" icon >
             <CardIcon color="info" style={{padding:'0'}}>
               <Assignment />
             </CardIcon>

@@ -13,14 +13,14 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import Icon from "@material-ui/core/Icon";
+//import Icon from "@material-ui/core/Icon";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 //import Tooltip from '@material-ui/core/Tooltip';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormLabel from '@material-ui/core/FormLabel';
+//import FormLabel from '@material-ui/core/FormLabel';
 import Chip from '@material-ui/core/Chip';
-
+import Assignment from "@material-ui/icons/Assignment";
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -29,7 +29,7 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-
+import SearchIcon from '@material-ui/icons/Search';
 
 //import CardIcon from "components/Card/CardIcon.js";
 // other import
@@ -134,7 +134,7 @@ class Clock extends React.Component {
 		time = this.props.deadline;
 	  }
 
-	  console.log("카운트다운!!!" + time);
+	  //console.log("카운트다운!!!" + time);
 	
 	  if (time < 0) {
 		this.setState({ minutes: 0, seconds: 0 });
@@ -158,20 +158,22 @@ class Clock extends React.Component {
 
 export default function ScheduleList(props) {
 
-  const {store} = props;
+  const {detailParam,store} = props;
   console.log(">>>>admin:",store);
   //const [carrierCode,setCarrierCode] = useState("");
-  const [vesselName,setVesselName] = useState("");
+  const [vesselName,setVesselName] = useState(detailParam?detailParam.vsl_name:"");
   const [terSchLogData,setTerSchLogData] = useState([]);
-  const setEndDate = new Date();
-  const [eDate,setEDate] = useState(setEndDate.setDate(setEndDate.getDate()+31));
-  const [sDate,setSDate] = useState(new Date());
-  const [area,setArea] = useState("PUS");
+  const setEndDate = detailParam?new Date(detailParam.start_day):new Date();
+  const setStartDate = detailParam?new Date(detailParam.start_day):new Date();
+  const [eDate,setEDate] = useState(detailParam?setEndDate.setDate(setEndDate.getDate()+3):setEndDate.setDate(setEndDate.getDate()+31));
+  const [sDate,setSDate] = useState(detailParam?setStartDate.setDate(setStartDate.getDate()-3):new Date());
+  const [area,setArea] = useState(detailParam?detailParam.start_port.substring(2,5):"PUS");
   const [gubun,setGubun] = useState("MNG");
   const [uniParam,setUniParam] = useState("");
   const [selectData,setSelectData] = useState([]);
   const [terminal,setTerminal] = useState("");
   const [value,setValue] = useState([]);
+  const [displayYn,setDisplayYn] = useState(detailParam?"none":"true");
   const [state, setState] = React.useState({
     checkedA: false,
   });
@@ -212,7 +214,7 @@ export default function ScheduleList(props) {
 		.then(res => setTerminalCode(res.data)).then(setValue([]))
 		//.then(res => console.log(JSON.stringify(res.data)));
 		.catch(err => {
-			if(err.response.status == "403"||err.response.status == "401") {
+			if(err.response.status === 403||err.response.status === 401) {
 				props.openLogin();
 			}
 		});
@@ -223,6 +225,15 @@ export default function ScheduleList(props) {
 	  console.log('cleanup');
 	};
   }, [area]);
+
+  useEffect(() => {
+	console.log('effect');
+	//debugger;
+	if(detailParam&&terminal) onSubmit();
+	return () => {
+	  console.log('cleanup');
+	};
+  }, [terminal]);
   
   const handleArea = (e) => {
 	  //debugger;
@@ -251,7 +262,7 @@ export default function ScheduleList(props) {
 				.then(setTerSchLogData([]))
 			    .then(res => setTerSchLogData(res.data)).then(setUpdateDate(new Date())).then(setRemainTime("reset"))
 			    .catch(err => {
-			        if(err.response.status == "403"||err.response.status == "401") {
+			        if(err.response.status === 403||err.response.status === 401) {
 			        	props.openLogin();
 			        }
 				});
@@ -266,7 +277,7 @@ export default function ScheduleList(props) {
 		axios.post("/sch/getTerminalCodeList",{area:paramArea},{headers:{'Authorization':'Bearer '+store.token}})
 		.then(res => setTerminalCode(res.data)).then(setValue([]))
 		.catch(err => {
-			if(err.response.status == "403"||err.response.status == "401") {
+			if(err.response.status === 403||err.response.status === 401) {
 				props.openLogin();
 			}
 		});
@@ -310,16 +321,16 @@ if(remainTime < 0) {
     <GridContainer>
     	<GridItem xs={12} sm={12} md={12}>
         	<Card style={{marginBottom:'0px'}}>
-      			<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
-					<CardIcon color="info" style={{height:'26px'}}>
-						<Icon style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</Icon>
-				</CardIcon>
-				<h4 className={classes.cardTitleBlack}>Terminal Schedule</h4>
-	  		</CardHeader>
+  			<CardHeader color="info" icon >
+			<CardIcon color="info" style={{padding:'0'}}>
+				<Assignment />
+			</CardIcon>
+			<h4 className={classes.cardTitleBlack}>Terminal Schedule</h4>
+		</CardHeader>
           	<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
           		<Grid item xs={12} sm={9} md={12}>
 			     	<Grid container spacing={1}>
-					 <Grid item xs={12} md={1}>
+					 <Grid item xs={12} md={'auto'}>
 					 <FormControl fullWidth>
 									<InputLabel >Port</InputLabel>
 									<Select 
@@ -417,7 +428,7 @@ if(remainTime < 0) {
 						</FormControlLabel>
 						</Grid>
 						<Grid item xs={12} md={1} >
-							<Button color="info" onClick = {onSubmit}
+							<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}
 							fullWidth>Search</Button>			
 						</Grid>
 		      		</Grid>
@@ -426,7 +437,7 @@ if(remainTime < 0) {
         </Card>
       </GridItem>
       <GridItem xs={12}>
-	  <Card style={{marginBottom:'0px'}}>
+	  <Card style={{marginBottom:'0px',marginTop:'10px',display:displayYn}}>
 	  <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
 	  <Grid item xs={12} sm={9} md={12}>
 			     	<Grid container spacing={1}>
@@ -449,45 +460,41 @@ if(remainTime < 0) {
 									<Grid item xs={12} md={4}>
 										<TextField id="cntrNo" label="화물관리번호 또는 M-B/L 또는 H-B/L을 입력해주세요." onChange={event => setUniParam(event.target.value)} value={uniParam} fullWidth />
 										</Grid>
-										<Grid item xs={12} md={5}></Grid>
+										{/* <Grid item xs={12} md={5}></Grid> */}
 										<Grid item xs={12} md={1} >
-							<Button color="info" component={Link} to={{pathname:"/svc/customImp",search:"?gubun="+ gubun +"&param="+ uniParam}}
+							<Button color="info" component={Link} to={{pathname:"/svc/customImp",search:"?gubun="+ gubun +"&param="+ uniParam}} endIcon={<SearchIcon/>}
 							fullWidth>Search</Button>							
 						</Grid>
 										</Grid>
 										</Grid>
 	  </CardBody>
 		  </Card>
-	  <Card style={{marginBottom:'0px'}}>
-	  <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
+	  <Card style={{marginBottom:'0px',marginTop:'10px'}}>
+	  <CardBody style={{paddingBottom: '10px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
 	  <Grid item xs={12} sm={9} md={12}>
-	  <Grid container spacing={1}>
-	  <Grid item xs={12} md={2} style={{paddingTop: '10px'}}>
-	  최종 업데이트 : {moment(updateDate).format('YYYY-MM-DD HH:mm')}
-	  </Grid>
-	  <Grid item xs={12} md={2} style={{paddingTop: '10px',display:'none'}}>
-	  <Clock deadline={refreshTime} setRemainTime={setRemainTime} remainTime={remainTime}/>
-	  </Grid>
-	  <Grid item xs={12} md={8} style={{paddingTop: '0px',display:'none'}}>
-		  <FormControl component="fieldset">
-      <RadioGroup aria-label="gender" name="gender1" value={refreshTime} onChange={refHandleChange} >
-	  <div>
-        <FormControlLabel value="0" control={<Radio size='small'/>} label="수동" size='small' />
-        <FormControlLabel value="300000" control={<Radio size='small'/>} label="5분" size='small' />
-        <FormControlLabel value="600000" control={<Radio size='small'/>} label="10분" size='small' />
-      </div>
-	  </RadioGroup>
-    </FormControl>
-	</Grid>
-	<Grid item xs={12} md={9}></Grid>
-	<Grid item xs={12} md={1}>
-	<CSVLink
-						data={terSchLogData}
-						headers={headers}
-                        filename="terminal_sch_data.csv"><Button fullWidth raised color="info" size="sm">EXCEL 다운로드</Button>
-	</CSVLink>
-	</Grid>
-	</Grid>
+	  	<Grid container spacing={1}>
+	  		<Grid item xs={12} md={3} style={{paddingTop: '10px'}}>최종 업데이트 : {moment(updateDate).format('YYYY-MM-DD HH:mm')}</Grid>
+	  		<Grid item xs={12} md={2} style={{paddingTop: '10px',display:'none'}}><Clock deadline={refreshTime} setRemainTime={setRemainTime} remainTime={remainTime}/></Grid>
+			<Grid item xs={12} md={7} style={{paddingTop: '0px',display:'none'}}>
+				  <FormControl component="fieldset">
+		          	<RadioGroup aria-label="gender" name="gender1" value={refreshTime} onChange={refHandleChange} >
+					  <div>
+				        <FormControlLabel value="0" control={<Radio size='small'/>} label="수동" size='small' />
+				        <FormControlLabel value="300000" control={<Radio size='small'/>} label="5분" size='small' />
+				        <FormControlLabel value="600000" control={<Radio size='small'/>} label="10분" size='small' />
+				      </div>
+				    </RadioGroup>
+				 </FormControl>
+			</Grid>
+			<Grid item xs={12} md={8}></Grid>
+			<Grid item xs={12} md={1} justify={'flex-end'}>
+				<CSVLink
+									data={terSchLogData}
+									headers={headers}
+			                        filename="terminal_sch_data.csv"><Button fullWidth raised color="info" size="sm">EXCEL 다운로드</Button>
+				</CSVLink>
+		    </Grid>
+	    </Grid>
 	</Grid>
 	  <TerminalSchTable
 	                      tableHeaderColor="info"

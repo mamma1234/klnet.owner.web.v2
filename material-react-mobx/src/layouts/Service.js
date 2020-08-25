@@ -28,7 +28,7 @@ import { observer, inject } from 'mobx-react'; // 6.x
 // import Zoom from '@material-ui/core/Zoom';
 // import Toolbar from '@material-ui/core/Toolbar';
 // import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import Tooltip from '@material-ui/core/Tooltip';
+//import Tooltip from '@material-ui/core/Tooltip';
 var ps;
 
 const useStyles = makeStyles(styles);
@@ -77,7 +77,6 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const mainPanel = React.createRef();
   // effect instead of componentDidMount, componentDidUpdate and componentWillUnmount
   
-  console.log("layout");
   React.useEffect(() => {
 
 	    /*if (userStore.token) {*/
@@ -157,9 +156,6 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const getRoute = () => {
     return window.location.pathname !== "/admin/full-screen-maps";
   };
-  const BLuploadPage = () => {
-    return window.location.pathname !== "/svc/uploadbl";
-  };  
   const getActiveRoute = routes => {
     let activeRoute = "Default Brand Text";
     for (let i = 0; i < routes.length; i++) {
@@ -183,6 +179,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
       if (prop.collapse) {
         return getRoutes(prop.views);
       }
+ 
       if (prop.layout === "/svc") {
         return (
           <Route
@@ -212,12 +209,12 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
 	  setUserData(userStore.user);
   }
   
-  const handleClick = (event) => {
+/*  const handleClick = (event) => {
 	  const anchor = document.querySelector('#scroll_top');
 	  if(anchor) {
 		  anchor.scrollIntoView();
 	  }
-  };
+  };*/
 
   return (
     <div className={classes.wrapper}>
@@ -245,14 +242,14 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           onLoginPageOpen={()=>setOpen(true)}
           {...rest}
         />
-        <div id="scroll_top"></div>
+        {/*<div id="scroll_top"></div>*/}
         {/* On the /maps/full-screen-maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
         {getRoute() ? (
           <div className={classes.content} style={{paddingTop:'0px',paddingBottom:'0px'}}>
             <div className={classes.container}>
               <Switch>
                 {getRoutes(routes)}
-                <Redirect from="/svc" to="/svc/tracking" />
+                <Redirect from="/svc" to="/svc/dashbord" />
               </Switch>
             </div>
           </div>
@@ -260,19 +257,19 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           <div className={classes.map}>
             <Switch>
               {getRoutes(routes)}
-              <Redirect from="/svc" to="/svc/tracking" />
+              <Redirect from="/svc" to="/svc/dashbord" />
             </Switch>
           </div>
         )}
-        {BLuploadPage() ? <Footer fluid /> : null}
+        <Footer fluid store={store} />
         
-      <div className={"fixed-plugin"} style={{top:'85%',width:'35px'}}>
+{/*      <div className={"fixed-plugin"} style={{top:'85%',width:'35px'}}>
 	    <div onClick={handleClick}>
 	    	<Tooltip title="Scroll Top">
 	    		<i className="fa fa-angle-double-up fa-2x" style={{color:'white'}}/>
 	    	</Tooltip>
 	    </div>
-      </div>
+      </div>*/}
       <Dialog
       	open={open}
         onClose={()=>setOpen(false)}

@@ -171,31 +171,25 @@ export default function TermianlList(props) {
 }
 
 class MapControl extends Component {
-	
-	static contextTypes = {
-		[MAP] : PropTypes.object
-	}
-	
-	componentWillMount() {
-		
-		this.map = this.context[MAP]
-		this.controlDiv = document.createElement('div');
-		this.map.controls[this.props.position].push(this.controlDiv);
-	
-	}
-	
-	componentWillUnmount() {
-		
-		const controlArray = this.map.controls[this.props.position].getArray()
-		
-		for (let index in controlArray) {
-			if(controlArray[index] === this.controlDiv) {
-				this.map.controls[this.props.position].removeAt(index);
-			}
-		}
-	}
-
-	render() {
-		return createPortal(this.props.children,this.controlDiv)
-	}
-}
+    static contextTypes = {
+      [MAP] : PropTypes.object
+    }
+  
+    componentWillMount() {
+      this.map = this.context[MAP]
+      this.controlDiv = document.createElement('div');
+      this.map.controls[this.props.position].push(this.controlDiv);
+    }
+  
+    componentWillUnmount() {
+      const controlArray = this.map.controls[this.props.position].getArray();
+      for (let i=0; i < controlArray.length; i++) {
+        if(controlArray[i] === this.controlDiv) {
+          this.map.controls[this.props.position].removeAt(i);
+        }
+      }
+    }
+    render() {
+      return createPortal(this.props.children,this.controlDiv)
+    }
+  }

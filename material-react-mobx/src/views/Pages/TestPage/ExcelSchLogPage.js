@@ -107,7 +107,7 @@ export default function ScheduleList(props) {
 				.then(setExcelSchLogData([]))
 			    .then(res => setExcelSchLogData(res.data))
 			    .catch(err => {
-			        if(err.response.status == "403") {
+			        if(err.response.status === 403) {
 			        	//setOpenJoin(true);
 			        }
 			    });

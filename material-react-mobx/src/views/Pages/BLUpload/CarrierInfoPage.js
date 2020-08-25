@@ -1,6 +1,5 @@
 import React,{useState} from "react";
 // @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
 // core components
 //import Grid from '@material-ui/core/Grid';
 import GridItem from "components/Grid/GridItem.js";
@@ -19,88 +18,37 @@ import IconM from "@material-ui/core/Icon";
 //import Modal from '@material-ui/core/Modal';
 //import JoinPage from "components/Form/Common/JoinPage.js";
 import axios from 'axios';
+import Draggable from 'react-draggable';
 
-
-const useStyless = makeStyles(theme => ({
-	  root: {
-	'& >*': {
-		width:200,
-	}  
-  },
-}));
-
-const styles = {
-
-  cardCategoryWhite: {
-    "&,& a,& a:hover,& a:focus": {
-      color: "rgba(255,255,255,.62)",
-      margin: "0",
-      fontSize: "14px",
-      marginTop: "0",
-      marginBottom: "0"
-    },
-    "& a,& a:hover,& a:focus": {
-      color: "#FFFFFF"
-    }
-  },
-  cardTitleWhite: {
-    color: "#FFFFFF",
-    marginTop: "0px",
-    minHeight: "auto",
-    fontWeight: "300",
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
-    textDecoration: "none",
-    "& small": {
-      color: "#777",
-      fontSize: "65%",
-      fontWeight: "400",
-      lineHeight: "1"
-    }
-  },
-};
-
-const useStyles = makeStyles(styles);
 
 export default function TableList(props) {
-  const classes = useStyles();
-  const [userStore,setUseStore] = useState(props);
   const [selectData,setSelectData] = useState([]);
-  const [openJoin,setOpenJoin] = useState(false);
   const [carrierName, setCarrierName] = useState("");
   const [carrierEName, setCarrierEName] = useState("");
   React.useEffect(() => {
-	    getCarrierInfo();
-	    //.then(res => console.log(JSON.stringify(res.data)));
-	    
-	    return () => {
-	      console.log('cleanup');
-	    };
-	  }, []);
-  
-  function getCarrierInfo() {
-	  return axios.post("/com/getCarrierInfo",{knm:"", enm:""},{headers:{'Authorization':'Bearer '+props.token.token}}).then(res => setSelectData(res.data))
+	  axios.post("/com/getCarrierInfo",{knm:"", enm:""},{headers:{'Authorization':'Bearer '+props.token.token}}).then(res => setSelectData(res.data))
 	    .catch(err => {
-		       //console.log(err.response.status);
-		        if(err.response.status == "401") {
-		        	setOpenJoin(true);
-		        }
-        });
-      
-  }
+          if(err.response.status === 403||err.response.status === 401) {
+						//props.openLogin();
+					}
+    });
+    return () => {
+    };
+  }, [props.token.token]);
+  
   
   const handleCarrierSearch = () => {
     axios.post("/com/getCarrierInfo",{knm:carrierName, enm:carrierEName},{headers:{'Authorization':'Bearer '+props.token.token}}).then(res => setSelectData(res.data))
 	    .catch(err => {
-		       //console.log(err.response.status);
-		        if(err.response.status == "401") {
-		        	setOpenJoin(true);
-		        }
+           if(err.response.status === 403||err.response.status === 401) {
+						//props.openLogin();
+					}
         });
   }
 
   return (
-    <Card style={{width:'700px'}}>
+    <Draggable>
+    <Card style={{maxWidth:'700px'}}>
  		  <CardHeader color="info" stats icon >
 		    <CardIcon color="info" style={{height:'55px'}}>
 			    <IconM style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</IconM>
@@ -137,12 +85,7 @@ export default function TableList(props) {
 				        />
 				     </GridItem>
           </CardBody>
-	{/*  <Modal
-	   		open={openJoin}
-	  		onClose={handleJoinClose}
-	      >
-	      <JoinPage mode="0" page="/svc/tracking" reTurnText="Login" />
-	   </Modal>*/}
         </Card>
+        </Draggable>
   );
 }

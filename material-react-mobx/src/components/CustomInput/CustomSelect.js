@@ -28,7 +28,7 @@ export default function CustomSelects(props) {
 
  // const [value, setvalue] = React.useState(setValue);
 
-  console.log(">>>>>",setValue);
+  //console.log(">>>>>",setValue);
   const labelClasses = classNames({
     [" " + classes.labelRootError]: error,
     [" " + classes.labelRootSuccess]: success && !error

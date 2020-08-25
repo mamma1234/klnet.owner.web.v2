@@ -47,7 +47,7 @@ export default function BoardTest(props) {
               setBoardMode("LIST");
             })
         .catch(err => {
-          if(err.response.status == "403") {
+          if(err.response.status === 403) {
             alert('오류가 발생했습니다.');
           }
         });

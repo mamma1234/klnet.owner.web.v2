@@ -31,7 +31,7 @@ export default function CustomTabs(props) {
   });
   return (
     <Card plain={plainTabs}>
-      <CardHeader color={headerColor} plain={plainTabs}>
+      <CardHeader color={headerColor} plain={plainTabs} style={{paddingTop:'0',paddingBottom:'0'}}>
         {title !== undefined ? <div className={cardTitle}>{title}</div> : null}
         <Tabs
           value={value}

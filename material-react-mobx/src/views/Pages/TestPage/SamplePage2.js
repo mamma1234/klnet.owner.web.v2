@@ -105,7 +105,7 @@ export default function ScheduleList() {
 				.then(setImportData([]))
 			    .then(res => setImportData(res.data))
 			    .catch(err => {
-			        if(err.response.status == "403") {
+			        if(err.response.status === 403) {
 			        	//setOpenJoin(true);
 			        }
 			    });
@@ -115,7 +115,7 @@ export default function ScheduleList() {
 					.then(setExportData([]))
 					.then(res => setExportData(res.data))
 					.catch(err => {
-						if(err.response.status == "403") {
+						if(err.response.status === 403) {
 					       	//setOpenJoin(true);
 					    }
 					});

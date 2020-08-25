@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 // core components
 //import Grid from '@material-ui/core/Grid';
 import GridItem from "components/Grid/GridItem.js";
-import GridContainer from "components/Grid/GridContainer.js";
+//import GridContainer from "components/Grid/GridContainer.js";
 import Table from "./TablePaging.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -97,10 +97,11 @@ const TableList = inject('userStore', 'trackStore')(observer(({ userStore, track
       } else { //ERROR
         alert(res.data.errMsg);
       }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    }).catch(err => {
+        if(err.response.status === 401) {
+        	props.openLogin();
+        }
+        });
   }
 
   return (

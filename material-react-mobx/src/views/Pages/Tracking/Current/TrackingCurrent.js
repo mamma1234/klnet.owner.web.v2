@@ -54,6 +54,7 @@ export default function TableList(props) {
   const {data,store} = props;
   
   const [selectData,setSelectData] = useState([]);
+
   //const [ietype,setIetype] = useState("");
   //const [open, setOpen] = useState(false);
   //const [delSeq, setDelSeq] = useState("");
@@ -70,7 +71,7 @@ export default function TableList(props) {
   
   useEffect(() => {
 	    axios.post("/loc/getCntrList",
-	    		{ reqseq: data.req_seq,carriercode:data.carrier_code,blbk: data.bl_bkg },
+	    		{ reqseq: data.req_seq, carriercode:data.carrier_code,blbk: data.bl_bkg },
 	    		{headers:{'Authorization':'Bearer '+store.token}}
 	    ).then(res => setSelectData(res.data))
 	    return () => {

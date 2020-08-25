@@ -49,10 +49,11 @@ const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore
 		} else {
 			alert(res.data.errMsg);
 		}
-	})
-	.catch(err => {
-		console.log(err);
-	});
+	}).catch(err => {
+        if(err.response.status === 401) {
+        	props.openLogin();
+        }
+        });
   },[]);
 
 

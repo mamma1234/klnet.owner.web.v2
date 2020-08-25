@@ -1,15 +1,9 @@
 import React,{useState,useEffect} from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import moment from 'moment';
 
-import TextField from '@material-ui/core/TextField';
-import Table from "@material-ui/core/Table";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableFooter from "@material-ui/core/TableFooter";
+import {TextField, Table, TableHead, TableRow, TableBody, TableCell, TableFooter, Paper, Grid, Icon} from '@material-ui/core';
+
 import Autocomplete from '@material-ui/lab/Autocomplete';
 // core components
 import GridItem from "components/Grid/GridItem.js";
@@ -19,69 +13,27 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import CustomTable from "components/Table/TablePaging.js";
-import { Tooltip } from "@material-ui/core";
 //import CardIcon from "components/Card/CardIcon.js";
 // other import
 import axios from 'axios';
 //import moment from 'moment';
-
-import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
-
-import Grid from '@material-ui/core/Grid';
-import CustomTabs from "components/CustomTabs/CustomTabs2.js";
-import ExcelSchLogTable from "components/Table/TablePaging.js";
-import CalendarBox from "components/CustomInput/CustomCalendar.js";
 import CustomSelect from "components/CustomInput/CustomSelect.js";
-const styles = {
-  cardCategoryWhite: {
-    "&,& a,& a:hover,& a:focus": {
-      color: "rgba(255,255,255,.62)",
-      fontSize: "14px",
-      marginTop: "0",
-      marginBottom: "0"
-    },
-    "& a,& a:hover,& a:focus": {
-      color: "#FFFFFF"
-    }
-  },
-  cardTitleWhite: {
-    color: "#FFFFFF",
-    minHeight: "auto",
-    fontWeight: "300",
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
-    textDecoration: "none",
-    "& small": {
-      color: "#777",
-      fontSize: "65%",
-      fontWeight: "400",
-      lineHeight: "1"
-    }
-  },
-  cardTitleBlack: {
-	    textAlign: "left",
-	    color: "#000000",
-	    minHeight: "auto",
-	    fontWeight: "300",
-	    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-	    marginBottom: "3px",
-	    textDecoration: "none",
-	    "& small": {
-	      color: "#777",
-	      fontSize: "65%",
-	      fontWeight: "400",
-	      lineHeight: "1"
-	    }
-    },
-    divStyle: {
-      overflowX: "auto",
-      overflowY: "scroll"
-    }
-};
 
-const useStyles = makeStyles(styles);
+const styles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+  },
+  paper: {
+    padding:'15px',
+    width: '100%',
+    height: '80vh',
+    marginBottom: theme.spacing(2),
+    overflow:'scroll'
+  },gridContainer: {
+    padding:'15px'
+  }
+}))
 
 
 export default function UserRequest(props) {
@@ -96,8 +48,7 @@ export default function UserRequest(props) {
   const [reqseq,setReqseq] = useState("");
   const [Num,setNum] = useState(1);
   const [userRequest, setUserRequest] = useState([]);
-  const [openJoin,setOpenJoin] = useState(false);
-  const [portData,setPortData] = useState([]);
+  const [setOpenJoin] = useState(false);
   const [carrierCode, setCarrierCode] = useState("")
   
   useEffect(() => {
@@ -107,35 +58,32 @@ export default function UserRequest(props) {
 	  return () => {
 		  console.log('LINE CODE cleanup');
 	  };
-  }, []);
+  }, [store.token]);
   const onCarrierChange = (e,data) => {
-      if(data) {setCarrierCode(data.id);} else {setCarrierCode("");}
-    }
-  const onSubmit = () => {
-            setNum(1);
-
-            axios.post("/com/getUserRequest",{
-              req_seq:reqseq,
-              userno:userno,
-              carrier_code:carrierCode,
-              bl_bkg:blbkg,
-              ie_type:ieType,
-              num:Num,
-
-            },{headers:{'Authorization':'Bearer '+store.token}})
-            .then(res => {setUserRequest(res.data);console.log(res.data)})
-            .catch(err => {
-                if(err.response.status == "403" || err.response.status == "401") {
-                    setOpenJoin(true);
-                }
-            });
-        
-
+    if(data) {setCarrierCode(data.id);} else {setCarrierCode("");}
   }
-  const onMore = () => {
-    if(Num != userRequest[0].tot_page) {
+  const onSubmit = (param) => {
+    setNum(1);
+    axios.post("/com/getUserRequest",{
+      req_seq:reqseq,
+      userno:userno,
+      carrier_code:carrierCode,
+      bl_bkg:blbkg,
+      ie_type:ieType,
+      num:param,
+
+    },{headers:{'Authorization':'Bearer '+store.token}})
+    .then(res => {setUserRequest(res.data);console.log(res.data)})
+    .catch(err => {
+        if(err.response.status === 403 || err.response.status === 401) {
+            setOpenJoin(true);
+        }
+    });
+  }
+  const onMore = (param) => {
+    if(Num !== Number(userRequest[0].tot_page)) {
         //page ++
-        setNum(Num+1);
+        setNum(param);
 
         axios.post("/com/getUserRequest",{
           req_seq:reqseq,
@@ -143,11 +91,11 @@ export default function UserRequest(props) {
           carrier_code:carrierCode,
           bl_bkg:blbkg,
           ie_type:ieType,
-          num:Num,
+          num:param,
         },{headers:{'Authorization':'Bearer '+store.token}})
         .then(res => setUserRequest([...userRequest,...res.data]))
         .catch(err => {
-            if(err.response.status == "403" || err.response.status == "401") {
+            if(err.response.status === 403 || err.response.status === 401) {
                 setOpenJoin(true);
             }
         });
@@ -159,11 +107,11 @@ export default function UserRequest(props) {
 		
 	}	
 
-  const classes = useStyles();
+  const classes = styles();
   
   return (
-    <div className={classes.divStyle}>
-    <GridContainer>
+    <div className={classes.root}>
+    <GridContainer className={classes.gridContainer}>
     	<GridItem xs={12} sm={12} md={12}>
         	<Card style={{marginBottom:'0px'}}>
       			<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
@@ -210,7 +158,7 @@ export default function UserRequest(props) {
               </Grid>
              
 						<Grid item xs={12} md={3} >
-							<Button color="info" onClick = {onSubmit}  
+							<Button color="info" onClick = {() =>onSubmit(1)}  
 							fullWidth>Search</Button>							
 						</Grid>
 		      		</Grid>
@@ -221,6 +169,7 @@ export default function UserRequest(props) {
       <GridItem xs={12}>
       	<Card style={{marginBottom:'0px'}}>
       		<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
+            <Paper className={classes.paper}>
               <Table className={classes.table}>
                   <TableHead className={classes.table} style={{padding:'5px'}}>
                       <TableRow>
@@ -300,11 +249,11 @@ export default function UserRequest(props) {
                        userRequest.length >= 10 ? (
                         <TableFooter >
                         <TableRow  >
-                        <TableCell style={{textAlignLast:'center',paddingTop:'0',paddingBottom:'0'}} colSpan={8}>
+                        <TableCell style={{paddingLeft:'15px',paddingTop:'0',paddingBottom:'0'}} colSpan={29}>
                             <Button
                                 color="info"
-                                onClick={onMore}
-                                style={{paddingLeft:'60px',paddingRight:'60px'}}
+                                onClick={() => onMore(Num + 1)}
+                                style={{paddingLeft:'60px',paddingRight:'60px',width:'100%'}}
                             >MORE&nbsp;(&nbsp;{Num}&nbsp;/&nbsp;{userRequest[0].tot_page}&nbsp;)</Button>
                         </TableCell>
                         </TableRow>
@@ -313,8 +262,8 @@ export default function UserRequest(props) {
 
                   }
               </Table>
-              
-	      	 </CardBody>
+            </Paper>
+	      	</CardBody>
         </Card>
 		</GridItem>     
     </GridContainer>

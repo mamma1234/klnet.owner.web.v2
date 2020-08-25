@@ -5,7 +5,7 @@ const basicauth = require("basic-auth");
 const sUser = require('../../models/sessionUser');
 
 const getTrackingList = (request, response) => {
-	  
+
     request.session.sUser = sUser;
    let sqlText ="";
   //  sqlText += "select coalesce(bb.totalcnt,0) as totalcnt,coalesce(bb.full_out,0) as full_out, \n";
@@ -73,12 +73,17 @@ const getTrackingList = (request, response) => {
   //  sqlText += " and aa.ie_type= bb.ie_type \n";
   //  sqlText += " order by case when aa.book_mark='Y' then 0 else 1 end,start_day \n";
 
-  sqlText += " select a.req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
+  sqlText += " select coalesce((select bb.req_seq \n";
+  sqlText += "                    from own_dem_det bb \n";
+  sqlText += "                    where bb.user_no = a.user_no  \n";
+  sqlText += "                    and bb.line_code= a.carrier_code \n";
+  sqlText += "                    and bb.ie_type = a.ie_type \n";
+  sqlText += "                    and bb.bl_bkg = a.bl_bkg \n";
+  sqlText += "                    order by coalesce(update_date,insert_date) desc \n";
+  sqlText += "                    limit 1),a.req_seq) req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
   sqlText += "       ,a.cntr_no ,a.mbl_no ,a.bkg_no ,a.bl_yy ,a.web_seq ,a.book_mark \n";
-  sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod \n";
+  sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod, a.pol_cd, a.pod_cd \n";
   sqlText += "       ,a.pol_atd, a.pol_etd \n";
-  sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod \n";
-  sqlText += "       ,pol_atd, pol_etd \n";
   sqlText += "       ,case when (a.pol_atd is null or a.pol_atd ='')  \n";
   sqlText += "             then case when to_timestamp(a.pol_etd,'yyyymmdd') < now()  \n";
   sqlText += "                       then 'A' \n";
@@ -86,15 +91,19 @@ const getTrackingList = (request, response) => {
   sqlText += "                   end \n";
   sqlText += "             else 'A' \n";
   sqlText += "        end as start_db \n";
-  sqlText += "       ,case when (pol_atd is null or pol_atd ='') \n";
-  sqlText += "             then to_char(to_date(pol_etd,'yyyymmdd'),'YYYY/MM/DD') \n";
-  sqlText += "             else to_char(to_date(pol_atd,'yyyymmdd'),'YYYY/MM/DD') \n";
+  sqlText += "       ,case when (pol_atd is null or pol_atd ='') and (pol_etd is null or pol_etd ='') \n";
+  sqlText += "             then '' \n";
+  sqlText += "             else case when (pol_atd is null or pol_atd ='') \n";
+  sqlText += "                  then to_char(to_date(pol_etd,'yyyymmdd'),'YYYY/MM/DD') \n";
+  sqlText += "                  else to_char(to_date(pol_atd,'yyyymmdd'),'YYYY/MM/DD') end \n";
   sqlText += "        end as start_day \n";
-  sqlText += "       ,case when sign(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)) = 1 \n";
-  sqlText += "             then '-'||coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)  \n";
-  sqlText += "             when sign(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)) = 0 \n";
-  sqlText += "             then 'D-Day' \n";
-  sqlText += "             else '+'||ABS(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0))  \n";
+  sqlText += "       ,case when (pol_atd is null or pol_atd ='') and (pol_etd is null or pol_etd ='') \n";
+  sqlText += "             then '' \n";
+  sqlText += "             else case when sign(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)) = 1 \n";
+  sqlText += "                      then '-'||coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)  \n";
+  sqlText += "                      when sign(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)) = 0 \n";
+  sqlText += "                      then 'D-Day' \n";
+  sqlText += "                      else '+'||ABS(coalesce(to_date(case when (pol_atd is null or pol_atd ='') then pol_etd else pol_atd end,'yyyymmdd')-current_Date,0)) end \n";
   sqlText += "        end start_cnt \n";
   sqlText += "       ,case when (a.pod_ata is null or a.pod_ata ='')  \n";
   sqlText += "             then case when to_timestamp(a.pod_eta,'yyyymmdd') < now()  \n";
@@ -103,9 +112,11 @@ const getTrackingList = (request, response) => {
   sqlText += "                   end \n";
   sqlText += "             else 'A' \n";
   sqlText += "        end as end_db \n";
-  sqlText += "       ,case when (pod_ata is null or pod_ata ='') \n";
-  sqlText += "             then to_char(to_date(pod_eta,'yyyymmdd'),'YYYY/MM/DD') \n";
-  sqlText += "             else to_char(to_date(pod_ata,'yyyymmdd'),'YYYY/MM/DD') \n";
+  sqlText += "       ,case when (pod_ata is null or pod_ata ='')  and (pod_eta is null or pod_eta ='') \n";
+  sqlText += "             then '' \n";
+  sqlText += "             else case when (pod_ata is null or pod_ata ='') \n";
+  sqlText += "                       then to_char(to_date(pod_eta,'yyyymmdd'),'YYYY/MM/DD') \n";
+  sqlText += "                       else to_char(to_date(pod_ata,'yyyymmdd'),'YYYY/MM/DD') end \n";
   sqlText += "        end as end_day \n";
   sqlText += "       ,case when sign(coalesce(to_date(case when (pod_ata is null or pod_ata ='') then pod_eta else pod_ata end,'yyyymmdd')-current_Date,0)) = 1 \n";
   sqlText += "             then '-'||coalesce(to_date(case when (pod_ata is null or pod_ata ='') then pod_eta else pod_ata end,'yyyymmdd')-current_Date,0) \n";
@@ -121,6 +132,7 @@ const getTrackingList = (request, response) => {
   sqlText += "        end as view_bl_bkg  \n";
   sqlText += "       ,c.image_yn ,c.line_code ,c.nm_kor as line_nm ,c.url as line_url \n";
   sqlText += "       ,(select d.move_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1) as last_status \n";
+  sqlText += "       ,(select d.loc_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1) as last_location \n";
   sqlText += "       ,(select case when length(move_time)>=12 then to_char(to_timestamp(substring(move_time,0,12),'yyyymmddhh24mi'),'yyyy/mm/dd hh24:mi')   \n";
   sqlText += "                else to_char(to_timestamp(move_time,'yyyymmdd'),'yyyy/mm/dd') end  from own_tracking_loc_new d where d.req_seq = a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD')   \n";
   sqlText += "                order by loc_seq asc limit 1) as last_status_time \n";
@@ -129,13 +141,13 @@ const getTrackingList = (request, response) => {
   sqlText += "       ,coalesce(d.mt_out,0) as mt_out \n";
   sqlText += "       ,coalesce(d.mt_in,0) as mt_in  \n";
   sqlText += "       ,coalesce(d.full_in,0) as full_in  \n";
-  sqlText += "       ,tot_page, curpage  \n";
+  sqlText += "       ,tot_page, curpage , tot_cnt \n";
   sqlText += "   from ( \n";
   sqlText += "         select a.req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
   sqlText += "               ,a.cntr_no ,a.mbl_no ,a.bkg_no ,a.bl_yy ,a.web_seq ,a.book_mark \n";
-  sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod \n";
+  sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod, a.pol_cd, a.pod_cd \n";
   sqlText += "       ,a.pol_atd, a.pol_etd,a.pod_ata, a.pod_eta \n";
-  sqlText += "               ,count(*) over()/10+1 as tot_page \n";
+  sqlText += "               , floor(count(*) over()/10) as tot_page,count(*) over() as tot_cnt  \n";
   sqlText += "               ,floor(((row_number() over()) -1) /10 +1) as curpage \n";
   sqlText += "           from ( \n";
   sqlText += "                 select a.req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
@@ -143,7 +155,11 @@ const getTrackingList = (request, response) => {
   sqlText += "                       ,a.cntr_no ,a.mbl_no ,a.bkg_no \n";
   sqlText += "                       ,substring(a.start_date,0 ,5) as bl_yy \n";
   sqlText += "                       ,a.web_seq ,a.book_mark \n";
-  sqlText += "       ,b.vsl_code, b.vsl_name ,b.voyage ,b.pol, b.pod \n";
+  sqlText += "       ,b.vsl_code, b.vsl_name ,b.voyage \n";
+  sqlText += "       ,coalesce((select port_ename from own_code_port where port_code = b.pol) ,b.pol) pol \n";
+  sqlText += "       ,coalesce((select port_ename from own_code_port where port_code = b.pod), b.pod) pod \n";
+  sqlText += "       ,coalesce((select port_code from own_code_port where port_code = b.pol) ,b.pol) pol_cd \n";
+  sqlText += "       ,coalesce((select port_code from own_code_port where port_code = b.pod), b.pod) pod_cd \n";
   sqlText += "       ,b.pol_atd, b.pol_etd,b.pod_ata, b.pod_eta \n";
   sqlText += "                   from own_user_request a \n";
   sqlText += "                  left outer join own_tracking_bl_new b on a.req_seq = b.req_seq and a.user_no = b.user_no and a.carrier_code = b.carrier_code and a.bl_bkg = b.bl_bkg \n";
@@ -159,13 +175,18 @@ const getTrackingList = (request, response) => {
   }
   if(request.body.from != "Invalid date" && request.body.to != "Invalid date" ) {
     if(request.body.blbk == "") {
-        if(request.body.dategb == "A" ) {
+        if(request.body.dategb == "A" ) { // ETA
             sqlText += " and case when (b.pod_ata is not null and b.pod_ata != '') then b.pod_ata else b.pod_eta end between '"+request.body.from+"' and '"+request.body.to+"' \n";
-        } else {
+        } else if (request.body.dategb == "D" ) { // ETD
             sqlText += " and case when (b.pol_atd is not null and b.pol_atd != '') then b.pol_atd else b.pol_etd end between '"+request.body.from+"' and '"+request.body.to+"' \n";
+        } else if (request.body.dategb == "I" ) { // INSERT DATE
+            if(request.body.blbk == "") {
+                sqlText += " and start_date between  '"+request.body.from+"' and '"+request.body.to+"' \n";
+            }
         }
     }
 }
+
 if(request.body.start != "") {
     sqlText += " and b.pol = '"+request.body.start+"' \n";
 }
@@ -173,6 +194,14 @@ if(request.body.end != "") {
     sqlText += " and b.pod = '"+request.body.end+"' \n";
 }
   // sqlText += " --                  order by case when a.book_mark='Y' then 0 else 1 end \n";
+if(request.body.initial == "Y") {
+	sqlText += "   order by case when a.ie_type='E' then case when (b.pol_atd is not null and b.pol_atd != '') then b.pol_atd              \n";
+	sqlText += "   			else b.pol_etd end               \n";
+	sqlText += "   else case when (b.pod_ata is not null and b.pod_ata != '') then b.pod_ata               \n";
+	sqlText += "    		else b.pod_eta end end desc,a.bl_bkg              \n";
+} else {
+	sqlText += " order by case when (b.pol_atd is not null and b.pol_atd != '') then b.pol_atd else b.pol_etd end,a.bl_bkg                  \n";
+}
   sqlText += "                 ) a \n";
   sqlText += "         where a.seq = 1 \n";
   sqlText += "         ) a \n";
@@ -184,10 +213,20 @@ if(request.body.end != "") {
   sqlText += "                   ,count(case when ie_type='I' and mt_ingate_date is not null then 1 end ) as mt_in  \n";
   sqlText += "                   ,count(case when ie_type='E' and full_ingate_date is not null then 1 end ) as full_in,bl_bkg,ie_type  \n";
   sqlText += "               from own_dem_det d \n";
+  sqlText += "              where d.user_no = '"+request.session.sUser.userno+"' \n";
+  if(request.body.ietype != "" && request.body.ietype != "A") {
+      sqlText += " and d.ie_type = '"+request.body.ietype+"' \n";
+  }
+  if(request.body.line != "") {
+      sqlText += " and d.line_code = '"+request.body.line+"' \n";
+  }
+  if(request.body.blbk != "") {
+      sqlText += " and d.bl_bkg = '"+request.body.blbk+"' \n";
+  }
   sqlText += "               group by bl_bkg,ie_type) d \n";
   sqlText += " on a.bl_bkg = d.bl_bkg  and a.ie_type= d.ie_type \n";
   sqlText += "where curpage = '"+request.body.num+"' \n";
-  sqlText += "order by case when a.book_mark='Y' then 0 else 1 end,start_day \n";
+  sqlText += "order by case when a.book_mark='Y' then 0 else 1 end,start_day limit 10 \n";
 
   // sqlText += "select aa.mbl_no ,aa.bkg_no \n";
   // sqlText += ",case when (aa.bkg_no is not null or aa.bkg_no != '') and (aa.mbl_no is not null or aa.mbl_no != '') then aa.bl_bkg \n";
@@ -280,25 +319,30 @@ if(request.body.end != "") {
    
    
 console.log(sqlText);
-  pgsqlPool.connect(function(err,conn,done) {
+  pgsqlPool.connect(function(err,conn,release,done) {
       if(err){
           console.log("err" + err);
           response.status(400).send(err);
+      } else {
+          conn.query(sqlText, function(err,result){
+            //   done();
+              if(err){
+                  console.log(err);
+                  release();
+                  response.status(400).send(err);
+              } else {
+                  //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+            	  release();
+                  response.status(200).json(result.rows);
+                  // console.log(result.fields.map(f => f.name));
+
+              }
+    
+    
+          });
+
       }
 
-      conn.query(sqlText, function(err,result){
-          done();
-          if(err){
-              console.log(err);
-              response.status(400).send(err);
-          }
-
-          //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-          
-          response.status(200).json(result.rows);
-          // console.log(result.fields.map(f => f.name));
-
-      });
 
       // conn.release();
   });
@@ -306,10 +350,28 @@ console.log(sqlText);
 
 const getMyBlList = (request, response) => {
     let sql = "";
-    sql = " select row_number()over( order by insert_date desc) as num ";
+
+
+
+        // sql += " select * from ( ";
+    // sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, * from own_user_request ";
+    // sql += " where 1=1 "
+    // sql += request.body.req_seq==""?" ":" and req_seq ='"+ request.body.req_seq + "' ";
+    // sql += request.body.userno==""?" ":" and user_no ='"+ request.body.userno + "' ";
+    // sql += request.body.carrier_code==""?" ":" and carrier_code ='"+ request.body.carrier_code + "' ";
+    // sql += request.body.bl_bkg==""?" ":" and bl_bkg ='"+ request.body.bl_bkg + "' ";
+    // sql += request.body.ie_type==""?" ":" and ie_type ='"+ request.body.ie_type + "' ";
+    // sql += " order by user_no desc ";
+    // sql +=")a where curpage ='"+request.body.num+"'";
+
+
+
+    sql += " select a.* from ("
+    sql += " select row_number()over( order by insert_date desc, bl_bkg desc) as num, count(*) over()/10+1 as tot_page, ";
+    sql += " count(*) over() as tot_cnt, floor(((row_number() over()) -1) /10 +1) as curpage ";
     sql += " ,mbl_no as bl_no,carrier_code,to_char(insert_date,'YYYY/MM/DD') as insert_date, ie_type, bkg_no, cntr_no, ";
-    sql += " (select b.nm_kor from own_code_cuship b where a.carrier_code = b.id group by id, nm_kor) as nm_kor"
-    sql += " from own_user_request a";
+    sql += " b.nm_kor"
+    sql += " from own_user_request a left outer join (select nm_kor, id from own_code_cuship group by id,nm_kor)b on a.carrier_code = b.id ";
     sql += " where 1=1 ";
     sql += " and user_no = '"+request.session.sUser.userno+"' ";
     if( '' != request.body.fromDate && '' != request.body.toDate ) {
@@ -328,22 +390,30 @@ const getMyBlList = (request, response) => {
         sql += " and bl_bkg like upper('%"+ request.body.searchKey +"%') ";
     }
     sql += " and del_yn ='N' order by num";
+    sql += " )a where curpage ='"+request.body.num+"'";
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                	release();
+                    response.status(200).json(result.rows);
+
+                }
+    
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-
-            response.status(200).json(result.rows);
-        });
     });
 }
   
@@ -363,28 +433,36 @@ const getMyBlList = (request, response) => {
         sql += request.body.cntrNumber==""?" and cntr_no is null ":" and cntr_no = upper('"+cntrNumber+"')";
 
         console.log( sql );
-	    pgsqlPool.connect(function(err,conn,done) {
+	    pgsqlPool.connect(function(err,conn,release,done) {
             try{
                 if(err){
                     console.log("err" + err);
+                    release();
                     response.status(400).send(err);
+                } else {
+                    conn.query(sql, function(err,result){
+                        // done();
+                        if(err){
+                            console.log(err);
+                            release();
+                            response.status(400).send(err);
+                        } else {
+                            if(result != null) {
+                            	release();
+                                response.status(200).json(result.rows);
+                            } else {
+                            	release();
+                                response.status(200).json([]);
+                            }
+
+                        }
+                    });
+
                 }
 
-                conn.query(sql, function(err,result){
-                    done();
-                    if(err){
-                        console.log(err);
-                        response.status(400).send(err);
-                    }
-                    if(result != null) {
-                        response.status(200).json(result.rows);
-                    } else {
-                        response.status(200).json([]);
-                    }
-                });
             }catch(e) {
                 console.log(e);
-                done();
+                release();
             	response.status(400).send(error);
             }
 
@@ -408,30 +486,37 @@ const getMyBlList = (request, response) => {
     }
     console.log( sql );
     try{
-        pgsqlPool.connect(function(err,conn,done) {
+        pgsqlPool.connect(function(err,conn,release,done) {
             if(err){
                 console.log("err" + err);
+                release();
                 response.status(400).send(err);
+            } else {
+                conn.query(sql, function(err,result){
+                    // done();
+                    if(err){
+                        console.log(err);
+                        release();
+                        response.status(400).send(err);
+                    } else {
+                        if(result != null) {
+                        	release();
+                            response.status(200).json(result.rows);
+                        } else {
+                        	release();
+                            response.status(200).json([]);
+                        }
+                    }
+                });
+
             }
 
-            conn.query(sql, function(err,result){
-                done();
-                if(err){
-                    console.log(err);
-                    response.status(400).send(err);
-                }
-                if(result != null) {
-                    response.status(200).json(result.rows);
-                } else {
-                    response.status(200).json([]);
-                }
-            });
 
             // conn.release();
         });
     }catch(e){
         console.log(e);
-        done();
+        release();
         response.status(400).send(error);
     }
 }
@@ -464,28 +549,34 @@ const getMyBlList = (request, response) => {
 
       console.log( sql );
       try{
-        pgsqlPool.connect(function(err,conn,done) {
+        pgsqlPool.connect(function(err,conn,release,done) {
             if(err){
                 console.log("err" + err);
+                release();
                 response.status(400).send(err);
+            } else {
+                conn.query(sql, function(err,result){
+                    // done();
+                    if(err){
+                        console.log(err);
+                        release();
+                        response.status(400).send(err);
+                    } else {
+                        if(result != null) {
+                        	release();
+                            response.status(200).json(result.rows);
+                        } else {
+                        	release();
+                            response.status(200).json([]);
+                        }
+                    }
+                });
             }
     
-            conn.query(sql, function(err,result){
-                done();
-                if(err){
-                    console.log(err);
-                    response.status(400).send(err);
-                }
-                if(result != null) {
-                    response.status(200).json(result.rows);
-                } else {
-                    response.status(200).json([]);
-                }
-            });
         });
       }catch(e) {
         console.log(e);
-        done();
+        release();
         response.status(400).send(error);
       }
   }
@@ -499,23 +590,30 @@ const getBookMark = (request, response) => {
         rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                	release();
+                    response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+
+                }
+    
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -539,23 +637,29 @@ const getCntrList = (request, response) => {
             //rowMode: 'array',
         }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                	release();
+                    response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+                }
+    
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -573,27 +677,34 @@ const getUserSetting = (request, response) => {
         rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    //response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -613,27 +724,35 @@ const getCntrDetailList = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    //response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -666,19 +785,25 @@ const getCarrierInfo = (request, response) => {
         rowMode: 'array',
     }
     console.log("query == ",sql);    
-    pgsqlPool.connect(function(err,client,done) {
+    pgsqlPool.connect(function(err,client,release,done) {
       if(err){
         console.log("err" + err);
+        release();
         response.status(400).send(err);
+      } else {
+          client.query(sql, function(err,result){
+            // done();
+            if(err){
+              console.log(err);
+              release();
+              response.status(400).send(err);
+            } else {
+            	release();
+                response.status(200).send(result.rows);
+            }
+          });
+
       }
-      client.query(sql, function(err,result){
-        done();
-        if(err){
-          console.log(err);
-          response.status(400).send(err);
-        }
-        response.status(200).send(result.rows);
-      });
   
     });
 }
@@ -711,27 +836,35 @@ const setUserSetting = (request, response) => {
         rowMode: 'array',
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    //response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+
+                }
+            });
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -804,34 +937,39 @@ const saveBlList = ( request, response ) => {
         // values: multi_params,
     }
     console.log( sql );
-    pgsqlPool.connect( (err,conn,done) =>{
+    pgsqlPool.connect( (err,conn,release,done) =>{
         if(err){
             console.log("err" + err);
+            release();
             // response.status(400).send(err);
+        } else {
+
+            conn.query(sql, function(err,result){
+                // done();
+                // console.log( result.command );
+                if(err){
+                    error = err;
+                    console.log(err);
+                    // console.log(error);
+                    release();
+                    response.status(200).send(err);
+                    // response.status(400).send(err);
+                } else {
+                    count += 1;
+                    console.log(count)
+                    // if(null != error){
+                    // } else {
+                    //     console.log("COUNT "+ count)
+                    //     response.status(200).json(count+"건 처리되었습니다.");
+                    // }
+                    // if ( count == dataRows.length) {
+                    release();
+                        response.status(200).json(count+"건 처리되었습니다.");
+                    // }
+                }
+            });
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            // console.log( result.command );
-            if(err){
-                error = err;
-                console.log(err);
-                // console.log(error);
-                response.status(200).send(err);
-                // response.status(400).send(err);
-            } else {
-                count += 1;
-                console.log(count)
-                // if(null != error){
-                // } else {
-                //     console.log("COUNT "+ count)
-                //     response.status(200).json(count+"건 처리되었습니다.");
-                // }
-                // if ( count == dataRows.length) {
-                    response.status(200).json(count+"건 처리되었습니다.");
-                // }
-            }
-        });
     });
     // }
     // console.log( "최종>>>", error);
@@ -863,29 +1001,37 @@ const insertBlRequest = ( request, response ) => {
     console.log('sql===',sql);
     
     try{
-        pgsqlPool.connect(function(err,conn,done) {
+        pgsqlPool.connect(function(err,conn,release,done) {
             if(err){
                 console.log("err" + err);
+                release();
                 response.status(400).send(err);
+            } else {
+                conn.query(sql, function(err,result){
+                    // done();
+                    if(err){
+                        console.log(err);
+                        release();
+                        response.status(400).send(err);
+                    } else {
+                        if(result != null) {
+                        	release();
+                            response.status(200).json(result.rows);
+                        } else {
+                        	release();
+                            response.status(200).json([]);
+                        }
+
+                    }
+                });
+
             }
 
-            conn.query(sql, function(err,result){
-                done();
-                if(err){
-                    console.log(err);
-                    response.status(400).send(err);
-                }
-                if(result != null) {
-                    
-                    response.status(200).json(result.rows);
-                } else {
-                    response.status(200).json([]);
-                }
-            });
         });
     }catch(e) {
         console.log(e);
-        done();
+        //done();
+        release();
         response.status(400).send(error);
     }
 }
@@ -899,25 +1045,32 @@ const setUserBLUpdate = ( request, response ) => {
         values: [request.body.bookmark,request.body.reqseq,request.session.sUser.userno, request.body.blbk],
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                
-                response.status(200).json(result.rows);
-            } else {
-                response.status(200).json([]);
-            }
-        });
     });
 }
 
@@ -934,24 +1087,32 @@ const getDemdetDtlCurrent = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-        });
 
     });
 }
@@ -1003,35 +1164,48 @@ const getdemdetCurrent = (request, response) => {
         //rowMode: 'array',
     }
 console.log("emdet:",sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-        });
 
     });
 }
 
 const getDemdetCntrList = (request, response) => {
-
+console.log(request.body.at_terminal);
     let sql = {};
     if ( "I" == request.body.ie_type ) {
         // 수입의 경우
         sql = {
-            text: "select cntr_no,type_size ,b.berth_terminal,b.berth_date,  \n"+
+        	text: "select * from (   \n"+	
+            " select row_number()over(partition by cntr_no order by unload_date > berth_date ) as num, cntr_no,type_size ,case when $9::varchar is not null and  unload_date is null then   \n"+
+            " (select  terminal_kname from own_terminal_info where terminal= $9::varchar) else  \n"+
+            " (select  terminal_kname from own_terminal_info where terminal= b.berth_terminal) end as berth_terminal,  \n"+
+            "  case when $9::varchar is not null and  unload_date is null then to_char(to_timestamp($10::varchar,'YYYYMMDDHH24'),'YYYY-MM-DD HH24') \n"+
+            "   else  to_char(to_timestamp(b.berth_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24')  end as berth_date, \n"+
             " to_char(to_timestamp(unload_date,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI') as unload_date,  \n"+
             "     to_char(to_date(substring(dem_date,1,8),'YYYYMMDD'),'YYYY-MM-DD') as dem_date,  \n"+
             "     to_char(to_timestamp(full_outgate_date,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI') as full_outgate_date,  \n"+
@@ -1067,15 +1241,18 @@ const getDemdetCntrList = (request, response) => {
             "  where a.vessel_name = case when $5::varchar is null or $5::varchar = '' \n "+
             "  then (select ship_nm from own_vsl_info where ship_imo = $6 and ship_nm is not null limit 1 ) \n "+
             "  else $5::varchar end \n "+
-            "     and a.voyage_no = $7 \n"+
-            "    and a.auth_port_code = substring($8, 3) \n"+
-            "    and to_date(substring(coalesce(a.ata, a.atb) ,0,9), 'YYYYMMDD') between to_date($9, 'YYYYMMDD')-3 and to_date($9, 'YYYYMMDD')+7 \n"+
-            "   order by coalesce(a.load_begin_date, a.atb) desc limit 1 \n"+
+            // "     and a.voyage_no = $7 \n"+
+            // "    and a.auth_port_code = substring($8, 3) \n"+
+            "    and a.auth_port_code in (select cal_sch_code from own_cal_sch_terminal_port b where b.port_code = $7) \n "+
+            "    and to_date(substring(coalesce(a.load_begin_date, a.atb) ,0,9), 'YYYYMMDD') between to_date($8, 'YYYYMMDD')-3 and to_date($8, 'YYYYMMDD')+7 \n"+
+            //"   order by coalesce(a.load_begin_date, a.atb) desc limit 1 \n"+  양하지 와 접안일 문제로 수정 
+            "   order by coalesce(a.load_begin_date, a.atb) desc \n"+
             " ) b \n"+
             " on a.vessel_name = b.vessel_name \n"+
-            " and a.voyage_no = b.voyage_no \n",
+            " and case when  a.unload_date is not null then a.unload_date >= berth_date else null end )a where num =1 \n", //양하지 와 접안일 문제로 추가 
+            // " and a.voyage_no = b.voyage_no \n",
             values: [request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg
-                , request.body.vsl_name, request.body.vsl_code, request.body.voyage_no, request.body.pod, request.body.eta],
+                , request.body.vsl_name, request.body.vsl_code, request.body.pod, request.body.eta,request.body.at_terminal,request.body.at_date],
         }
     } else {
         // 수출의 경우
@@ -1105,24 +1282,32 @@ const getDemdetCntrList = (request, response) => {
         }
     }
     console.log( sql );
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-        });
 
     });
 }
@@ -1158,27 +1343,35 @@ const getScrapManageList = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    //response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -1220,27 +1413,34 @@ const getTrackingTerminal = (request, response) => {
     sql += " and req_seq = '"+ request.body.req_seq +"' ";
 
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    // } else {
+                    // 	response.status(200).json([]);
+                    }
+
+                }
+                //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                //response.status(200).json(result.rows);
+                // console.log(result.fields.map(f => f.name));
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            // } else {
-            // 	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
     });
@@ -1253,7 +1453,8 @@ const getImportTerminalActivity = (request, response) => {
     let sqlText = " select a.terminal, coalesce(b.terminal_kname, a.terminal) as terminal_name , activity_date \n ";
     sqlText += "       ,case when activity_date is null then null \n ";
     sqlText += "             else a.activity||' ('||substring(a.activity_date, 0, 9)||')' \n ";
-    sqlText += "        end activity \n ";
+    sqlText += "        end view_activity \n ";
+    sqlText += "       ,a.activity \n ";
     sqlText += "       ,a.req_seq \n ";
     sqlText += "       ,b.url as terminal_url \n ";
     sqlText += "   from ( \n ";
@@ -1292,34 +1493,40 @@ const getImportTerminalActivity = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                        if (result.rows.length > 0 ) {
+                            // 수입의 경우 결과값이 없으면 OWN_CAL_SCH 테이블 조회
+                            if ( null == result.rows[0].terminal ) {
+                                getImportTerminalActivityFromCalSch( request, response );
+                            } else {
+                            	release();
+                                response.status(200).json(result.rows);
+                            }
+                        } else {
+                            getImportTerminalActivityFromCalSch( request, response );
+                        }
+                    } else {
+                        getImportTerminalActivityFromCalSch( request, response );
+                        // getTerminalActivityFromSch()
+                    }
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                if (result.rows.length > 0 ) {
-                    // 수입의 경우 결과값이 없으면 OWN_CAL_SCH 테이블 조회
-                    if ( null == result.rows[0].terminal ) {
-                        getImportTerminalActivityFromCalSch( request, response );
-                    } else {
-                        response.status(200).json(result.rows);
-                    }
-                } else {
-                    getImportTerminalActivityFromCalSch( request, response );
-                }
-            } else {
-                getImportTerminalActivityFromCalSch( request, response );
-                // getTerminalActivityFromSch()
-            }
-        });
     });
 }
 
@@ -1331,9 +1538,11 @@ const getImportTerminalActivityFromCalSch = (request, response) => {
     let sqlText = " select a.terminal, coalesce(b.terminal_kname, a.terminal) as terminal_name \n ";
     sqlText += "       ,case when coalesce(a.load_begin_date, a.atb) is null then null \n ";
     sqlText += "             else 'BERTHING'||' ('||substring(coalesce(a.load_begin_date, a.atb), 0, 9)||')' \n ";
-    sqlText += "        end activity \n ";
+    sqlText += "        end view_activity \n ";
+    sqlText += "       ,'BERTHING' activity \n ";
     sqlText += "       ,$1 req_seq \n ";
     sqlText += "       ,url as terminal_url \n ";
+    sqlText += "       ,substring(coalesce(a.load_begin_date, a.atb), 0, 11) as activity_date \n ";
     sqlText += "   from own_cal_sch a \n ";
     sqlText += " left outer join own_terminal_info b \n ";
     sqlText += "   on a.terminal = b.terminal \n ";
@@ -1341,34 +1550,41 @@ const getImportTerminalActivityFromCalSch = (request, response) => {
     sqlText += "  then (select ship_nm from own_vsl_info where ship_imo = $3 and ship_nm is not null limit 1 ) \n ";
     sqlText += "  else $2::varchar end \n ";
     // sqlText += "    and a.voyage_no = $4 \n "; 20200616 사업팀 요청에 의해 제거
-    sqlText += "    and a.auth_port_code = substring($4, 3) \n ";
-    sqlText += "    and to_date(substring(coalesce(a.ata, a.atb) ,0,9), 'YYYYMMDD') between to_date($5, 'YYYYMMDD')-3 and to_date($5, 'YYYYMMDD')+7 \n ";
-    sqlText += "    order by a.ata desc \n ";
+    sqlText += "    and a.auth_port_code in (select cal_sch_code from own_cal_sch_terminal_port b where b.port_code = $4) \n ";
+    sqlText += "    and to_date(substring(coalesce(a.load_begin_date, a.atb) ,0,9), 'YYYYMMDD') between to_date($5, 'YYYYMMDD')-3 and to_date($5, 'YYYYMMDD')+7 \n ";
+    sqlText += "    order by a.load_begin_date desc \n ";
     const sql = {
         text: sqlText,
         values: [request.body.req_seq, request.body.vsl_name, request.body.vsl_code, request.body.pod, request.body.eta],
         //rowMode: 'array',
     }
     console.log(sqlText);
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    // } else {
+                        // response.status(200).json([]);
+                        // getTerminalActivityFromSch()
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                response.status(200).json(result.rows);
-            // } else {
-                // response.status(200).json([]);
-                // getTerminalActivityFromSch()
-            }
-        });
     });
 }
 
@@ -1385,7 +1601,8 @@ const getExportTerminalActivity = (request, response) => {
     let sqlText = "select a.terminal, coalesce(b.terminal_kname, a.terminal) as terminal_name \n ";
     sqlText += "      ,case when activity_date is null then null \n ";
     sqlText += "            else a.activity||' ('||substring(a.activity_date, 0, 9)||')' \n ";
-    sqlText += "       end activity \n ";
+    sqlText += "       end view_activity \n ";
+    sqlText += "      ,a.activity \n ";
     sqlText += "      ,a.req_seq \n ";
     sqlText += "      ,b.url \n ";
     sqlText += "      ,load_terminal_ref_no \n ";
@@ -1441,43 +1658,53 @@ const getExportTerminalActivity = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                        if (result.rows.length > 0 ) {
+                            // 수출의 경우 값이 있으면 Terminal, Terminal_ref_no 정보로 OWN_CAL_SCH
+                            // OWN_CAL_SCH 값이 있으면 해당건을 우선으로 보여준다.
+                            // mt_outgate_date > full_ingate_date > pol_ingate_time > load_date > departure
+                            // BERTH 정보는 선석 스케줄에 있다
+                            if ( null == result.rows[0].terminal ) {
+                            	release();
+                                response.status(200).json([]);
+                            } else {
+                                // activity 정보가 현재 시점 보다 과거의 경우 스케줄 정보를 보여준다.
+                                console.log(result.rows[0].activity_date,  result.rows[0].today);
+                                if (result.rows[0].activity_date < result.rows[0].today) {
+                                    getExportTerminalActivityFromCalSch( request, response , result);
+                                } else {
+                                	release();
+                                    response.status(200).json(result.rows);
+                                }
+                            }
+                        } else {
+                        	release();
+                            response.status(200).json([]);
+                        }
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                        // getTerminalActivityFromSch()
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-                if (result.rows.length > 0 ) {
-                    // 수출의 경우 값이 있으면 Terminal, Terminal_ref_no 정보로 OWN_CAL_SCH
-                    // OWN_CAL_SCH 값이 있으면 해당건을 우선으로 보여준다.
-                    // mt_outgate_date > full_ingate_date > pol_ingate_time > load_date > departure
-                    // BERTH 정보는 선석 스케줄에 있다
-                    if ( null == result.rows[0].terminal ) {
-                        response.status(200).json([]);
-                    } else {
-                        // activity 정보가 현재 시점 보다 과거의 경우 스케줄 정보를 보여준다.
-                        console.log(result.rows[0].activity_date,  result.rows[0].today);
-                        if (result.rows[0].activity_date < result.rows[0].today) {
-                            getExportTerminalActivityFromCalSch( request, response , result);
-                        } else {
-                            response.status(200).json(result.rows);
-                        }
-                    }
-                } else {
-                    response.status(200).json([]);
-                }
-            } else {
-                response.status(200).json([]);
-                // getTerminalActivityFromSch()
-            }
-        });
     });
 }
 
@@ -1489,15 +1716,17 @@ const getExportTerminalActivityFromCalSch = (request, response, beforeReuslt) =>
     let sqlText = " select * from (select a.terminal, coalesce(b.terminal_kname, a.terminal) as terminal_name \n ";
     sqlText += "       ,case when coalesce(a.load_end_date, a.atd) is null then null \n ";
     sqlText += "             else 'DEPARTURE'||' ('||substring(coalesce(a.load_end_date, a.atd), 0, 9)||')' \n ";
-    sqlText += "        end activity \n ";
+    sqlText += "        end view_activity \n ";
+    sqlText += "       ,'DEPARTURE' activity \n ";
     sqlText += "       ,$1 req_seq \n ";
     sqlText += "       ,url as terminal_url \n ";
+    sqlText += "       ,to_char(to_Date(substring(coalesce(a.load_end_date, a.atd), 0, 9),'YYYYMMDD'),'YYYY-MM-DD') as activity_date \n ";
     sqlText += "       ,0 seq \n ";
     sqlText += "   from own_cal_sch a \n ";
     sqlText += " left outer join own_terminal_info b \n ";
     sqlText += "   on a.terminal = b.terminal \n ";
     sqlText += "  where a.terminal = $2 \n ";
-    sqlText += "    and lpad(a.terminal_ref_no,3,'0') = $3 \n ";
+    sqlText += "    and lpad(a.terminal_ref_no,3,'0') = lpad($3,3,'0') \n ";
     // sqlText += "    and a.auth_port_code = substring($3, 3) \n ";
     sqlText += "    and to_date(substring(coalesce(a.load_end_date, a.atd) ,0,9), 'YYYYMMDD') between to_date($4, 'YYYYMMDD')-3 and to_date($4, 'YYYYMMDD')+7 \n ";
     sqlText += "    and substring(coalesce(a.load_end_date, a.atd), 0, 9) >= $4 order by coalesce(a.load_end_date, a.atd) asc limit 1 ) a \n ";
@@ -1505,15 +1734,17 @@ const getExportTerminalActivityFromCalSch = (request, response, beforeReuslt) =>
     sqlText += " select * from (select a.terminal, coalesce(b.terminal_kname, a.terminal) as terminal_name \n ";
     sqlText += "       ,case when coalesce(a.load_end_date, a.atd) is null then null \n ";
     sqlText += "             else 'DEPARTURE'||' ('||substring(coalesce(a.load_end_date, a.atd), 0, 9)||')' \n ";
-    sqlText += "        end activity \n ";
+    sqlText += "        end view_activity \n ";
+    sqlText += "       ,'DEPARTURE' activity \n ";
     sqlText += "       ,$1 req_seq \n ";
     sqlText += "       ,url as terminal_url \n ";
+    sqlText += "       ,to_char(to_Date(substring(coalesce(a.load_end_date, a.atd), 0, 9),'YYYYMMDD'),'YYYY-MM-DD') as activity_date \n ";
     sqlText += "       ,1 seq \n ";
     sqlText += "   from own_cal_sch a \n ";
     sqlText += " left outer join own_terminal_info b \n ";
     sqlText += "   on a.terminal = b.terminal \n ";
     sqlText += "  where a.terminal = $2 \n ";
-    sqlText += "    and lpad(a.terminal_ref_no,3,'0') = $3 \n ";
+    sqlText += "    and lpad(a.terminal_ref_no,3,'0') = lpad($3,3,'0') \n ";
     // sqlText += "    and a.auth_port_code = substring($3, 3) \n ";
     sqlText += "    and to_date(substring(coalesce(a.load_end_date, a.atd) ,0,9), 'YYYYMMDD') between to_date($4, 'YYYYMMDD')-3 and to_date($4, 'YYYYMMDD')+7 \n ";
     sqlText += "    and substring(coalesce(a.load_end_date, a.atd), 0, 9) < $4 order by coalesce(a.load_end_date, a.atd) desc limit 1) a \n ";
@@ -1528,68 +1759,340 @@ const getExportTerminalActivityFromCalSch = (request, response, beforeReuslt) =>
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,done) {
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
+            release();
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    // 수출의 경우 선석이 마지막 이므로 데이터가 있는 경우 해당 정보 보여준다.
+                    if(result != null) {
+                        if (result.rows.length > 0 ) {
+                            if ( null == result.rows[0].terminal ) {
+                            	release();
+                                response.status(200).json(beforeReuslt.rows);
+                            } else {
+                            	release();
+                                response.status(200).json(result.rows);
+                            }
+                        } else {
+                        	release();
+                            response.status(200).json(beforeReuslt.rows);
+                        }
+                    } else {
+                    	release();
+                        // 데이터가 없는 경우 이전에 조회 했던 내용을 보내준다
+                        response.status(200).json(beforeReuslt.rows);
+                    }
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            // 수출의 경우 선석이 마지막 이므로 데이터가 있는 경우 해당 정보 보여준다.
-            if(result != null) {
-                if (result.rows.length > 0 ) {
-                    if ( null == result.rows[0].terminal ) {
-                        response.status(200).json(beforeReuslt.rows);
-                    } else {
-                        response.status(200).json(result.rows);
-                    }
-                } else {
-                    response.status(200).json(beforeReuslt.rows);
-                }
-            } else {
-                // 데이터가 없는 경우 이전에 조회 했던 내용을 보내준다
-                response.status(200).json(beforeReuslt.rows);
-            }
-        });
     });
 }
 const getTsTracking = (request, response) => {
     console.log(request.body)
     let sql = "";
-    sql += " select vessel, start_location as pol, end_location as pod from own_tracking_bl_ports_new ";
+    sql += " select vessel, "
+    // sql += " case when start_location = 'KRPUS' then 'KRBNP' else start_location end as pol, "
+    // sql += " case when end_location = 'KRPUS' then 'KRBNP' else end_location end as pod from own_tracking_bl_ports_new ";
+    sql += " start_location as pol, "
+    sql += " end_location as pod from own_tracking_bl_ports_new ";
     sql += " where 1=1 ";
     sql += " and req_seq = '"+ request.body.reqseq+"' ";
     sql += " and carrier_code = '" +request.body.carrierCode+ "' ";
     sql += " and user_no = '"+request.session.sUser.userno+"'"
     sql += " order by seq "
-    pgsqlPool.connect(function(err,conn,done) {
+    console.log(sql);
+    pgsqlPool.connect(function(err,conn,release,done) {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                    //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
+                    //response.status(200).json(result.rows);
+                    // console.log(result.fields.map(f => f.name));
+
+                }
+            });
+
         }
 
-        conn.query(sql, function(err,result){
-            done();
-            if(err){
-                console.log(err);
-                response.status(400).send(err);
-            }
-            if(result != null) {
-            	response.status(200).json(result.rows);
-            } else {
-            	response.status(200).json([]);
-            }
-            //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            //response.status(200).json(result.rows);
-            // console.log(result.fields.map(f => f.name));
-        });
 
         // conn.release();
+    });
+}
+
+const getScrapLineCodeList = (request, response) => {
+
+    let params = [];
+    params.push(request.body.num);
+    let sqlText = " select customs_line_code, line_code, web_scrap_yn, table_name, no  ";
+    sqlText += " from own_web_scrp_manage order by no ";
+
+    console.log(sqlText, params);
+    const sql = {
+        text: sqlText,
+        // values: params,
+    }
+
+    pgsqlPool.connect(function(err,conn,release,done) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+    
+}
+
+// 스크래핑 선사별 결과 테이블 조회
+const getLineScrapingResultData = (request, response) => {
+
+    let params = [];
+    params.push(request.body.scrapDate+'%');
+    params.push(request.body.num);
+    let sqlText = "select a.* \n"
+    sqlText += " from ( select  ";
+    request.body.column_list.map( row => {
+        sqlText += row +",";
+    });
+    sqlText += "\n row_number()over( order by insert_date desc) as num, count(*) over()/10+1 as tot_page \n";
+    sqlText += ",count(*) over() as tot_cnt, floor(((row_number() over()) -1) /10 +1) as curpage \n";
+    sqlText += " from  ";
+    sqlText += request.body.table_name;
+    sqlText += " where "+request.body.column_list[0]+" like $1";
+    sqlText += " ) a where curpage = $2";
+    console.log(sqlText, params);
+    const sql = {
+        text: sqlText,
+        values: params,
+    }
+
+    pgsqlPool.connect(function(err,conn,release,done) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+    
+}
+
+const getHeaderForLine = (request, response) => {
+
+    let params = [];
+    let sqlText = " select column_name ";
+    sqlText += " from information_schema.columns ";
+    sqlText += " where table_catalog = 'owner' ";
+    sqlText += " and table_name = $1 ";
+    sqlText += " order by ordinal_position ";
+    
+    params.push(request.body.table_name);
+
+    console.log(sqlText, params);
+    const sql = {
+        text: sqlText,
+        values: params,
+    }
+
+    pgsqlPool.connect(function(err,conn,release,done) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+
+                }
+            });
+
+        }
+
+    });
+    
+}
+const getTrackingDate = (req,res) => {
+    // if( !req.body.param) {
+    //     res.status(400).send('Bad Request');
+    //     return;
+    // };
+
+
+
+    let sql = " select a.req_seq, a.carrier_code, (select coalesce(nm_kor,nm) from own_code_cuship where id = a.carrier_code limit 1) as carrier_name ,a.bl_bkg, a.ie_type, a.cntr_no, b.type_size, b.voyage, b.pol, b.pod, "
+    sql += " least(full_outgate_date, full_ingate_date, mt_outgate_date,mt_ingate_date,unload_date,load_date) as start_dt, "
+    sql += " greatest(full_outgate_date, full_ingate_date, mt_outgate_date,mt_ingate_date,unload_date,load_date) as end_dt, "
+    sql += " coalesce(b.vsl_name,(select vsl_name from own_tracking_bl_new c where a.req_seq = c.req_seq)) as vsl_name, "
+    // sql += " least(coalesce(b.eta, (select coalesce(c.pol_etd,c.pol_atd) from own_tracking_bl_new c where a.req_seq = c.req_seq)),coalesce(b.etd, (select coalesce(c.pod_eta,c.pod_ata) from own_tracking_bl_new c where a.req_seq = c.req_seq),to_char(to_date(eta,'yyyymmdd')-interval '90 day','yyyymmdd'))) as start_date, "
+    // sql += " greatest(coalesce(b.eta, (select coalesce(c.pol_etd,c.pol_atd) from own_tracking_bl_new c where a.req_seq = c.req_seq)),coalesce(b.etd, (select coalesce(c.pod_eta,c.pod_ata) from own_tracking_bl_new c where a.req_seq = c.req_seq),to_char(to_date(eta,'yyyymmdd')-interval '90 day','yyyymmdd'))) as end_date, "
+    sql += " case when a.ie_type = 'E' then coalesce(b.etd,(select coalesce(case when pol_atd = '' then null else pol_atd end, case when pol_etd = '' then null else pol_etd end) from own_tracking_bl_new c where a.req_seq = c.req_seq)) else coalesce((select coalesce(case when pol_atd = '' then null else pol_atd end, case when pol_etd = '' then null else pol_etd end) from own_tracking_bl_new c where a.req_seq = c.req_seq),coalesce(b.etd,to_char(to_date(b.eta, 'yyyymmdd')-interval '90 day', 'yyyymmdd'))) end as start_date, "
+    sql += " case when a.ie_type = 'E' then coalesce((select coalesce(case when pod_ata = '' then null else pod_ata end, case when pod_eta = '' then null else pod_eta end) from own_tracking_bl_new c where a.req_seq = c.req_seq),coalesce(b.eta,to_char(to_date(b.etd, 'yyyymmdd')+interval '90 day', 'yyyymmdd'))) else coalesce(b.eta,(select coalesce(case when pod_ata = '' then null else pod_ata end, case when pod_eta = '' then null else pod_eta end) from own_tracking_bl_new c where a.req_seq = c.req_seq)) end as end_date, "
+    sql += " (select float8(wgs84_x) from own_code_port ocp where ocp.port_code = b.pol) as pol_wgs84_x, (select float8(wgs84_y) from own_code_port ocp where ocp.port_code = b.pol) as pol_wgs84_y, (select port_name from own_code_port ocp where ocp.port_code = b.pol) as pol_name, (select nation_code from own_code_port ocp where ocp.port_code = b.pol) as pol_nation_code, "
+    sql += " (select float8(wgs84_x) from own_code_port ocp where ocp.port_code = b.pod) as pod_wgs84_x, (select float8(wgs84_y) from own_code_port ocp where ocp.port_code = b.pod) as pod_wgs84_y, (select port_name from own_code_port ocp where ocp.port_code = b.pod) as pod_name, (select nation_code from own_code_port ocp where ocp.port_code = b.pod) as pod_nation_code, "
+    sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_y, "
+    sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.load_terminal limit 1) as load_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.load_terminal limit 1) as load_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.load_terminal limit 1) as load_y, "
+    sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.full_outgate_terminal limit 1) as full_outgate_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.full_outgate_terminal limit 1) as full_outgate_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.full_outgate_terminal limit 1) as full_outgate_y, "
+    sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.full_ingate_terminal limit 1) as full_ingate_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.full_ingate_terminal limit 1) as full_ingate_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.full_ingate_terminal limit 1) as full_ingate_y, "
+	sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.mt_outgate_terminal limit 1) as mt_outgate_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.mt_outgate_terminal limit 1) as mt_outgate_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.mt_outgate_terminal limit 1) as mt_outgate_y, "
+    sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.mt_ingate_terminal limit 1) as mt_ingate_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.mt_ingate_terminal limit 1) as mt_ingate_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.mt_ingate_terminal limit 1) as mt_ingate_y "
+    sql += " from own_user_request a, own_dem_det b "
+    sql += " where a.req_seq = b.req_seq "
+    sql += " and	  a.user_no = b.user_no "
+    sql += " and   a.cntr_no = b.cntr_no "
+    sql += " and a.cntr_no = upper('"+req.body.param+"') "
+    sql += " and a.user_no = upper('"+req.session.sUser.userno+ "') "
+    sql += " order by a.insert_date desc "
+    sql += " limit 1 "
+    
+    console.log(sql);
+    
+    pgsqlPool.connect(function(err,conn,release,done) {
+        if(err){
+            console.log("err" + err);
+            release();
+            res.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                	release();
+                    console.log(err);
+                    res.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        res.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        res.status(200).json([]);
+                    }
+
+                }
+            });
+
+        }
+
+    });
+}
+const getContainerMovement = (req,res) => {
+    
+    console.log(req.body.param[0]);
+    if( req.body.param[0].start_dt === req.body.param[0].end_dt) {
+        res.status(200).send({sendMessage:'NO DATA'});
+        return;
+    };
+    if( req.body.param[0].cntr_no === null && req.body.param[0].start_dt === null && req.body.param[0].end_dt === null) {
+        res.status(200).send({sendMessage:'BAD REQUEST'});
+        return;
+    }
+    let sql = "";
+    sql += " select container_no1, float8(wgs84_y) as latitude, float8(wgs84_x) as longitude, trace_date from own_container_movement "
+    sql += " where container_no1= '"+ req.body.param[0].cntr_no +"' " 
+    sql += " and trace_date between  to_timestamp('"+req.body.param[0].start_dt+"','YYYYMMDDHH24MISS') and  to_timestamp('"+req.body.param[0].end_dt+"','YYYYMMDDHH24MISS') "
+    sql += " order by trace_date asc"
+    console.log(sql)
+    
+    pgsqlPool.connect(function(err,conn,release,done) {
+        if(err){
+            console.log("err" + err);
+            release();
+            res.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    res.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        res.status(200).send({sendMessage:'SUCCESS', result:result.rows});
+                    } else {
+                    	release();
+                        res.status(200).send({sendMessage:'NO_DATA', result:[]});
+                    }
+
+                }
+            });
+
+        }
+
     });
 }
 
@@ -1615,5 +2118,10 @@ module.exports = {
     getTrackingTerminal,
     getImportTerminalActivity,
     getExportTerminalActivity,
-    getTsTracking
+    getTsTracking,
+    getScrapLineCodeList,
+    getHeaderForLine,
+    getLineScrapingResultData,
+    getTrackingDate,
+    getContainerMovement
 }
