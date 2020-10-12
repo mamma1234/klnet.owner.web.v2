@@ -7,7 +7,6 @@ import Chart, {
 	Legend,
 	Tooltip,
 	Grid,Point,Margin } from 'devextreme-react/chart';
-
 import axios from 'axios';
 	
 
@@ -37,8 +36,7 @@ export default function ShipmentChart(props) {
 	 var datapoint = [];
 	 
 	  React.useEffect(() => {
-		  
-		  axios.post("/com/getCarrierStatList",{},{headers:{'Authorization':'Bearer '+props.store.token}})
+		  axios.post("/com/getCarrierStatList",{},{headers:{'Authorization':'Bearer '+props.token}})
 	  	    // .then(setCarrierList([]))
 			.then(res => {
 				console.log("data:",res.data);
@@ -52,7 +50,7 @@ export default function ShipmentChart(props) {
 				setCarrierList([]);
 			});
 		  
-		  axios.post("/com/getCarrierStatInfo",{},{headers:{'Authorization':'Bearer '+props.store.token}})
+		  axios.post("/com/getCarrierStatInfo",{},{headers:{'Authorization':'Bearer '+props.token}})
 	  	    // .then(setStats([]))
 		    .then(res => {console.log("data carrier:",res.data);
 		    //setStats(res.data);

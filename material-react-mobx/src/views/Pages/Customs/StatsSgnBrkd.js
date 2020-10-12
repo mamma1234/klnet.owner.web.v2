@@ -15,7 +15,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
 import CustomInput from "components/CustomInput/CustomInput.js";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -48,7 +48,7 @@ function Alert(props) {
 
 export default function StatsSgnBrkd(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+ // const [userStore] = useState(props.store);
   const classes = useStyless();
   const [cntrCnt, setCntrCnt] = useState('0');
   const [gubunCode, setGubunCode] = useState("A01");
@@ -108,6 +108,7 @@ export default function StatsSgnBrkd(props) {
 
   }
   const onSubmit = () => {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
 	//필수 입력 
 	if(cdValtValNm === "" && cdValtVal === "") {
 		if(gubunCode === "A08" || gubunCode === "A10" || gubunCode === "A11") {
@@ -115,8 +116,8 @@ export default function StatsSgnBrkd(props) {
 			return;
 		}
 	}
-
-    axios.post("/com/uniPassApiStatsSgnBrkd",{param:gubunCode,param2:cdValtValNm,param3:cdValtVal}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+	if(token) {
+    axios.post("/com/uniPassApiStatsSgnBrkd",{param:gubunCode,param2:cdValtValNm,param3:cdValtVal}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message === "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -133,6 +134,9 @@ export default function StatsSgnBrkd(props) {
         	props.openLogin();
         }
         });
+	} else {
+		props.openLogin();
+	}
   }
   return (
     <div>

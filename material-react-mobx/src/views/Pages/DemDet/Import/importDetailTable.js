@@ -25,6 +25,7 @@ import Tariff from "views/Pages/DemDet/PopUp/tariff.js";
 // core components
 import { slideDown, slideUp } from "components/Slide/Slide.js";
 import TableList from "components/Table/TableSmallLine.js";
+import Tablestyles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
 
 
 
@@ -58,6 +59,8 @@ const useStyles = makeStyles(styles => ({
     width: 1,
   }
 }));
+
+const TableStyle = makeStyles(Tablestyles);
 
 function TablePageinationActions(props) {
 	const theme = useTheme();
@@ -127,7 +130,7 @@ TablePageinationActions.propTypes = {
 export default function ToggleTable(props) {
 
 
-  const classes = useStyles();
+  const classes = TableStyle();
   const { tableData, tableHeaderColor } = props;
   //console.log(">>> tableData : ",tableData);
   //console.log(props);

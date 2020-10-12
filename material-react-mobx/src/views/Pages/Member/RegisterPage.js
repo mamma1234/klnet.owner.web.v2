@@ -65,6 +65,7 @@ import Privacy from 'views/Pages/PrivacyPolicy.js';
 import styles from "assets/jss/material-dashboard-pro-react/views/registerPageStyle";
 import axios from 'axios';
 import dotenv from "dotenv";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 //import queryString from 'query-string';
 import { observer, inject } from 'mobx-react'; // 6.x
 dotenv.config();
@@ -72,12 +73,12 @@ dotenv.config();
 const useStyles = makeStyles(styles);
 
 
-//export default function RegisterPage(props) {
-const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props}) => {	
+export default function RegisterPage(props) {
+//const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props}) => {	
 
    const classes = useStyles();
-   const userStoreValue = userStore.user;
-   //const userStoreValue = {'provider':'kakao','userid':'test00000001','accessToken':'test123123123123'};
+   const localStore =  userService.GetItem()||null;
+   //const localStore.user = {'provider':'kakao','userid':'test00000001','accessToken':'test123123123123'};
    
    
    const [uid,setUid] = React.useState();
@@ -125,9 +126,9 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 	//console.log(">>>uservalue:",userStore.user);
 
 	React.useEffect(() => {
-		  if(userStore.user) {
+		  if(localStore) {
 			  //setUserName(userStore.user.username);
-			  setEmail(userStore.user.email);
+			  setEmail(localStore.user.email);
 		  }
 
 		    return () => {
@@ -291,7 +292,7 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 
 	 if(!idCheck&&!passwordCheck&&!repasswordCheck&&certifyStatus) {
 		 
-	    if(userStoreValue) {
+	    if(localStore) {
 	    	setAgreeText("소셜 계정 과 연동 하여 PLISM PLUS 회원에 가입 하시겠습니까?");
 	    } else {
 	    	setAgreeText("PLISM PLUS 회원에 가입 하시겠습니까?");
@@ -305,29 +306,30 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
   
   const onSubmit = () => {
 	  setOpen(false);
-	  if(userStoreValue) {
+	  if(localStore) {
 		  return axios ({
 				url:'/auth/join',
 				method:'POST',
-				data: {provider:userStoreValue.provider,
+				data: {provider:localStore.user.provider,
 					   id:uid,
 					   password:password,
 					   name:userName,
 					   phone:phoneNum,
 					   email:email,
-					   kakaoid:userStoreValue.provider==='kakao'?userStoreValue.userid:'',
-					   tokenkakao:userStoreValue.provider==='kakao'?userStoreValue.accessToken:'',
-					   naverid:userStoreValue.provider==='naver'?userStoreValue.userid:'',
-					   tokennaver:userStoreValue.provider==='naver'?userStoreValue.accessToken:'',
-					   faceid:userStoreValue.provider==='facebook'?userStoreValue.userid:'',
-					   tokenface:userStoreValue.provider==='facebook'?userStoreValue.accessToken:'',
-					   googleid:userStoreValue.provider==='google'?userStoreValue.userid:'',
-					   tokengoogle:userStoreValue.provider==='google'?userStoreValue.accessToken:'',
+					   kakaoid:localStore.user.provider==='kakao'?localStore.user.userid:'',
+					   tokenkakao:localStore.user.provider==='kakao'?localStore.user.accessToken:'',
+					   naverid:localStore.user.provider==='naver'?localStore.user.userid:'',
+					   tokennaver:localStore.user.provider==='naver'?localStore.user.accessToken:'',
+					   faceid:localStore.user.provider==='facebook'?localStore.user.userid:'',
+					   tokenface:localStore.user.provider==='facebook'?localStore.user.accessToken:'',
+					   googleid:localStore.user.provider==='google'?localStore.user.userid:'',
+					   tokengoogle:localStore.user.provider==='google'?localStore.user.accessToken:'',
 					   linkyn:'Y'}
 			}).then(res=>{
 						  alertMessage('소셜 계정 과 연동 하여 PLISM PLUS 가입되었습니다. 메인화면으로 이동됩니다.','success');
-						  userStore.setUser(res.data.user);
-				          userStore.setToken(res.data.token);
+						  //userStore.setUser(res.data.user);
+				          //userStore.setToken(res.data.token);
+						  userService.SetItem(res.data);
 						  props.history.push("/landing");
 			}
 			)
@@ -489,7 +491,7 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
   const mergesubmit = () => {
 
 	  setOpen(false);
-	  if(!userStoreValue) {
+	  if(!localStore) {
 		  alertMessage('[ERROR] SOCAIL INFO ERROR !!!','error');
 	  } else {
 		  return axios ({
@@ -499,20 +501,21 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 				data: {provider:'merge',
 					   id : mergeId,
 					   password : mergePw,
-					   kakaoid:userStoreValue.provider=='kakao'?userStoreValue.userid:'',
-					   tokenkakao:userStoreValue.provider=='kakao'?userStoreValue.accessToken:'',
-					   naverid:userStoreValue.provider=='naver'?userStoreValue.userid:'',
-					   tokennaver:userStoreValue.provider=='naver'?userStoreValue.accessToken:'',
-					   faceid:userStoreValue.provider=='facebook'?userStoreValue.userid:'',
-					   tokenface:userStoreValue.provider=='facebook'?userStoreValue.accessToken:'',
-					   googleid:userStoreValue.provider=='google'?userStoreValue.userid:'',
-					   tokengoogle:userStoreValue.provider=='google'?userStoreValue.accessToken:'', 
+					   kakaoid:localStore.user.provider=='kakao'?localStore.user.userid:'',
+					   tokenkakao:localStore.user.provider=='kakao'?localStore.user.accessToken:'',
+					   naverid:localStore.user.provider=='naver'?localStore.user.userid:'',
+					   tokennaver:localStore.user.provider=='naver'?localStore.user.accessToken:'',
+					   faceid:localStore.user.provider=='facebook'?localStore.user.userid:'',
+					   tokenface:localStore.user.provider=='facebook'?localStore.user.accessToken:'',
+					   googleid:localStore.user.provider=='google'?localStore.user.userid:'',
+					   tokengoogle:localStore.user.provider=='google'?localStore.user.accessToken:'', 
 					   linkyn:'Y'	   
 					   }
 			}).then(res=>{
 						  alertMessage('PLISM PLUS 계정과 연동이 되었습니다. 메인페이지로 이동됩니다.','success');
-			              userStore.setUser(res.data.user);
-	         			  userStore.setToken(res.data.token);
+			              //userStore.setUser(res.data.user);
+	         			  //userStore.setToken(res.data.token);
+						  userService.SetItem(res.data);
 						  props.history.push("/landing");
 			})
 			.catch(err => {
@@ -553,17 +556,17 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
     	    <input type="hidden" name="RSLT_NAME"/>
     	</form>  		
     <GridContainer justify="center">
-        <GridItem xs={12} sm={8} md={userStoreValue?8:6}>
+        <GridItem xs={12} sm={8} md={localStore?8:6}>
           <Card className={classes.cardSignup} style={{margin:'0',paddingTop:'10px',paddingBottom:'0'}}>
           
           <CardHeader className={`${classes.cardHeader} ${classes.textCenter}`} color="info">
           <HighlightOff onClick={()=> props.history.push("/landing")} style={{color:'white',top:'2',right:'2',position:'absolute'}}/>
-          {userStoreValue?
+          {localStore?
           <h3 className={classes.cardTitle} style={{marginBottom:'0'}}><font color="white">해당 계정으로 가입된 이력이 존재하지 않습니다.</font></h3>
           :<h3 className={classes.cardTitle} style={{marginBottom:'0'}}><font color="white">회원가입</font></h3>}
           </CardHeader>
             <CardBody style={{paddingTop:'10px',paddingBottom:'15px'}}>
-            {userStoreValue?<div><p style={{marginBottom:'0',fontWeight:'bold',textAlignLast:'center'}}><font size="3" color="green">{userStoreValue.provider} 계정으로 인증하였습니다.</font></p>
+            {localStore?<div><p style={{marginBottom:'0',fontWeight:'bold',textAlignLast:'center'}}><font size="3" color="green">{localStore.user.provider} 계정으로 인증하였습니다.</font></p>
             <Divider /></div>:
 	            <GridItem xs={12} style={{textAlignLast:'center'}}>			
 					<Button
@@ -610,9 +613,9 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 		            <Divider />
 		        </GridItem>}
 	            <GridContainer style={{paddingLeft:'10px',paddingRight:'10px'}}>
-	            	<GridItem xs={12} sm={12} md={userStoreValue?7:12}>
+	            	<GridItem xs={12} sm={12} md={localStore?7:12}>
 	            	<GridItem xs={12} sm={12}>
-	            		{userStoreValue?<p style={{marginTop:'10px',marginBottom:'0',fontWeight:'bold',textAlignLast:'center'}}>몇가지 입력후 회원가입이 가능합니다.</p>:null}
+	            		{localStore?<p style={{marginTop:'10px',marginBottom:'0',fontWeight:'bold',textAlignLast:'center'}}>몇가지 입력후 회원가입이 가능합니다.</p>:null}
 		        	<CustomInput
 			            labelText={
 			              <span>
@@ -829,7 +832,7 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
 	         </GridItem>
 					    
 					</GridItem>
-				{userStoreValue?
+				{localStore?
 	            <GridItem xs={12} sm={12} md={5}>
 		            <div style={{textAlignLast:'center',paddingLeft:'20px',paddingRight:'20px',paddingTop:'80px',fontWeight:'bold'}}>
 				     	<p>기존 ID가 있으시다면,<br/> 소셜계정을 연동하실 수 있습니다.</p><br/>
@@ -865,6 +868,6 @@ const RegisterPage = inject('userStore', 'trackStore')(observer(({ userStore, tr
   );
 }
 
-))
+//))
 
-export default RegisterPage;
+//export default RegisterPage;

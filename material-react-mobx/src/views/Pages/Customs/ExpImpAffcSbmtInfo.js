@@ -23,7 +23,7 @@ import Assignment from "@material-ui/icons/Assignment";
 import CustomInput from "components/CustomInput/CustomInput.js";
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
 import Moment from 'moment';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -57,7 +57,7 @@ function Alert(props) {
 
 export default function ExpImpAffcSbmtInfo(props) {
   const [severity, setSeverity] = useState("");
-  const {store} =props;
+  //const {store} =props;
   const classes = useStyless();
   const [cntrList, setCntrList] = useState([]);
 
@@ -94,14 +94,15 @@ export default function ExpImpAffcSbmtInfo(props) {
   };
   
   const onSubmit = () => {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
 	  if(!dcshSbmtNo) {
 		  AlertMessage("HS코드 값은 필수 입력값입니다.","error");
 		  return;
 	  }
-	  if(store.token) {
+	  if(token) {
 
 		    axios.post("/com/uniPassApiHsSgn",{param1:dcshSbmtNo , param2:selectValue}, 
-		    		{headers:{'Authorization':'Bearer '+store.token}}).then(
+		    		{headers:{'Authorization':'Bearer '+token}}).then(
 		      res => {
 		        if(res.data.message == "SUCCESS") {
 		          setGridData(res.data.infoData.data);

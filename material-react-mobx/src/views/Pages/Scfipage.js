@@ -38,8 +38,7 @@ export default function Scfipage(props) {
 	const [store] = useState(props.param.store);
 	const [getData, setGetData] = useState([]);
 	useEffect(() => {
-		console.log(store.token)
-		Axios.post('/com/scfiApi',{},{headers:{'Authorization':'Bearer '+store.token}}).then(
+		Axios.post('/com/scfiApi',{},{headers:{'Authorization':'Bearer '+store}}).then(
 			res => {
 				setGetData(res.data.data);
 			}

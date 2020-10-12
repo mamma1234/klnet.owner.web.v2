@@ -20,7 +20,7 @@ import IconM from "@material-ui/core/Icon";
 //import JoinPage from "components/Form/Common/JoinPage.js";
 import axios from 'axios';
 import { observer, inject} from 'mobx-react'; // 6.x
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyless = makeStyles(theme => ({
 	  root: {
@@ -63,7 +63,8 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 
-const TableList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function CntrHistoryPage(props) {
+//const TableList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   const classes = useStyles();
   const [cntrList, setCntrList] = useState([]);
   const [cntrCnt, setCntrCnt] = useState('0');
@@ -85,23 +86,28 @@ const TableList = inject('userStore', 'trackStore')(observer(({ userStore, track
     const searchData = {
       cargMtNo: props.cargMtNo
     };
-    axios.post("/com/uniPassApiSelectCntrInfo",searchData, {headers:{'Authorization':'Bearer '+userStore.token}})
-    .then(res => {
-      if (res.data.message == "SUCCESS"){
-        setCntrCnt(res.data.infoDataList.length);
-        setCntrList(res.data.infoDataList);
-      }
-      else if(res.data.message == "NO_DATA"){
-        alert("조회결과가 없습니다");
-        return;
-      } else { //ERROR
-        alert(res.data.errMsg);
-      }
-    }).catch(err => {
-        if(err.response.status === 401) {
-        	props.openLogin();
-        }
-        });
+    const token = userService.GetItem()?userService.GetItem().token:null;
+    if(token) {
+	    axios.post("/com/uniPassApiSelectCntrInfo",searchData, {headers:{'Authorization':'Bearer '+token}})
+	    .then(res => {
+	      if (res.data.message == "SUCCESS"){
+	        setCntrCnt(res.data.infoDataList.length);
+	        setCntrList(res.data.infoDataList);
+	      }
+	      else if(res.data.message == "NO_DATA"){
+	        alert("조회결과가 없습니다");
+	        return;
+	      } else { //ERROR
+	        alert(res.data.errMsg);
+	      }
+	    }).catch(err => {
+	        if(err.response.status === 401) {
+	        	props.openLogin();
+	        }
+	        });
+    }else{
+    	props.openLogin();
+    }
   }
 
   return (
@@ -126,5 +132,5 @@ const TableList = inject('userStore', 'trackStore')(observer(({ userStore, track
     </Card>
   );
 }
-));
-export default TableList;
+//));
+//export default TableList;

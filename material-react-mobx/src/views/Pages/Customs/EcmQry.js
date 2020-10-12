@@ -15,6 +15,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import MaskedInput from 'react-text-mask';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -63,7 +64,7 @@ function TextMaskCustom(props) {
 
 export default function Ecmqry(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+  //const [userStore] = useState(props.store);
   const classes = useStyless();
   const [gubunText, setGubunText] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
@@ -93,6 +94,7 @@ export default function Ecmqry(props) {
     setGubunText(e.target.value);
   }
   const onSubmit = () => {
+	  const token = userService.GetItem()?userService.GetItem().token:null; 
     let number = businessNumber.replace(/-/gi,'');
     number = number.replace(/(\s*)/gi,'');
 
@@ -108,8 +110,8 @@ export default function Ecmqry(props) {
       AlertMessage("사업자 번호의 길이가 10자리가 아닙니다.","error");
       return;
     }
-    
-    axios.post("/com/uniPassApiecmQry",{_text:gubunText,_number:businessNumber}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+    if(token){
+    axios.post("/com/uniPassApiecmQry",{_text:gubunText,_number:businessNumber}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message === "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -125,6 +127,9 @@ export default function Ecmqry(props) {
         	props.openLogin();
         }
         });
+    } else {
+    	props.openLogin();
+    }
   }
   return (
     <div>

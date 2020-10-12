@@ -31,14 +31,7 @@ module.exports = (passport) => {
         try {
             //console.log('(facebookStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
             // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
-            sUser.provider = 'facebook';
-        	sUser.userno = '';
-            sUser.email = profile.email;
-            sUser.id = profile.id;  //3383301225075545
-            sUser.username = profile.username;
-            sUser.displayName = profile.displayName;       
-            sUser.accessToken = accessToken;
-            sUser.refreshToken = refreshToken;
+
             /*
                 2020.01.21 pdk ship 
 
@@ -59,19 +52,19 @@ module.exports = (passport) => {
             
            	const sql = {
         	        text: "SELECT * FROM OWN_COMP_USER \n"+
-        	              " where face_id = $1 \n"+
+        	              " where trim(face_id) = trim($1) \n"+
         	        	  "  limit 1 ",
         	        values: [profile.id],
         	        //rowMode: 'array',
         	    }
 
         	    console.log(sql);
-        	    pgsqlPool.connect(function(err,conn) {
+        	    pgsqlPool.connect(function(err,conn,release) {
         	        if(err){
         	            console.log("err" + err);
         	        }
         	        conn.query(sql, function(err,result){
-        	            
+        	        	release();
         	            if(err){
         	                console.log(err);
         	            }
@@ -81,7 +74,7 @@ module.exports = (passport) => {
         	            	sUser.provider = 'facebook';
         	            	sUser.userno = result.rows[0].user_no;
         	                sUser.email = profile.email; //mamma1234@naver.com
-        	                sUser.id = profile.id;  //3383301225075545
+        	                sUser.id = '';  //3383301225075545
         	                sUser.username = result.rows[0].user_name;
         	                sUser.displayName = profile.displayName;       
         	                //sUser.accessToken = accessToken;
@@ -89,6 +82,14 @@ module.exports = (passport) => {
         	                req.session.sUser = sUser;
     	                    done(null, sUser); 
         	            } else {
+        	                sUser.provider = 'facebook';
+        	            	sUser.userno = '';
+        	                sUser.email = profile.email;
+        	                sUser.id = profile.id;  //3383301225075545
+        	                sUser.username = profile.username;
+        	                sUser.displayName = profile.displayName;       
+        	                sUser.accessToken = accessToken;
+        	                sUser.refreshToken = refreshToken;
         	            	console.log('가입되지 않은 회원입니다.');
         	                done(null, false, { message: '가입되지 않은 회원입니다.' });
         	            }

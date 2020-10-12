@@ -31,15 +31,15 @@ module.exports = (passport) => {
         try {
             console.log('(kakaoStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
             // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
-	            sUser.provider = 'kakao';
-	            sUser.userid = profile.id;  //1261001956
+/*	            sUser.provider = 'kakao';
+	            //sUser.userid = profile.id;  //1261001956
 	            sUser.userno = '';
 	            sUser.username = profile.username;
                 sUser.displayName = profile.displayName;
                 sUser.accessToken = accessToken;
                 sUser.refreshToken = '';
                 sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
-
+*/
             /*
                 2020.01.21 pdk ship 
 
@@ -53,38 +53,47 @@ module.exports = (passport) => {
             */
 
             const userid = profile.id;
+            console.log("user_id:",profile.id);
            //const password = accessToken
         	const sql = {
-        	        text: "SELECT * FROM OWN_COMP_USER where kakao_id = $1 limit 1 ",
+        	        text: "SELECT * FROM OWN_COMP_USER where trim(kakao_id) = trim($1) limit 1 ",
         	        values: [profile.id],
         	        //rowMode: 'array',
         	    }
 
         	    console.log(sql);
-        	    pgsqlPool.connect(function(err,conn) {
+        	    pgsqlPool.connect(function(err,conn,release) {
         	        if(err){
         	            console.log("err" + err);
         	        }
         	        conn.query(sql, function(err,result){
-        	            
+        	        	release();
         	            if(err){
         	                console.log(err);
         	            }
-        	            //onsole.log(">>>",result);
-        	            console.log("ROW CNT:",result.rowCount);
+        	            //console.log(">>>",result);
+        	            console.log("USER DATA CNT:",result.rowCount);
         	            if(result.rowCount > 0) {
     	     	            sUser.provider = 'kakao';
-    	    	            sUser.userid = profile.id;  //1261001956
+    	    	            sUser.userid = '';  //1261001956
     	    	            sUser.userno = result.rows[0].user_no;
     	    	            sUser.username = profile.username?profile.username:result.rows[0].user_name;
                             sUser.displayName = profile.displayName;
-                            //sUser.accessToken = accessToken;
+                            sUser.accessToken = accessToken;
                             //sUser.refreshToken = refreshToken;
                             sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
-    	                    req.session.sUser = sUser;
-    	                    console.log(">user value:",sUser);
+    	                    //req.session.sUser = sUser;
+    	                    //console.log(">user value:",sUser);
     	                    done(null, sUser); 
         	            } else {
+        	            	sUser.provider = 'kakao';
+        		            sUser.userid = profile.id;  //1261001956
+        		            sUser.userno = '';
+        		            sUser.username = profile.username;
+        	                sUser.displayName = profile.displayName;
+        	                sUser.accessToken = accessToken;
+        	                sUser.refreshToken = '';
+        	                sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
         	            	console.log('가입되지 않은 회원입니다.');
         	                done(null, sUser, { message: '가입되지 않은 회원입니다.' });
         	            }

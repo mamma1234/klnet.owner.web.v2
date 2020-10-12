@@ -2,6 +2,7 @@
 
 const pgsqlPool = require("../pool.js").pgsqlPool
 const basicauth = require("basic-auth");
+const sUser = require('../../models/sessionUser');
 
 
 const getPortCode = (request, response) => {
@@ -21,20 +22,17 @@ const getPortCode = (request, response) => {
       pgsqlPool.connect(function(err,conn,release) {
           if(err){
               console.log("err" + err);
-              release();
               response.status(400).send(err);
           } else {
               console.log("sql : " + sql.text);
               conn.query(sql, function(err,result){
-                //   done();
+            	  release();
                   if(err){
                       console.log(err);
-                      release();
                       response.status(400).send(err);
                   } else {
                       //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
                       //console.log(result);
-                	  release();
                       response.status(200).json(result.rows);
                       // console.log(result.fields.map(f => f.name));
                   }
@@ -62,20 +60,17 @@ const getPortTrackingCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
             console.log("sql : " + sql.text);
             conn.query(sql, function(err,result){
-                // done();
+            	release();
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
                     //console.log(result);
-                	release();
                     response.status(200).json(result.rows);
                     // console.log(result.fields.map(f => f.name));
                 }
@@ -89,28 +84,25 @@ const getPortTrackingCode = (request, response) => {
   const getPortCodeInfo = (request, response) => {
     const sql = {
         text: "select port_code,port_name from own_code_port order by port_code",
-       // values: [request.session.sUser.userno],
+       // values: [sUser.userno],
         rowMode: 'array',
     }
 
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+            	release();
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     console.log(result);
                     
                     if(result != null) {
                         //console.log(result.rows[0]);
-                    	release();
                         response.status(200).json(result.rows);
                     } else {
                     	release();
@@ -142,17 +134,14 @@ const getCustomLineCode = (request, response) => {
     pgsqlPool.connect(function(err,client,release) {
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
             client.query(sql, function(err,result){
-                // done();
+            	release();
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
-                	release();
                     response.status(200).send(result.rows);
                 }
             });
@@ -166,7 +155,7 @@ const getCustomLineCode = (request, response) => {
 
 
 const getErrorLogList = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, ";
@@ -190,17 +179,14 @@ const getErrorLogList = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
-                // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -218,7 +204,7 @@ const getErrorLogList = (request, response) => {
 
 
 const getUserData = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, * from own_comp_user ";
@@ -232,17 +218,14 @@ const getUserData = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -257,7 +240,7 @@ const getUserData = (request, response) => {
 }
 
 const getUserRequest = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, * from own_user_request ";
@@ -274,17 +257,14 @@ const getUserRequest = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -301,7 +281,7 @@ const getUserRequest = (request, response) => {
 
 
 const getTerminalInfo = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, * from own_terminal_info ";
@@ -314,18 +294,15 @@ const getTerminalInfo = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
 
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -342,7 +319,7 @@ const getTerminalInfo = (request, response) => {
 
 
 const getCodecuship = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page,floor(((row_number() over()) -1) /10 +1) as curpage, * from own_code_cuship ";
@@ -356,18 +333,15 @@ const getCodecuship = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
 
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -395,17 +369,14 @@ const getPortLocation = (req,res) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 res.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         res.status(400).send(err);
                     } else {
-                    	release();
                         res.status(200).send(result.rows);
                     }
                 });
@@ -436,17 +407,14 @@ const createApiKey = (req,res) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 res.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         res.status(400).send(err);
                     } else {
-                    	release();
                         res.status(200).send(s);
                     }
                 });
@@ -461,7 +429,7 @@ const createApiKey = (req,res) => {
 
 }
 const duplicateCheck =(req,res) => {
-    console.log(req.body);
+    //console.log(req.body);
 
     let sql = "";
 
@@ -476,17 +444,14 @@ const duplicateCheck =(req,res) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 res.status(400).send(err);
             } else {
                 client.query(sql, function(err,result){
                     // done();
                     if(err){
                         console.log(err);
-                        release();
                         res.status(400).send(err);
                     } else {
-                    	release();
                         res.status(200).send(result.rows);
                     }
                 });    
@@ -501,7 +466,7 @@ const duplicateCheck =(req,res) => {
 }
 
 const getVslTypeList = (request, response) => {
-    console.log(">>>>>>>", request.body);
+    //console.log(">>>>>>>", request.body);
     let sql = "";
         sql += " select * from ( ";
         sql += " select count(*) over()/10+1 as tot_page, floor(((row_number() over(order by insert_date desc))-1)/10+1) as curpage, * from own_vsl_type ";
@@ -514,17 +479,14 @@ const getVslTypeList = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err) {
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result) {
                     // done();
                     if(err) {
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -553,17 +515,14 @@ const getVslInfoList = (request, response) => {
         pgsqlPool.connect(function(err,client,release) {
             if(err) {
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result) {
-                    // done();
+                	release();
                     if(err) {
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });
@@ -579,27 +538,27 @@ const getVslInfoList = (request, response) => {
 
 const getNationInfo = (request, response) => {
     let sql = "";
-        sql += " select nation_kname, nation_ename "
+        sql += " select nation_kname, nation_ename, nation_code "
         sql += " from own_code_nation "
         sql += " where 1=1 "
-        sql += " and nation_code = '"+request.body.nationCode +"' "
-        sql += " limit 1 "
+        sql += request.body.nationCode !== ""?" and nation_code = '"+request.body.nationCode +"' ":""
+        sql += " order by nation_kname asc "
+        //sql += " limit 1 "
+
+
     console.log(sql);
     try {    
         pgsqlPool.connect(function(err,client,release) {
             if(err) {
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 client.query(sql, function(err,result) {
-                    // done();
+                	release();
                     if(err) {
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
-                    	release();
                         response.status(200).send(result.rows);
                     }
                 });

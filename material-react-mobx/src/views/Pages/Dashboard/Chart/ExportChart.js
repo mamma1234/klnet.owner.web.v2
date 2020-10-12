@@ -11,10 +11,10 @@ import axios from 'axios';
 	
 export default function ExportChart(props) {
 
-	const [stats,setStats] = React.useState([]); 
+	const [stats,setStats] = React.useState([]);
 	var datapoint = [];
 	  React.useEffect(() => {
-		  axios.post("/com/getExportStatInfo",{},{headers:{'Authorization':'Bearer '+props.store.token}})
+		  axios.post("/com/getExportStatInfo",{},{headers:{'Authorization':'Bearer '+props.token}})
 	  	  .then(setStats([]))
 		    .then(res => {console.log("ex data:",res.data);
 		    res.data.map((data) =>

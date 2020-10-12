@@ -57,7 +57,7 @@ import CustomTabs from "components/CustomTabs/CustomScrollTabs.js";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import queryString from 'query-string';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 export default function ScrollTapPages(props) {
 	
   const query = queryString.parse(window.location.search);

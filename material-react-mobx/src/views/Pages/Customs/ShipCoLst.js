@@ -23,7 +23,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
 import { Link } from 'react-router-dom';
 import ActListIcon from "@material-ui/icons/ListAlt";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -56,7 +56,7 @@ function Alert(props) {
 
 export default function StatsSgnBrkd(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore, setUseStore] = useState(props.store);
+ // const [userStore, setUseStore] = useState(props.store);
   const classes = useStyless();
   const [cnt, setCnt] = useState('0');
   const [shipCoNm, setShipCoNm] = useState("");
@@ -87,8 +87,9 @@ export default function StatsSgnBrkd(props) {
       alert( "선박회사명 필수 입력입니다." );
       return false;
     }
-    
-    axios.post("/com/uniPassApiShipCoLst",{shipCoNm:shipCoNm}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+    const token = userService.GetItem()?userService.GetItem().token:null;
+    if(token) {
+    axios.post("/com/uniPassApiShipCoLst",{shipCoNm:shipCoNm}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message == "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -113,6 +114,9 @@ export default function StatsSgnBrkd(props) {
         	props.openLogin();
         }
         });
+	 } else {
+			props.openLogin();
+		 }
   }
   return (
     <div>

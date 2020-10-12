@@ -130,7 +130,7 @@ export default function CurrentDetailTable(props) {
   const classes = useStyles();
   const { tableHead, tableData, tableHeaderColor,store } = props;
   const [page,setPage] = React.useState(0);
-  const token = store.token;
+  const token = store;
   const [rowsPerPage,setRowsPerPage] = React.useState(10);
 
   //const emptyRows = rowsPerPage - Math.min(rowsPerPage,tableData.length - page * rowsPerPage);

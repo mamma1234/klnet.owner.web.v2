@@ -16,7 +16,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -58,7 +58,7 @@ function Alert(props) {
 
 export default function ShedInfo(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+  //const [userStore] = useState(props.store);
   const classes = useStyless();
   const [tCnt, setTCnt] = useState('0');
   
@@ -94,7 +94,9 @@ export default function ShedInfo(props) {
 		  document.getElementById("customNo").focus();
       return false;
 	  } else {
-      axios.post("/com/uniPassShedInfo",{customNo:customNo,csaCode:csaCode}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+		  const token = userService.GetItem()?userService.GetItem().token:null;
+		  if(token) {
+      axios.post("/com/uniPassShedInfo",{customNo:customNo,csaCode:csaCode}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
           if(res.data.message == "SUCCESS") {
             AlertMessage("조회가 완료되었습니다.","success");
@@ -113,6 +115,9 @@ export default function ShedInfo(props) {
           	props.openLogin();
           }
           });
+			 } else {
+					props.openLogin();
+				 }
     }
   }
   return (

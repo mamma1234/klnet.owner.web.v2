@@ -35,6 +35,9 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import axios from 'axios';
 
 import styles from "assets/jss/material-dashboard-pro-react/views/dashboardStyle.js";
+import table from "assets/jss/material-dashboard-pro-react/components/tableStyle";
+
+const tableStyles = makeStyles(table);
 
 const useStyles = makeStyles(styles);
 
@@ -112,7 +115,7 @@ function Row(props) {
 	  const { row } = props;
 	  const [open, setOpen] = React.useState(false);
 	  const [detailData, setDetailData] = React.useState([]);
-	  const classes = useRowStyles();
+	  const classes = tableStyles();
 	  
 	  const handleOpen =(id)=>{
 
@@ -125,19 +128,19 @@ function Row(props) {
 
 	  return (
 	    <React.Fragment>
-	      <TableRow className={classes.root} onClick={(event) => handleOpen(row.board_id)}>
-	        <TableCell component="th" scope="row" style={{paddingTop:'10px',paddingBottom:'10px'}} >{row.board_id}</TableCell>
+	      <TableRow className={classes.tableRow} onClick={(event) => handleOpen(row.board_id)}>
+	      {/*<TableCell component="th" scope="row" style={{paddingTop:'10px',paddingBottom:'10px'}} >{row.board_id}</TableCell>*/}
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px'}}>{row.title}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px'}}>{row.author_name}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px'}}>{row.hit_count}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px'}}>{row.insert_date}</TableCell>
 	      </TableRow>
 	      <TableRow>
-	        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+	        <TableCell style={{ paddingBottom: 0, paddingTop: 0 , paddingLeft:'3px',paddingRight:'3px' }} colSpan={6}>
 	          <Collapse in={open} timeout="auto" unmountOnExit>
 	            <Box margin={1}>
-	            <GridItem xs={12} sm={12} md={10} >
-	            <Table style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
+	            <div className={classes.tableResponsive}>
+	            <Table style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}} className={classes.table}>
 	            <TableBody>
 		                <TableRow>
 		                  <TableCell style={{backgroundColor: "#f2fefd",paddingTop:'3px',paddingBottom:'3px',width:'10%'}}>제목</TableCell>
@@ -161,7 +164,7 @@ function Row(props) {
 		              	</TableRow>
 	            </TableBody>
 	        </Table>
-	        </GridItem>
+	        </div>
 	            </Box>
 	          </Collapse>
 	        </TableCell>
@@ -171,24 +174,22 @@ function Row(props) {
 	}
 
 	function CollapsibleTable(props) {
-	  const classes = useRowStyles();
+	  const classes = tableStyles();
 	  const { tableHead, tableData, tableHeaderColor, colSpan } = props; // eslint-disable-line no-unused-vars
 		 
 		 
 	  return (
-	     <div className={classes.tableResponsive}>
-	      <Table aria-label="collapsible table">
-	      {tableHead !== undefined ? (
-	              <TableHead style={{padding:'5px',backgroundColor:'#f2fefd'}}>
-	                <TableRow style={{borderBottomStyle:'solid',borderBottomColor:'#00bcd4'}}>
-	    	            <TableCell stype={{width:'5%'}}>no</TableCell>
-	    	            <TableCell >title</TableCell>
-	    	            <TableCell stype={{width:'10%'}}>inser_name</TableCell>
-	    	            <TableCell stype={{width:'5%'}}>search_cnt</TableCell>
-	    	            <TableCell stype={{width:'10%'}}>insert_date</TableCell>
+			    <div className={classes.tableResponsive}>
+			      <Table className={classes.table}>
+	              <TableHead style={{padding:'5px',backgroundColor:'#f2fefd'}} className={classes[tableHeaderColor + "TableHeader"]}>
+	                <TableRow style={{borderBottomStyle:'solid',borderBottomColor:'#00bcd4'}} className={classes.tableRow + " " + classes.tableRowHead}>
+	    	            {/*<TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%'}}>no</TableCell>*/}
+	    	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} >title</TableCell>
+	    	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>reg</TableCell>
+	    	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'5%'}}>view</TableCell>
+	    	            <TableCell className={classes.tableCell + " " + classes.tableHeadCell} stype={{width:'10%'}}>insert_date</TableCell>
 	                </TableRow>
 	              </TableHead>
-	            ) : null}
 	        <TableBody>
 	        {tableData.map((prop, key) => {
 	            return (

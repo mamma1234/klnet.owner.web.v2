@@ -81,7 +81,8 @@ const useStyles = makeStyles(styles);
 const useRadioStyles = makeStyles(customCheckboxRadioSwitch);
 let numCnt =1;
 
-const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function ImpCustomsPassInfo(props) {
+//const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
   const query = queryString.parse(window.location.search);
 
@@ -90,7 +91,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
   const [hblList,setHblList] = useState([]);
 
   //조회조건
-  const [store,setStore] = useState(props.store);
+  const [store,setStore] = useState(props.token);
 
   const year = (new Date()).getFullYear();
  
@@ -113,7 +114,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
   },[]);
 
   const onSubmit = () => {
-	  if(store.token) {
+	  if(store) {
       setShowHblList(false);
 	    selectPassInfo();
 	  } else {
@@ -123,7 +124,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
   //console.log(paramData);
 
   const handleAddRow = () => {
-	  if(store.token) {
+	  if(store) {
 	    //page ++
 	    numCnt=numCnt+1;
 	
@@ -191,7 +192,7 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
 		return axios ({
 			url:'/com/uniPassApiSelectPassInfo',
 			method:'POST',
-			headers:{'Authorization':'Bearer '+userStore.token},
+			headers:{'Authorization':'Bearer '+store},
 			data: searchData
 		})
 	    .then(res => {
@@ -443,6 +444,6 @@ const ImpCustomsPassInfo = inject('userStore', 'trackStore')(observer(({ userSto
     </GridContainer>
   );
 }
-))
+//))
 
-export default ImpCustomsPassInfo;
+//export default ImpCustomsPassInfo;

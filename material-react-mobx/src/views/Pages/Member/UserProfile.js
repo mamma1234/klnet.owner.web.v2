@@ -20,6 +20,7 @@ import axios from 'axios';
 import Select from '@material-ui/core/Select';
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const styles = {
   cardCategoryWhite: {
@@ -44,7 +45,7 @@ const useStyles = makeStyles(styles);
 
 export default function UserProfile(props) {
 	
-console.log("props:",props);
+//console.log("props:",props);
   const {store} = props;
   const classes = useStyles();
   const [svcType,setSvcType] = useState("E");
@@ -65,29 +66,33 @@ console.log("props:",props);
   const [userNo, setUserNo] = useState("");
   const [userId, setUserId] = useState("");
   useEffect(() => {
-	    console.log('useEffect 호출....');
-	    axios.post("/com/getUserInfo",{},{headers:{'Authorization':'Bearer '+store.token}})
-	    .then(res => {
-	    	setSvcType(res.data[0].user_type);
-	    	setInserDate(res.data[0].insert_date);
-	    	setUserName(res.data[0].user_name?res.data[0].user_name:"");
-	    	setUserPhone(res.data[0].user_phone?res.data[0].user_phone:"");
-	    	setUserEmail(res.data[0].user_email?res.data[0].user_email:"");
-	    	setSocialUse(res.data[0].social_link_yn === "Y"?true:false);
-	    	setSocialLinkDate(res.data[0].social_link_date?res.data[0].social_link_date:"");
-	    	setKakao(res.data[0].kakao_id?res.data[0].kakao_id:"");
-	    	setNaver(res.data[0].naver_id?res.data[0].naver_id:"");
-	    	setFacebook(res.data[0].face_id?res.data[0].face_id:"");
-			setGoogle(res.data[0].google_id?res.data[0].google_id:"");
-			setUserNo(res.data[0].user_no?res.data[0].user_no:"");
-			setUserId(res.data[0].local_id?res.data[0].local_id:"");
-			setApiKey(res.data[0].api_service_key?res.data[0].api_service_key:"");
-	    })
-	    //.then(res => console.log(">>>>>>>>>>>>>>>>>>>>>>>>",JSON.stringify(res.data[0])))
-	    .catch(err => {
-		    alert(err);
-		    });
-	    
+	   // console.log('useEffect 호출....');
+	    const token = userService.GetItem()?userService.GetItem().token:null;
+	    if(token) {
+		    axios.post("/com/getUserInfo",{},{headers:{'Authorization':'Bearer '+token}})
+		    .then(res => {
+		    	setSvcType(res.data[0].user_type);
+		    	setInserDate(res.data[0].insert_date);
+		    	setUserName(res.data[0].user_name?res.data[0].user_name:"");
+		    	setUserPhone(res.data[0].user_phone?res.data[0].user_phone:"");
+		    	setUserEmail(res.data[0].user_email?res.data[0].user_email:"");
+		    	setSocialUse(res.data[0].social_link_yn === "Y"?true:false);
+		    	setSocialLinkDate(res.data[0].social_link_date?res.data[0].social_link_date:"");
+		    	setKakao(res.data[0].kakao_id?res.data[0].kakao_id:"");
+		    	setNaver(res.data[0].naver_id?res.data[0].naver_id:"");
+		    	setFacebook(res.data[0].face_id?res.data[0].face_id:"");
+				setGoogle(res.data[0].google_id?res.data[0].google_id:"");
+				setUserNo(res.data[0].user_no?res.data[0].user_no:"");
+				setUserId(res.data[0].local_id?res.data[0].local_id:"");
+				setApiKey(res.data[0].api_service_key?res.data[0].api_service_key:"");
+		    })
+		    //.then(res => console.log(">>>>>>>>>>>>>>>>>>>>>>>>",JSON.stringify(res.data[0])))
+		    .catch(err => {
+			    alert(err);
+			    });
+	    } else {
+	    	props.history.push("/");
+	    }
 	    return () => {
 	      console.log('cleanup');
 	    };
@@ -124,24 +129,28 @@ console.log("props:",props);
 	  }
   }
   const onCreateApikey = () => {
-	
-	axios.post('/com/duplicateCheck',{user:{id:userId, no:userNo}},{headers:{'Authorization':'Bearer '+store.token}}).then(
-		res => {
-			if(res.data[0].api_service_key == null) {
-				axios.post('/com/createApikey',{user:{id:userId, no:userNo, apiKey:apiKey}},{headers:{'Authorization':'Bearer '+store.token}}).then(
-					res => {
-						if(res.statusText === "OK") {
-							setApiKey(res.data);
-						}else {
-							alert('키 생성중 오류가 발생했습니다.');
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
+		axios.post('/com/duplicateCheck',{user:{id:userId, no:userNo}},{headers:{'Authorization':'Bearer '+token}}).then(
+			res => {
+				if(res.data[0].api_service_key == null) {
+					axios.post('/com/createApikey',{user:{id:userId, no:userNo, apiKey:apiKey}},{headers:{'Authorization':'Bearer '+token}}).then(
+						res => {
+							if(res.statusText === "OK") {
+								setApiKey(res.data);
+							}else {
+								alert('키 생성중 오류가 발생했습니다.');
+							}
 						}
-					}
-				)
-			}else {
-				alert('이미 등록된 키 정보가 있습니다. API KEY : '+res.data[0].api_service_key)
+					)
+				}else {
+					alert('이미 등록된 키 정보가 있습니다. API KEY : '+res.data[0].api_service_key)
+				}
 			}
-		}
-	)
+		)
+	} else {
+		props.openLogin();
+	}
 	
 
 	

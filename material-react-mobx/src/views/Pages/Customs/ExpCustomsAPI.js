@@ -42,6 +42,7 @@ import MaterialTable from 'material-table';
 import { observer, inject} from 'mobx-react'; // 6.x
 import axios from 'axios';
 import { Link } from "react-router-dom";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 import queryString from 'query-string';
 
@@ -116,11 +117,12 @@ const useRadioStyles = makeStyles(customCheckboxRadioSwitch);
 }*/}
 let numCnt =1;
 
-const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function ExpCustomsAPI(props) {
+//const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   
   const query = queryString.parse(window.location.search);
   //조회조건
-  const [store,setStore] = useState(props.store);
+  const token = userService.GetItem()?userService.GetItem().token:null;
  
   const [selectedEnabled, setSelectedEnabled] = React.useState(query.param&&query.gubun=="BL"?"bl":"declare");
   const [searchDclrNo,setSearchDclrNo] = useState(query.param&&query.gubun=="DECLARE"?query.param:"");
@@ -149,8 +151,8 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
   },[]);
 
   const onSubmit = () => {
-
-	  if(store.token) {
+	 
+	  if(token) {
 	    selectDclrInfo();
 	  } else {
 		  props.openLogin();
@@ -209,7 +211,7 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
 		return axios ({
 			url:'/com/uniPassApiSelectExpDclrInfo',
 			method:'POST',
-			headers:{'Authorization':'Bearer '+userStore.token},
+			headers:{'Authorization':'Bearer '+token},
 			data: searchData
 		})
 	    .then(res => {
@@ -439,5 +441,5 @@ const ExpCustomsAPI = inject('userStore', 'trackStore')(observer(({ userStore, t
   );
 }
 
-))
-export default ExpCustomsAPI;
+//))
+//export default ExpCustomsAPI;

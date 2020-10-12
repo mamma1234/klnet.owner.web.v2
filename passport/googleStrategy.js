@@ -40,15 +40,7 @@ module.exports = (passport) => {
             //console.log('(googleStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
             // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
             console.log("google profile:",profile);
-            sUser.provider = 'google';
-            sUser.email = profile.emails;
-            sUser.userno = '';
-            //sUser.id = profile.id;  
-            sUser.userid = profile.id;
-            sUser.username = profile.name.familyName+profile.name.givenName;
-            sUser.displayName = profile.displayName;      
-            sUser.accessToken = accessToken;
-            sUser.refreshToken = refreshToken;
+           
 
 
             /*
@@ -72,19 +64,19 @@ module.exports = (passport) => {
 
         	const sql = {
         	        text: "SELECT * FROM OWN_COMP_USER \n"+
-        	              " where google_id = $1 \n"+
+        	              " where trim(google_id) = trim($1) \n"+
         	        	  "  limit 1 ",
         	        values: [profile.id],
         	        //rowMode: 'array',
         	    }
 
         	    console.log(sql);
-        	    pgsqlPool.connect(function(err,conn) {
+        	    pgsqlPool.connect(function(err,conn,release) {
         	        if(err){
         	            console.log("err" + err);
         	        }
         	        conn.query(sql, function(err,result){
-        	            
+        	        	release();
         	            if(err){
         	                console.log(err);
         	            }
@@ -93,16 +85,24 @@ module.exports = (passport) => {
         	            if(result.rowCount > 0) {
         	                sUser.provider = 'google';
         	                sUser.email = profile.emails; 
-        	                sUser.userid = profile.id; 
+        	                sUser.userid = ''; 
         	                sUser.userno = result.rows[0].user_no;
         	                sUser.username = profile.name.familyName?profile.name.familyName+profile.name.givenName:result.rows[0].user_name;
         	                sUser.displayName = profile.displayName;      
         	                //sUser.accessToken = accessToken;
         	                //sUser.refreshToken = refreshToken;
-        	                req.session.sUser = sUser;
+        	                //req.session.sUser = sUser;
 
     	                    done(null, sUser); 
         	            } else {
+        	            	 sUser.provider = 'google';
+        	                 sUser.email = profile.emails;
+        	                 sUser.userno = '';
+        	                 sUser.userid = profile.id;
+        	                 sUser.username = profile.name.familyName+profile.name.givenName;
+        	                 sUser.displayName = profile.displayName;      
+        	                 sUser.accessToken = accessToken;
+        	                 sUser.refreshToken = refreshToken;
         	            	console.log('가입되지 않은 회원입니다.');
         	                done(null, sUser, { message: '가입되지 않은 회원입니다.' });
         	            }

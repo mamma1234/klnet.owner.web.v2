@@ -17,7 +17,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -64,7 +64,7 @@ function Alert(props) {
 
 export default function XtrnUserReqApreBrkd(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+  //const [userStore] = useState(props.store);
   const classes = useStyless();
   const [reqApreNo, setReqApreNo] = useState("");
   const [ieGubun, setIeGubun] = useState("I");
@@ -87,7 +87,9 @@ export default function XtrnUserReqApreBrkd(props) {
     setReqApreNo(e.target.value);
   }
   const onSubmit = () => {
-    axios.post("/com/uniPassXtrnUserReqApreBrkd",{imexTpcd:ieGubun,reqApreNo:reqApreNo}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
+    axios.post("/com/uniPassXtrnUserReqApreBrkd",{imexTpcd:ieGubun,reqApreNo:reqApreNo}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message === "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -110,6 +112,9 @@ export default function XtrnUserReqApreBrkd(props) {
         	props.openLogin();
         }
         });
+	  } else {
+		  props.openLogin();
+	  }
   }
   return (
   <div>

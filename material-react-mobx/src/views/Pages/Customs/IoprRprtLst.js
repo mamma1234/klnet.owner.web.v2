@@ -17,7 +17,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -59,7 +59,7 @@ function Alert(props) {
 
 export default function IoprRprtLst(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore, setUseStore] = useState(props.store);
+  //const [userStore, setUseStore] = useState(props.store);
   const classes = useStyless();
   const [tCnt, setTCnt] = useState('0');
   
@@ -116,25 +116,30 @@ export default function IoprRprtLst(props) {
 		  document.getElementById("customNo").focus();
 		  return false;
 	  } else {
-      axios.post("/com/uniPassIoprRprtLst",{shipCallImoNo:shipCallImoNo,gubunCode:gubunCode,customNo:customNo}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
-      res => {
-          if(res.data.message == "SUCCESS") {
-            AlertMessage("조회가 완료되었습니다.","success");
-            setTCnt(res.data.infoData.cnt)
-            setGridData(res.data.infoData.data);
-          }else if (res.data.message == "NO_DATA") {
-            AlertMessage("조회결과가 없습니다.","error");
-            setTCnt("0")
-            setGridData([]);
-          }else {
-            AlertMessage(res.data.errMsg,"error")
-          }
-        }                                     
-      ).catch(err => {
-          if(err.response.status === 401) {
-	        	props.openLogin();
-	        }
-          });
+		  const token = userService.GetItem()?userService.GetItem().token:null;
+		  if(token) {
+	      axios.post("/com/uniPassIoprRprtLst",{shipCallImoNo:shipCallImoNo,gubunCode:gubunCode,customNo:customNo}, {headers:{'Authorization':'Bearer '+token}}).then(
+	      res => {
+	          if(res.data.message == "SUCCESS") {
+	            AlertMessage("조회가 완료되었습니다.","success");
+	            setTCnt(res.data.infoData.cnt)
+	            setGridData(res.data.infoData.data);
+	          }else if (res.data.message == "NO_DATA") {
+	            AlertMessage("조회결과가 없습니다.","error");
+	            setTCnt("0")
+	            setGridData([]);
+	          }else {
+	            AlertMessage(res.data.errMsg,"error")
+	          }
+	        }                                     
+	      ).catch(err => {
+	          if(err.response.status === 401) {
+		        	props.openLogin();
+		        }
+	          });
+		  } else {
+			  props.openLogin();
+		  }
     }
   }
   return (

@@ -2,6 +2,7 @@
 
 const pgsqlPool = require("../pool.js").pgsqlPool
 const basicauth = require("basic-auth");
+const sUser = require('../../models/sessionUser');
 
 const getUserInfo = (request, response) => {
     const sql = {
@@ -11,42 +12,43 @@ const getUserInfo = (request, response) => {
         	  " to_char(naver_login_date,'YYYY/MM/DD hh24:mi:ss') as naver_login_date,face_id, to_char(face_login_date,'YYYY/MM/DD hh24:mi:ss') as face_login_date, \n"+
         	  "  google_id,to_char(google_login_date,'YYYY/MM/DD hh24:mi:ss') as google_login_date, api_service_key \n"+
         	  "  from own_comp_user where user_no = $1 limit 1",
-        values: [request.session.sUser.userno],
+        values: [sUser.userno],
         //rowMode: 'array',
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log(result);
                     
                     if(result != null) {
                         console.log(result.rows[0]);
-                        release();
+                        
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
                 }
-    
+                conn.release();
             });
 
         }
 
 
-        // conn.release();
+        // conn.
+        pgsqlPool.end();
     });
 }
 
@@ -101,7 +103,7 @@ if(provider == "kakao") {
 }
 
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
 
         if(err){
             console.log("err" + err);
@@ -112,7 +114,7 @@ console.log(sql);
                             console.log(err);
                             
                         } 
-                        release();
+                        
                         console.log(">>>",result);
                         return result;
                     });
@@ -130,19 +132,19 @@ const sql = {
     }
 
 console.log("db token insert:",sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
 
         if(err){
             console.log("err" + err);
         } else {
 
             conn.query(sql, function(err,result){
-                //  done();
+            	release();
                 if(err){
                     console.log(err);
                 }
                // console.log(">>>",result);
-                release();
+                
                 return "ok";
             });
         }
@@ -201,11 +203,11 @@ const setUpdateSocailUser = (kakaoid,tokenkakao,naverid,tokennaver,faceid,tokenf
 	            console.log("err" + err);
 	        } else {
                 conn.query(sql, function(err,result){
-                    //  done();
+                	release();
                     if(err){
                         console.log(err);
                     }
-                    release();
+                    
                     return "ok";
                 });
             }
@@ -215,9 +217,9 @@ const setUpdateSocailUser = (kakaoid,tokenkakao,naverid,tokennaver,faceid,tokenf
 
 
 const getUserNotice = (request, response) => {
-    console.log("getUserNotice==========>", request.session.sUser);
+    console.log("getUserNotice==========>", sUser);
     let sql = "select coalesce(count(*),0) as noti_cnt \n";
-        sql += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
+        sql += "from own_user_notice where user_no = '"+sUser.userno+"' and message_type ='W' \n";
         sql += "and read_yn = 'N' \n";
     
     
@@ -226,24 +228,24 @@ const getUserNotice = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     // console.log(result);
                      
                      if(result != null) {
-                         console.log("data",result.rows[0]);
-                         release();
+                        // console.log("data",result.rows[0]);
+                         
                          response.status(200).json(result.rows);
                      } else {
-                    	 release();
+                    	 
                          response.status(200).json([]);
                      }
 
@@ -254,33 +256,33 @@ const getUserNotice = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
 
 const getUserMessage = (request, response) => {
 	
-	const selectSql1 = "select 1 from own_user_notice where  user_no = '"+request.session.sUser.userno+"' and message_type ='W' and read_yn='N' \n";
+	const selectSql1 = "select 1 from own_user_notice where  user_no = '"+sUser.userno+"' and message_type ='W' and read_yn='N' \n";
 
 	let selectSql2 = "select user_no,message_type,message_seq,read_yn,read_Date,message_from,message,to_char(message_insert_date,'YYYY-MM-DD HH24:mi:ss') as message_insert_date \n";
-	selectSql2 += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
+	selectSql2 += "from own_user_notice where user_no = '"+sUser.userno+"' and message_type ='W' \n";
 	selectSql2 += " order by message_insert_date desc limit 5\n";
     
-    const updateSql = "update own_user_notice set read_yn='Y', read_date=now() where  user_no = '"+request.session.sUser.userno+"' and message_type ='W' and read_yn='N' \n";
+    const updateSql = "update own_user_notice set read_yn='Y', read_date=now() where  user_no = '"+sUser.userno+"' and message_type ='W' and read_yn='N' \n";
 
 
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(selectSql1, function(err,result){
                
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                // console.log(result);
@@ -291,7 +293,7 @@ const getUserMessage = (request, response) => {
                         conn.query(updateSql, function(err,result){
                             if(err){
                                 console.log(err);
-                                release();
+                                
                                 response.status(400).send(err);
                             } else {
                                 // console.log(result);
@@ -299,20 +301,20 @@ const getUserMessage = (request, response) => {
                                 if(result.rowCount > 0) {
                                     console.log("update success");
                                     conn.query(selectSql2, function(err,result){
-                                        // done();
+                                        release();
                                         if(err){
                                             console.log(err);
-                                            release();
+                                            
                                             response.status(400).send(err);
                                         } else {
                                             // console.log(result);
                                             
                                             if(result != null) {
                                                 console.log("data",result.rows);
-                                                release();
+                                                
                                                 response.status(200).send(result.rows);
                                             } else {
-                                            	release();
+                                            	
                                                 response.status(200).send([]);
                                             }
                                         }
@@ -321,7 +323,7 @@ const getUserMessage = (request, response) => {
             
                                 } else { 
                                     console.log("update failed");
-                                    release();
+                                    
                                     response.status(200).send([]);
                                 }
 
@@ -332,20 +334,20 @@ const getUserMessage = (request, response) => {
                     } else {
                         console.log("no select");
                         conn.query(selectSql2, function(err,result){
-                        // done();
+                        release();
                             if(err){
                                 console.log(err);
-                                release();
+                                
                                 response.status(400).send(err);
                             } else {
                             // console.log(result);
                                 
                                 if(result != null) {
-                                    console.log("data",result.rows);
-                                    release();
+                                    //console.log("data",result.rows);
+                                    
                                     response.status(200).send(result.rows);
                                 } else {
-                                	release();
+                                	
                                     response.status(200).send([]);
                                 }
 
@@ -361,7 +363,7 @@ const getUserMessage = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -370,7 +372,7 @@ const getUserMessage = (request, response) => {
 const getUserMoreNotice = (request, response) => {
 
     let sql = "select (row_number()over(order by message_insert_date desc) )as rownum,message,message_from,to_char(message_insert_date,'YYYY-MM-DD HH24:mi:ss')as message_insert_date \n";
-        sql += "from own_user_notice where user_no = '"+request.session.sUser.userno+"' and message_type ='W' \n";
+        sql += "from own_user_notice where user_no = '"+sUser.userno+"' and message_type ='W' \n";
         sql += "order by read_yn,message_insert_date desc \n";
     
     
@@ -379,24 +381,24 @@ const getUserMoreNotice = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     // console.log(result);
                      
                      if(result != null) {
-                         console.log("data",result.rows[0]);
-                         release();
+                         //console.log("data",result.rows[0]);
+                         
                          response.status(200).json(result.rows);
                      } else {
-                    	 release();
+                    	 
                          response.status(200).json([]);
                      }
 
@@ -407,7 +409,7 @@ const getUserMoreNotice = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -427,23 +429,23 @@ const getUserSettingSample = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     // console.log(result);
                      
                      if(result.rowCount > 0) {
-                    	 release();
+                    	 
                          response.status(200).json(result.rows);
                      } else {
-                    	 release();
+                    	 
                          response.status(404).json([]);
                      }
 
@@ -454,7 +456,7 @@ const getUserSettingSample = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -472,7 +474,7 @@ const setLoginHistory = (userno,inout_type, useragent,ip) => {
 
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	        } else {
                 conn.query(sql, function(err,result){
                     //  done();
@@ -481,7 +483,7 @@ const setLoginHistory = (userno,inout_type, useragent,ip) => {
                         
                     }
                    // console.log(">>>",result);
-                    release();
+                    
                     return "ok";
                 });
 

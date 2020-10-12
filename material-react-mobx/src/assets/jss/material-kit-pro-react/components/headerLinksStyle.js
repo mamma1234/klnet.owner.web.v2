@@ -39,7 +39,7 @@ const headerLinksStyle = theme => ({
     [theme.breakpoints.down("sm")]: {
       "& ul": {
         maxHeight: "400px",
-        overflow: "scroll"
+        overflow: "unset"
       },
       width: "100%",
       "&:not(:last-child)": {

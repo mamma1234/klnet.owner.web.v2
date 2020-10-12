@@ -2,18 +2,19 @@ import { observable, action } from 'mobx';
 import StorageService from './StorageService'
 
 class UserStore {
-  @observable me;
+  //@observable me;
   @observable user;
   @observable token;
   constructor() {
     // this.me = null;
-    this.me = "mobx test";
+    //this.me = "mobx test";
     this.user = null;
+    console.log("init");
     this.token = StorageService.getToken();
   }
-  @action setMe = (me) => {
-    this.me = me;
-  }
+ // @action setMe = (me) => {
+ //   this.me = me;
+ // }
   @action setUser = (user) => {
     this.user = user;
   }
@@ -21,6 +22,11 @@ class UserStore {
     this.token = token;
     StorageService.setToken(this.token);
   }
+  @action getToken = () => {
+	    this.token = StorageService.getToken();
+	    
+   }
+  
   // @computed get Token() {
   //   if (!this.token){
   //     this.token = StorageService.getToken();

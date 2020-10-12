@@ -5,21 +5,24 @@ import PropTypes from 'prop-types';
   import {MAP} from 'react-google-maps/lib/constants'
   import axios from 'axios';
   import MapSkin from 'components/Map/CustomMap';
-  import {Avatar, Card, CardHeader, IconButton, Switch, CardContent, AppBar, Tabs, Tab, Tooltip, Box, Grid, List,ListItem,ListItemText,Paper, InputBase,Divider, Collapse} from '@material-ui/core';
+  import {Avatar, Card, CardHeader, IconButton, Switch, CardContent, AppBar, Tabs, Tab, Tooltip, Box, Grid, List,ListItem,ListItemText,Paper, InputBase,Divider, Collapse, Snackbar} from '@material-ui/core';
   import Button from "components/CustomButtons/Button.js";
   import CalendarBox from "components/CustomInput/CustomCalendar.js";
   import SubMap from './Satellite.js'
   import {withScriptjs, withGoogleMap, GoogleMap, Marker, Polyline,} from "react-google-maps";
+  import MuiAlert from '@material-ui/lab/Alert';
   import Draggable from 'react-draggable';
   import { compose, withProps,withState,withHandlers } from "recompose";
   import CustomInput from "components/CustomInput/CustomInput.js";
-  
+  import {userService} from 'views/Pages/Login/Service/Service.js';
   import moment from 'moment';
   import { red } from '@material-ui/core/colors';
   import SearchIcon from '@material-ui/icons/Search';
   import {Filter, DirectionsBoat, Replay, YoutubeSearchedFor, Close, FindInPage, ArrowDownward, ArrowUpward} from '@material-ui/icons';
   
-
+  function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
   function TabPanel(props) {
     const { children, value, index, ...other } = props;
     
@@ -149,7 +152,7 @@ const MyMapComponent = compose(
                       )
                     }else {
                       return( 
-                        <ListItem key={index} role={undefined} dense button onClick={() => alert("No Search Vessel Position")}>
+                        <ListItem key={index} role={undefined} dense button onClick={() => props.AlertMessage("해당 선박의 위치를 찾을 수 없습니다.","error")}>
                             <ListItemText id={index} primary={element.shipName}/>
                         </ListItem>
                       )
@@ -394,8 +397,10 @@ const MyMapComponent = compose(
 
                           
                           {props.isOpen && data.shipId === props.shipId && (
+                              
                               <MapControl position = {window.google.maps.ControlPosition.BOTTOM_CENTER}>
-                                <Draggable>
+                              <Draggable
+                                grid={[50,50]}> 
                                   <Card style={{marginBottom: "50px",minWidth:400,maxWidth:500}}>  
                                     <CardHeader 
                                       avatar={<Avatar aria-label="recipe" style={{backgroundColor:red[500]}}>{data.nationCode}</Avatar>}
@@ -407,6 +412,7 @@ const MyMapComponent = compose(
                                         </IconButton>
                                       }>
                                     </CardHeader>
+                                     
                                     <CardContent>
                                       <AppBar position="static" color="default">
                                         <Tabs
@@ -469,10 +475,11 @@ const MyMapComponent = compose(
                                         </Grid>
                                       </TabPanel>
                                     </CardContent>
+                                   
                                   </Card>
-                                </Draggable>
+                                  </Draggable>
                               </MapControl>
-                                
+                              
                            
                           )} 
                         </Marker>
@@ -538,7 +545,7 @@ export default class DemDetMap extends React.Component {
       setStyle: [],
       locationlat:0,
       locationlng:0,
-      token: props.store.token,
+      token: userService.GetItem()?userService.GetItem().token:null,
       markerVisible: true,
       isOpen:false,
       isPortOver:false,
@@ -551,6 +558,9 @@ export default class DemDetMap extends React.Component {
       keyword:"",
       value:0,
       shipOverId:"",
+      severity:"",
+      errMessage:"",
+      alertOpen:false,
       shipId:"",
       fromDate:null,
       toDate:null,
@@ -588,7 +598,8 @@ export default class DemDetMap extends React.Component {
   }
 
   componentWillMount() {
-    axios.post("/com/getPortLocation", {portCode: ""},{headers:{'Authorization':'Bearer '+this.state.token}}).then(
+	  
+   axios.post("/com/getPortLocation", {portCode: ""},{headers:{'Authorization':'Bearer '+this.state.token}}).then(
       res=> {
         if(res.data.length !== 0 ) {
           this.setState(state => ({
@@ -661,7 +672,14 @@ export default class DemDetMap extends React.Component {
       locationlng:param2
     }));
   }
-
+  handleAlertClose = (event, reason) => {
+    if(reason ==='clickaway') {
+      return;
+    }
+    this.setState(state => ({
+      alertOpen:false
+    }))
+  }
 
 
   onTrackingSearch = (shipId, paramfromDate, paramtoDate) => {
@@ -683,7 +701,11 @@ export default class DemDetMap extends React.Component {
       }))
       }
     }).catch(err => {
-        alert(err+'err')
+      this.setState(state => ({
+        errMessage:err,
+        severity:"error",
+        alertOpen:true,
+      }))
     });
   }
   setKeyword = (param) => {
@@ -742,7 +764,13 @@ export default class DemDetMap extends React.Component {
       checked:!param
     }))
   }
-  
+  AlertMessage= (param1,param2) => {
+    this.setState(state => ({
+      errMessage:param1,
+      severity:param2,
+      alertOpen:true,
+    }))
+  }
   render() {
     return (
       <div>
@@ -784,8 +812,17 @@ export default class DemDetMap extends React.Component {
           shipRotate={this.state.shipRotate}
           checked={this.state.checked}
           toggleChecked={this.toggleChecked}
+          AlertMessage={this.AlertMessage}
         />
+        <Snackbar open={this.state.alertOpen} autoHideDuration={6000} onClose={this.handleAlertClose}>
+          <Alert 
+            onClose={this.handleAlertClose}
+            severity={this.state.severity}>
+              {this.state.errMessage}
+          </Alert>
+        </Snackbar>
       </div>
+      
     );
   }
 }

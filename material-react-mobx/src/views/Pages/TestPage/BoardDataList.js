@@ -76,8 +76,8 @@ function ScheduleTable(props) {
     </div>
   );
 }
-
-const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function BoardList(props) {
+//const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   const [boardId,setBoardId] = useState("");
   const [title,setTitle] = useState("");
   const [authorName,setAuthorName] = useState("");
@@ -86,7 +86,7 @@ const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, track
   const onSubmit = () => {
 	numCnt=1;
 	axios.post("/com/getBoardDataList",{num:numCnt,boardId:boardId,title:title,authorName:authorName}, //num:numCnt,boardId:boardId,title:title,authorName:authorName
-			{headers:{'Authorization':'Bearer '+userStore.token}})
+			{headers:{'Authorization':'Bearer '+props.token}})
 				.then(setBoardData([]))
 			    .then(res => setBoardData(res.data))
 			    .catch(err => {
@@ -101,7 +101,7 @@ const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, track
 	    if(numCnt !== boardData[0].tot_page) {
 	    	numCnt=numCnt+1;
 		    axios.post("/com/getBoardDataList",{num:numCnt,boardId:boardId,title:title,authorName:authorName},
-		    		{headers:{'Authorization':'Bearer '+userStore.token}})
+		    		{headers:{'Authorization':'Bearer '+props.token}})
 				  .then(res => setBoardData([...boardData,...res.data]))
 		   	      .catch(err => {
 		            if(err.response.status === 403 || err.response.status === 401) {
@@ -163,8 +163,8 @@ const BoardList = inject('userStore', 'trackStore')(observer(({ userStore, track
     </GridContainer>
   );
 }
-))
-export default BoardList;
+//))
+//export default BoardList;
 
 
 

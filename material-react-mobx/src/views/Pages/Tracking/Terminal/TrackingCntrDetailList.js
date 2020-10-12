@@ -14,8 +14,15 @@ import FirstPageIcon from "@material-ui/icons/FirstPage";
 import LastPageIcon from "@material-ui/icons/LastPage";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
+import DirectionsIcon from "@material-ui/icons/Directions";
+import Button from "components/CustomButtons/Button.js";
 // core components
 import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
+import { Popover } from "@material-ui/core";
+import SpeedDial from '@material-ui/lab/SpeedDial';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
+import {Link} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 
@@ -30,8 +37,6 @@ function TablePageinationActions(props) {
 	const classes = useStyles1();
 	const theme = useTheme();
 	const {count,page,rowsPerPage,onChangePage} =props;
-	
-	console.log(":"+count+":"+page+":"+rowsPerPage+":"+onChangePage);
 	
 	const handleFirstPageButtonClick = e => {
 		onChangePage(e,0);
@@ -124,7 +129,8 @@ export default function CustomTable(props) {
             	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반출지<br/>반출일시</TableCell>
             	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반납기한</TableCell>
             	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>반납지<br/>반납일시</TableCell>
-            	</TableRow>
+            	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>Map</TableCell>
+				</TableRow>
             :
             	<TableRow className={classes.tableHeadRow}>
 		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>no</TableCell>
@@ -138,6 +144,7 @@ export default function CustomTable(props) {
 		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>선적지<br/>선적지반입일시</TableCell>
 		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>선적일시</TableCell>
 		        	<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>출항일</TableCell>
+					<TableCell style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>Map</TableCell>
 		        </TableRow>}
           </TableHead>
         <TableBody>
@@ -178,9 +185,28 @@ export default function CustomTable(props) {
 }
 
 class ImportRows extends React.Component {
+		constructor(props) {
+			super(props);
+			this.state={
+				anchorEl: null
+				
+			}
+		}	
 	  render() {
-	     const { data} = this.props;
-	    return [
+		 const { data} = this.props;
+		 const handleClick = (e) => {
+			 this.setState({ 
+				 anchorEl:e.currentTarget
+			 })
+		 }
+		 const handleClose = () => {
+			 this.setState({ 
+				 anchorEl:null
+			 })
+		 }
+		 const open = Boolean(this.state.anchorEl);
+		 const id = open ? 'simple-popover' :undefined;
+		 return [
 	      <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{this.props.index}</TableCell>
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.cntr_no}</TableCell>
@@ -192,13 +218,66 @@ class ImportRows extends React.Component {
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.full_outgate_terminal}<br/>{data.full_outgate_date}</TableCell>
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.ret_date}</TableCell>
 	      	<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.mt_ingate_terminal}<br/>{data.mt_ingate_date}</TableCell>
+			<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}} align="center">
+			<IconButton onClick={handleClick}> 
+				<DirectionsIcon />
+			</IconButton>	
+				<Popover
+					id={id}
+					open={open}
+					anchorEl={this.state.anchorEl}
+					onClose={handleClose}
+					anchorOrigin={{
+						vertical:'bottom',
+						horizontal:'center'
+					}}
+					transformOrigin={{
+						vertical:'top',
+						horizontal:'center'
+					}}>
+					<div>
+						<a component={Link} target="_blank" href={`/svc/cntrmap?cntr_no=${data.cntr_no}`}>
+							<Button color="info">
+								New<br></br>Window
+							</Button>
+                        </a>
+						<Link to={{
+							pathname : `/svc/cntrmap`,
+							state : {param : data.cntr_no}}}>
+							<Button color="info">
+								Change<br></br>View
+							</Button>
+						</Link>
+					</div>
+					</Popover>
+			</TableCell>
 	      </TableRow>
 	    ];
 	  }
 }
 class ExportRows extends React.Component {
-	  render() {
-	     const { data,sch } = this.props;
+	constructor(props) {
+		super(props);
+		this.state={
+			anchorEl: null
+			
+		}
+	}
+	render() {
+		
+		const { data,sch } = this.props;
+		const handleClick = (e) => {
+			this.setState({ 
+				anchorEl:e.currentTarget
+			})
+		}
+		const handleClose = () => {
+			this.setState({ 
+				anchorEl:null
+			})
+		}
+		const open = Boolean(this.state.anchorEl);
+		const id = open ? 'simple-popover' :undefined;
 	    return [
 	      <TableRow  key={this.props.index}  style={{borderCollapse:'separate',borderSpacing:'2px 2px',paddingTop:'5px'}} >
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{this.props.index}</TableCell>
@@ -212,9 +291,44 @@ class ExportRows extends React.Component {
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.pol_ingate_terminal}<br/>{data.pol_ingate_time}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{data.load_date}</TableCell>
 	        <TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}}>{sch.activity==="DEPARTURE"?sch.activity_date:''}</TableCell>
-	      </TableRow>
+			<TableCell style={{paddingTop:'10px',paddingBottom:'10px',paddingLeft:'8px',paddingRight:'8px'}} align="center">
+				<DirectionsIcon 
+					onClick={handleClick}>
+				</DirectionsIcon>
+				<Popover
+					id={id}
+					open={open}
+					anchorEl={this.state.anchorEl}
+					onClose={handleClose}
+					anchorOrigin={{
+						vertical:'bottom',
+						horizontal:'center'
+					}}
+					transformOrigin={{
+						vertical:'top',
+						horizontal:'center'
+					}}>
+					<div>
+						
+						<a component={Link} target="_blank" href={`/svc/cntrmap?cntr_no=${data.cntr_no}`}>
+							<Button color="info">
+								New<br></br>Window
+							</Button>
+                        </a>
+						<Link to={{
+							pathname : `/svc/cntrmap`,
+							state : {param : data.cntr_no}}}>
+							<Button color="info">
+								Change<br></br>View
+							</Button>
+						</Link>
+					</div>
+					</Popover>
+			</TableCell>
+		  </TableRow>
 	    ];
 	  }
+
 }
 	        			
 CustomTable.defaultProps = {

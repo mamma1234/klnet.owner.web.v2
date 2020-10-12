@@ -56,29 +56,23 @@ module.exports = (passport) => {
                 // return done(null, profile);
 */                
                 
-           	 sUser.provider = profile.provider;
-             sUser.email = profile._json.email; //mamma1234@naver.com
-             sUser.userid = profile._json.id;  //30625476
-             sUser.username = profile._json.nickname;
-             sUser.displayName = profile.displayName; 
-             sUser.accessToken = accessToken;
-             sUser.refreshToken = refreshToken;
+           	
              
             	const sql = {
             	        text: "SELECT * FROM OWN_COMP_USER  \n"+
-            	              " where upper(naver_id) = upper($1) \n"+
+            	              " where trim(naver_id) = trim($1) \n"+
             	        	  "  limit 1 ",
             	        values: [profile._json.id],
             	        //rowMode: 'array',
             	    }
 
             	    console.log(sql);
-            	    pgsqlPool.connect(function(err,conn) {
+            	    pgsqlPool.connect(function(err,conn,release) {
             	        if(err){
             	            console.log("err" + err);
             	        }
             	        conn.query(sql, function(err,result){
-            	            
+            	        	release();
             	            if(err){
             	                console.log(err);
             	            }
@@ -86,24 +80,23 @@ module.exports = (passport) => {
             	           // console.log("ROW CNT:",result.rowCount);
             	            if(result.rowCount > 0) {
             	            	sUser.userno = result.rows[0].user_no;
-        	     /*	            sUser.provider = 'kakao';
-        	    	            sUser.userid = profile.id;  //1261001956
-        	    	            sUser.userno = result.rows[0].user_no;
-        	    	            sUser.username = profile.username,
-                                sUser.displayName = profile.displayName,
-                                sUser.accessToken = accessToken;
-                                sUser.refreshToken = refreshToken;
-                                sUser.email = profile._json.kakao_account.email; //mamma1234@naver.com;
-					*/         	sUser.provider = profile.provider;
+      	                        sUser.provider = profile.provider;
 								sUser.email = profile._json.email; //mamma1234@naver.com
-								sUser.userid = profile._json.id;  //30625476
+								sUser.userid = '';  //30625476
 								sUser.username = profile._json.nickname;
 								sUser.displayName = profile.displayName; 
 								//sUser.accessToken = accessToken;
 								//sUser.refreshToken = refreshToken;
-        	                    req.session.sUser = sUser;
+        	                   // req.session.sUser = sUser;
         	                    done(null, sUser); 
             	            } else {
+            	            	 sUser.provider = profile.provider;
+            	                 sUser.email = profile._json.email; //mamma1234@naver.com
+            	                 sUser.userid = profile._json.id;  //30625476
+            	                 sUser.username = profile._json.nickname;
+            	                 sUser.displayName = profile.displayName; 
+            	                 sUser.accessToken = accessToken;
+            	                 sUser.refreshToken = refreshToken;
             	            	console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>가입되지 않은 회원입니다.');
             	            	//req.session.sUser = sUser;
             	                done(null, sUser, { message: '가입되지 않은 회원입니다.' });

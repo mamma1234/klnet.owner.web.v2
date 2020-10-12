@@ -23,7 +23,7 @@ import Assignment from "@material-ui/icons/Assignment";
 import CustomInput from "components/CustomInput/CustomInput.js";
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
 import Table from "views/Pages/Customs/RetrieveLcaBrkd_Detail.js";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import Moment from 'moment';
 
 const useStyless = makeStyles(theme => ({
@@ -59,7 +59,7 @@ function Alert(props) {
 
 export default function RetrieveLcaBrkd(props) {
   const [severity, setSeverity] = useState("");
-  const {store} =props;
+  //const {store} =props;
   const classes = useStyless();
 
 
@@ -97,11 +97,11 @@ export default function RetrieveLcaBrkd(props) {
 		  AlertMessage("HS코드 값은 필수 입력값입니다.","error");
 		  return;
 	  }*/
-
-	  if(store.token) {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
 
 		    axios.post("/com/uniPassRetrieveLca",{param1:lcaSgn , param2:jrsdCstm}, 
-		    		{headers:{'Authorization':'Bearer '+store.token}})
+		    		{headers:{'Authorization':'Bearer '+token}})
 		    		.then(setGridData([]))
 		    		.then(
 		      res => {

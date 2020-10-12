@@ -250,6 +250,7 @@ router.post('/login', isLoggedPass, (req, res, next) => {
             //console.log("token value:"+token);
             /*res.cookie("connect.sid",token);
             res.cookie("connect.userno",user.userno);*/
+            //res.cookie("socialKey",{user:user, token:token});
             return res.json({user:user, token:token});
 
         });
@@ -274,7 +275,7 @@ router.get('/kakao/callback', isLoggedPass, (req, res,next) => {
             return next(authError);
         }
         if(info) {
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
         }
@@ -301,11 +302,12 @@ router.get('/kakao/callback', isLoggedPass, (req, res,next) => {
 
             const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
             //토큰 저장
-            res.cookie("plismplus",{user:user, token:token});
+            res.cookie("socialKey",{user:user, token:token});
             pgSql.setSocialLoginInfo(user.provider,user.userid, token , user.accessToken);
             //var ipaddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             var ipaddr = requestIp.getClientIp(req);
             pgSql.setLoginHistory(user.userno,'I',req.useragent, ipaddr);
+            //res.json({user:user, token:token});
             return res.redirect('/authpage?auth=social');
             //res.cookie("connect.sid",token);
             // res.cookie("connect.user",user);
@@ -361,7 +363,7 @@ router.get('/naver/callback', isLoggedPass, (req, res, next) => {
             return next(authError);
         }
         if(info) {
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
 
@@ -388,12 +390,12 @@ router.get('/naver/callback', isLoggedPass, (req, res, next) => {
             
             const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
             //토큰 저장
-            res.cookie("plismplus",{user:user, token:token});
+            res.cookie("socialKey",{user:user, token:token});
             pgSql.setSocialLoginInfo(user.provider,user.userid, token, user.accessToken);
             //var ipaddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             var ipaddr = requestIp.getClientIp(req);
             pgSql.setLoginHistory(user.userno,'I',req.useragent, ipaddr);
-            return res.redirect('/authpage?auth=check');
+            return res.redirect('/authpage?auth=social');
             //return res.redirect('http://localhost:3000');
             // res.status(200).json(user);
             // return;
@@ -423,7 +425,7 @@ router.get('/facebook/callback', isLoggedPass, (req, res, next) => {
             return next(authError);
         }
         if(info) {
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
 
@@ -444,7 +446,7 @@ router.get('/facebook/callback', isLoggedPass, (req, res, next) => {
             }
             const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
             //토큰 저장
-            res.cookie("plismplus",{user:user, token:token});
+            res.cookie("socialKey",{user:user, token:token});
             pgSql.setSocialLoginInfo(user.provider,user.userid, token ,user.accessToken);
             //var ipaddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             var ipaddr = requestIp.getClientIp(req);
@@ -472,7 +474,7 @@ router.get('/google/callback', isLoggedPass, (req, res, next) => {
 
         if(info.message != undefined) {
         	//console.log("info");
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
         }
@@ -485,7 +487,7 @@ router.get('/google/callback', isLoggedPass, (req, res, next) => {
             }
             const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
             //토큰 저장
-            res.cookie("plismplus",{user:user, token:token});
+            res.cookie("socialKey",{user:user, token:token});
             pgSql.setSocialLoginInfo(user.provider,user.userid, token, user.accessToken);
             //var ipaddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             var ipaddr = requestIp.getClientIp(req);
@@ -514,7 +516,7 @@ router.get('/openbank/callback', isLoggedPass, (req, res, next) => {
             return next(authError);
         }
         if(info) {
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
 
@@ -553,7 +555,7 @@ router.get('/microsoft/callback', isLoggedPass, (req, res, next) => {
             return next(authError);
         }
         if(info) {
-        	//res.cookie("plismplus",{user:user});
+        	res.cookie("socialKey",{user:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
 
@@ -592,7 +594,7 @@ router.get('/daum/callback', isLoggedPass, (req, res, next) => {
             return next(authError);
         }
         if(info) {
-        	res.cookie("plismplus",{profile:user});
+        	res.cookie("socialKey",{profile:user});
         	return res.redirect('/authpage?auth=register');
         	//return res.redirect('http://localhost:3000/landing');
 
@@ -789,13 +791,13 @@ router.get('/logout',  function (req, res) {
   var ipaddr = requestIp.getClientIp(req);
 
   //pgSql.setLoginHistory(req.session.sUser.userno,'O',req.useragent,ipaddr);
-  req.session.sUser = null;
-  req.session = null;
+  //req.session.sUser = null;
+  //req.session = null;
   req.logout();
  // res.clearCookie('connect.sid',{ path: '/' });
   res.clearCookie('express:sess',{ path: '/' });
   res.clearCookie('express:sess.sig',{ path: '/' });
-  console.log(":>>>");
+  //console.log(":>>>");
   res.send(false);
     
 });

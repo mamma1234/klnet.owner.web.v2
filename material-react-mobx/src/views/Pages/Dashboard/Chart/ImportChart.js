@@ -13,9 +13,10 @@ export default function ImportChart(props) {
 
 	
 	const [stats,setStats] = React.useState([]); 
+
 	var datapoint = [];
 	  React.useEffect(() => {
-		  axios.post("/com/getImportStatInfo",{},{headers:{'Authorization':'Bearer '+props.store.token}})
+		  axios.post("/com/getImportStatInfo",{},{headers:{'Authorization':'Bearer '+props.token}})
 	  	  .then(setStats([]))
 		    .then(res => {
 		    res.data.map((data) => 

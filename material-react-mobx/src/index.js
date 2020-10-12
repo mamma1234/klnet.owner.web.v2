@@ -33,13 +33,13 @@ import Certify from 'views/Pages/phone_certify.js';
 
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 
-import { Provider } from 'mobx-react';
+//import { Provider } from 'mobx-react';
 
-import userStore from './store/userStore';
-import trackStore from './store/trackStore';
+//import userStore from './store/userStore';
+//import trackStore from './store/trackStore';
 // import { AsyncLocalStorage } from "async_hooks";
-
-const stores = { userStore, trackStore };
+//console.log("index");
+//const stores = { userStore, trackStore };
 // onst hydrate = create({storage:AsyncLocalStorage})
 
 const hist = createBrowserHistory();
@@ -54,7 +54,7 @@ const NoMatch = (arg) => {
 ReactDOM.render(
   // <Provider>
   // <Provider rootStore={rootStore}>
-  <Provider { ...stores }>
+  //<Provider { ...stores }>
     <Router history={hist}>
       <Switch>
         <Route path="/" exact component={Landing} /> 
@@ -65,7 +65,7 @@ ReactDOM.render(
         <Route path="/return_certify" component={Certify} />
         <Route component={NoMatch} />
       </Switch>
-    </Router>
-  </Provider>,
+    </Router>,
+  //</Provider>,
   document.getElementById("root")
 );

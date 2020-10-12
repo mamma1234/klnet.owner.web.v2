@@ -46,10 +46,12 @@ app.set('view engine', 'pug'); //템플리트 엔진을 사용 2
 app.use(swaggerRouter);//swagger API
 app.use(morgan('dev')); //morgan: 요청에 대한 정보를 콘솔에 기록
 app.use(express.static(path.join(__dirname, 'public'))); //static: 정적인 파일을 제공, public 폴더에 정적 폴더를 넣는다.
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({limit:"50mb"}));
+app.use(express.urlencoded({ limit:"50mb",extended: false }));
+
 app.use(cookieParser('nodebirdsecret')); //cookie-parser: 요청에 동봉된 쿠키를 해석
-app.use(cookieSession({   //express-session: 세션 관리용 미들웨어, 로그인 드의 이유로 세션을 구현할 때 유용하다.
+
+/*app.use(cookieSession({   //express-session: 세션 관리용 미들웨어, 로그인 드의 이유로 세션을 구현할 때 유용하다.
     resave: false,
     saveUninitialized: false,
     secret: 'nodebirdsecret',
@@ -61,7 +63,7 @@ app.use(cookieSession({   //express-session: 세션 관리용 미들웨어, 로�
         //saveUninitialized:true,
         maxAge: 1000 * 60 * 60, // 유효기간 1시간
     },
-}));
+}));*/
 
 	 
 // app.use(cookieSession({
@@ -72,7 +74,7 @@ app.use(cookieSession({   //express-session: 세션 관리용 미들웨어, 로�
 // }));
 app.use(flash()); //connect-flash: 일회성 메시지들을 웹 브라우저에 나타낼 때 사용한다. cookie-parser와 express-session 뒤에 위치해야한다.
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
 
 /*
 2020.01.21 pdk ship 개발 혹은 테스트 기간중 아래 세션 체크 로직 편의상 막아도 됨
@@ -127,14 +129,14 @@ app.use('/', pageRouter); // 2020.04.17 pdk ship Login 필요 없는 페이지 �
 
 app.route(/^((?!\/auth\/|\/api\/).)*$/s).all(isVerifyToken,function(req, res, next) {    
 	var path = req.params[0];
-  console.log("(server.js) path:",path);
+  //console.log("(server.js) path:",path);
 
-  if ( req.session.sUser.userno ) { 
+//  if ( req.session.sUser.userno ) { 
 //     console.dir( req.session.sUser );
 //     console.log('로그인 정보 남아 있음.');
 //     console.log(req.originalUrl);
      next();
-  } else {
+  //} else {
     
 //     var fullUrl = req.protocol + '://' + req.headers.host + req.originalUrl;
 //    // console.log( fullUrl );
@@ -142,8 +144,10 @@ app.route(/^((?!\/auth\/|\/api\/).)*$/s).all(isVerifyToken,function(req, res, ne
 //     //console.log(req.headers.host);
 //     req.logout();
 //     //res.clearCookie('connect.sid');
-     return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
-  }
+
+	  //     return res.status(401).json({ errorcode: 401, error: 'unauthorized' });
+//  }
+	  
 });
 
 app.use('/auth', authRouter);
@@ -217,6 +221,9 @@ app.post("/loc/getContainerMovement", dao.pgtracking.getContainerMovement);
 
 //공통
 
+app.post("/com/getBoardSearch", dao.postgresql.getBoardSearch);
+app.post("/com/getDemDetOsc", dao.postgresql.getDemDetOsc);
+app.post("/com/getThreadSearch", dao.postgresql.getThreadSearch);
 app.post("/com/getImportingList", dao.pgstat.getImportingList);
 app.post("/com/getExportingList", dao.pgstat.getExportingList);
 app.post("/com/getCarrierStatList", dao.pgstat.getCarrierStatList);
@@ -251,6 +258,7 @@ app.post("/com/boardAttachDown", function (req, res) {
 });
 //코드
 
+app.post("/com/setExcelData", dao.postgresql.saveExcelData);
 app.post("/com/getExcelSchLogList", dao.postgresql.getExcelSchLogList);
 app.post("/com/getErrorLogList", dao.pgcodes.getErrorLogList);
 app.post("/com/getUserData", dao.pgcodes.getUserData);
@@ -288,7 +296,7 @@ app.post("/sch/getPicCodeList", dao.schedule.getPicCodeList);
 app.post("/sch/insertPicCode", dao.schedule.insertPicCode);
 app.post("/sch/updatePicCode", dao.schedule.updatePicCode);
 app.post("/sch/deletePicCode", dao.schedule.deletePicCode);
-
+app.post("/sch/shipChargeList", dao.schedule.shipChargeList)
 
 //사용자 알림
 app.post("/com/getUserMessage", dao.pgusers.getUserMessage);
@@ -346,6 +354,14 @@ app.post("/com/uniPassApiSelectExpDclrInfo", uniPassApiService.selectExpDclrInfo
 // app.post("/com/uniPassApiPostNoPrCstmSgnQry", uniPassApiService.API031);
 // app.post("/com/uniPassApiAlspEntsCdQry", uniPassApiService.API033);
 
+
+//PUSH Service 
+app.post("/api/pushUserInsert",dao.push.createPushUser);
+app.post("/api/pushUserDelete",dao.push.deletePushUser);
+app.post("/api/checkPushUser",dao.push.checkPushUser);
+app.post("/api/updatePushToken",dao.push.updatePushToken);
+app.post("/api/pushreciveTime",dao.push.pushUserSettingUpdate);
+app.post("/api/pushreciveGubun",dao.push.pushServiceGubun)
 // 공지 게시판
 app.post("/api/getBoardList", dao.pgboard.getBoardMainList);
 app.post("/api/getBoardDetail", dao.pgboard.getBoardDetail);

@@ -5,7 +5,7 @@ const basicauth = require("basic-auth");
 const sUser = require('../../models/sessionUser');
 
 const getImportDemDetList = (request, response) => {
-	request.session.sUser = sUser;
+	sUser = sUser;
     console.log( request.body );
     let sql_string = "";
     let params = [];
@@ -90,7 +90,7 @@ const getImportDemDetList = (request, response) => {
             sql_string += " and ((coalesce(b.dem_amount,0) > 0 and b.full_outgate_date is null)  or (coalesce(b.det_amount,0) > 0 and b.mt_ingate_date is null) or (coalesce(b.osc_amount,0) > 0 and b.full_outgate_date is null))"; 
         }
         
-        //console.log("> request.session.sUser.userno :"+request.session.sUser.userno );
+        //console.log("> sUser.userno :"+sUser.userno );
         console.log("> request.body.onlyChecked :"+ request.body.onlyChecked );
         sql_string += "order by cast(b.dem_amount as float), cast(b.det_amount as float), cast(b.osc_amount as float), a.carrier_code, a.bl_bkg, a.cntr_no, a.insert_date desc ";
         sql_string += ") X ";
@@ -98,7 +98,7 @@ const getImportDemDetList = (request, response) => {
 
         
 
-        params.push( request.session.sUser.userno );
+        params.push( sUser.userno );
         params.push( request.body.ieType );
         params.push( request.body.num );
 
@@ -110,16 +110,14 @@ const getImportDemDetList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
 
             console.log("sql : " + sql.text);
             conn.query(sql, function(err,result){
-                // done();
+            	
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     
@@ -128,10 +126,8 @@ const getImportDemDetList = (request, response) => {
                     // console.log(result.fields.map(f => f.name));
                     
                     if(result != null) {
-                    	release();
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
                         response.status(200).json([]);
                     }
 
@@ -140,12 +136,12 @@ const getImportDemDetList = (request, response) => {
             });
         }
 
-        // conn.release();
+        // conn.
     });
 }
 
 const getExportDemDetList = (request, response) => {
-	request.session.sUser = sUser;
+	sUser = sUser;
     console.log( request.body );
     let sql_string = "";
     let params = [];
@@ -245,7 +241,7 @@ const getExportDemDetList = (request, response) => {
             sql_string += " and ((coalesce(b.dem_amount,0) > 0 and b.full_outgate_date is null)  or (coalesce(b.det_amount,0) > 0 and b.mt_ingate_date is null) or (coalesce(b.osc_amount,0) > 0 and b.full_outgate_date is null))"; 
         }
         
-        //console.log("> request.session.sUser.userno :"+request.session.sUser.userno );
+        //console.log("> sUser.userno :"+sUser.userno );
         console.log("> request.body.onlyChecked :"+ request.body.onlyChecked );
         sql_string += "order by cast(b.dem_amount as float), cast(b.det_amount as float), cast(b.osc_amount as float), a.carrier_code, a.bl_bkg, a.cntr_no, a.insert_date desc ";
         sql_string += ") X ";
@@ -253,7 +249,7 @@ const getExportDemDetList = (request, response) => {
 
         
 
-        params.push( request.session.sUser.userno );
+        params.push( sUser.userno );
         params.push( request.body.ieType );
         params.push( request.body.num );
 
@@ -265,15 +261,13 @@ const getExportDemDetList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
             console.log("sql : " + sql.text);
             conn.query(sql, function(err,result){
-                // done();
+            	release();
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
         
@@ -282,10 +276,8 @@ const getExportDemDetList = (request, response) => {
                     // console.log(result.fields.map(f => f.name));
                     
                     if(result != null) {
-                    	release();
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
                         response.status(200).json([]);
                     }
 
@@ -295,7 +287,7 @@ const getExportDemDetList = (request, response) => {
 
         }
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -323,26 +315,23 @@ const getTarrifList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) { 
         if(err){
             console.log("err" + err);
-            release();
             response.status(400).send(err);
         } else {
             console.log("sql : " + sql.text);
             conn.query(sql, function(err,result){
-                // done();
+            	release();
                 if(err){
                     console.log(err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                	release();
                     response.status(200).json(result.rows);
                     // console.log(result.fields.map(f => f.name));
                 }
             });
         }
 
-        // conn.release();
+        // conn.
     });
 }
   
@@ -368,7 +357,7 @@ const getDemDetPort = (request, response) => {
     sql+= " ,  (case when combin_amount > 0 then mt_ingate_terminal else '' end) as combin_terminal ";
     sql+= " from own_dem_det odd ";
     sql+= " where ie_type = 'I' ";
-    sql+= " and user_no ='"+request.session.sUser.userno+"' ";
+    sql+= " and user_no ='"+sUser.userno+"' ";
     sql+= " and ((unload_date is not null and mt_ingate_date < to_char(now() + interval '8 day','yyyymmdd')) ";
     sql+= " or (unload_date < to_char(now(), 'yyyymmdd') and mt_ingate_date is null) ";
     sql+= " or (unload_date < to_char(now(), 'yyyymmdd') and mt_ingate_date < to_char(now() + interval '8 day','yyyymmdd'))) ";
@@ -388,7 +377,7 @@ const getDemDetPort = (request, response) => {
     sql+= " from own_dem_det odd ";
     sql+= " where ie_type = 'E' ";
     sql+= " and (load_terminal is not null or full_ingate_terminal is not null or mt_outgate_terminal is not null) ";
-    sql+= " and user_no ='"+request.session.sUser.userno+"' ";
+    sql+= " and user_no ='"+sUser.userno+"' ";
     sql+= " and ((mt_outgate_date < to_char(now(),'yyyymmdd') and load_date is null) or (load_date < to_char(now() + interval '8 day','yyyymmdd')  )) ";
     sql+= " and ((unload_date is not null and mt_ingate_date < to_char(now() + interval '8 day','yyyymmdd')) or (unload_date > to_char(now(),'yyyymmdd') and mt_ingate_date is null) or (unload_date > to_char(now(),'yyyymmdd') and mt_ingate_date < to_char(now() + interval '8 day','yyyymmdd'))) ";
     //sql+= " and pod in ('KRPUS','KRINC','KRPTK','KRKAN','KRUSN','KRKPO') ";
@@ -410,18 +399,18 @@ const getDemDetPort = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     //console
-                	release();
+                	
                     response.status(200).send(result.rows);
                 }
             });
@@ -513,7 +502,7 @@ const getDemDetPort = (request, response) => {
     sql += " group by pod, terminal, unload_date, mt_ingate_date,user_no ";
     sql += " )y ";
     sql += " where port = '"+request.body.portCode+"' ";
-    sql += " and user_no ='"+request.session.sUser.userno+"' ";
+    sql += " and user_no ='"+sUser.userno+"' ";
     sql += " group by port, terminal,user_no ";
   
     
@@ -522,17 +511,17 @@ const getDemDetPort = (request, response) => {
     pgsqlPool.connect(function(err,client,release) {
       if(err){
         console.log("err" + err);
-        release();
+        
         response.status(400).send(err);
       } else {
           client.query(sql, function(err,result){
-            // done();
+            release();
             if(err){
               console.log(err);
-              release();
+              
               response.status(400).send(err);
             } else {
-            	release();
+            	
                 response.status(200).send(result.rows);
             }
           });
@@ -605,24 +594,24 @@ const getDemDetPort = (request, response) => {
 	sql += " where ((mt_outgate_date < to_char(now(),'yyyymmdd') and load_date is null) or (load_date < to_char(now() + interval '8 day','yyyymmdd'))) ";
 	sql += " group by (select 'KR' || location_code from own_terminal_info where terminal = x.terminal), terminal, mt_outgate_date, load_date, user_no ";
     sql += " ) x where x.port = '" +request.body.portCode+"' ";
-    sql += " and x.user_no = '"+request.session.sUser.userno+"' ";
+    sql += " and x.user_no = '"+sUser.userno+"' ";
     sql += " group by (case when port not in ('KRPUS','KRINC','KRPTK','KRKAN','KRUSN','KRKPO') then 'OTHER' else port end), terminal ";
   
     console.log("query == ",sql);    
     pgsqlPool.connect(function(err,client,release) {
       if(err){
         console.log("err" + err);
-        release();
+        
         response.status(400).send(err);
       } else {
           client.query(sql, function(err,result){
-            // done();
+            release();
             if(err){
               console.log(err);
-              release();
+              
               response.status(400).send(err);
             } else {
-            	release();
+            	
                 response.status(200).send(result.rows);
             }
           });    

@@ -27,12 +27,7 @@ import Grid from '@material-ui/core/Grid';
 import CustomTabs from "components/CustomTabs/CustomTabs2.js";
 //import ImpTable from "components/Table/TablePaging.js";
 //import ExpTable from "components/Table/TablePaging.js";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableHead from "@material-ui/core/TableHead";
-import TableFooter from "@material-ui/core/TableFooter";
+import {CircularProgress,Table,TableRow,TableHead,TableBody,TableCell,TableFooter} from "@material-ui/core";
 
 import tablestyles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
 

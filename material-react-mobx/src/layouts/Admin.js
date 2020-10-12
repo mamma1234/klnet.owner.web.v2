@@ -19,15 +19,15 @@ import DialogContent from '@material-ui/core/DialogContent';
 import LoginPage from 'views/Pages/Login/LoginPage.js';
 import routes from "admin_routes.js";
 import { observer, inject } from 'mobx-react'; // 6.x
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import styles from "assets/jss/material-dashboard-pro-react/layouts/adminStyle.js";
 
 var ps;
 
 const useStyles = makeStyles(styles);
 
-//export default function Dashboard(props) {
-const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function AdminLayout(props) {
+//const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
   const { ...rest } = props;
   // states and functions
@@ -42,7 +42,9 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [open,setOpen] = React.useState(false);
   const [userData,setUserData] =React.useState([]);
-  const store =userStore;
+  //const store =userStore;
+  const token =  userService.GetItem()?userService.GetItem().token:null;
+  //console.log("adminlayout token",token);
    
   // styles
   const classes = useStyles();
@@ -124,6 +126,12 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
     }
     return activeRoute;
   };
+  const onOpenHandle = () => {
+	  
+	  setOpen(true);
+	  setIsAuthenticated(false);
+  }
+  
   const getRoutes = routes => {
     return routes.map((prop, key) => {
       if (prop.collapse) {
@@ -134,7 +142,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           <Route
             path={prop.layout + prop.path}
             //component={prop.component}
-          	render={() => <prop.component openLogin={()=>setOpen(true)} loginClose={handleLoginClose} store={store}/> }
+          	render={() => <prop.component openLogin={onOpenHandle} loginClose={event=>handleLoginClose(event)} token={token}/> }
             key={key}
           />
         );
@@ -154,39 +162,53 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   
   React.useEffect(() => {
 
-	    if (userStore.token && userStore.user) {
+	    if (token) {
 
-	      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
+	      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+token}})
 	        //.then(res => console.log("return:",res.data))
 	        .then(res => 
 	          {if(res.data) {
 
-	            console.log("res.data.user", res.data.user);
-	            userStore.setUser(res.data.user);
-	            userStore.setToken(res.data.token);
+	            //console.log("res.data.user", res.data.user);
+	            //userStore.setUser(res.data.user);
+	            //userStore.setToken(res.data.token);
 
 	            setIsAuthenticated(true);
 	            setUserData(res.data.user);
+	            if(res.data.user.usertype!="A") {
+	            	alert("페이지 접근할 수 없습니다.");
+	    	    	props.history.push('/landing');
+	            }
 	          } else {
 	            setIsAuthenticated(false);
 	            setUserData([]);
 	          }}
 	        )
 	        .catch(err => {
-	        setIsAuthenticated(false);
-	      });    
-
+	        //setIsAuthenticated(false);
+	        onOpenHandle();
+	      });
 	    }  else {
-	    	alert("페이지 접근할 수 없습니다.");
-	    	props.history.push('/landing');
+	    	onOpenHandle();
 	    }
 
 	  }, []);
   
-  const handleLoginClose=() => {
+  const handleLoginClose=(user) => {
 	  setOpen(false);
-	  setIsAuthenticated(true);
-	  setUserData(userStore.user);
+	  if(user) {
+		  console.log(">>user:",user);
+		  setIsAuthenticated(true);
+		  setUserData(user);
+		  if(user.type !="A") {
+			  alert("페이지 접근할 수 없습니다.");
+			  props.history.push('/landing');
+		  }
+		  
+	  } else {
+		  setIsAuthenticated(false);
+		  setUserData([]); 
+	  }
   }
 
   return (
@@ -222,7 +244,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
             <div className={classes.container}>
               <Switch>
                 {getRoutes(routes)}
-                <Redirect from="/admin" to="/admin/manage" />
+                <Redirect from="/admin" to="/admin/userlist" />
               </Switch>
             </div>
           </div>
@@ -230,11 +252,11 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           <div className={classes.map}>
             <Switch>
               {getRoutes(routes)}
-              <Redirect from="/admin" to="/admin/manage" />
+              <Redirect from="/admin" to="/admin/userlist" />
             </Switch>
           </div>
         )}
-        {getRoute() ? <Footer fluid store={store}/> : null}
+        {getRoute() ? <Footer fluid store={token}/> : null}
        {/* <FixedPlugin
           handleImageClick={handleImageClick}
           handleColorClick={handleColorClick}
@@ -252,10 +274,10 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
       	open={open}
         onClose={()=>setOpen(false)}
       >
-       <DialogContent style={{maxWidth:'400px',minWidth:'400px'}}><LoginPage onClose={handleLoginClose}/></DialogContent>   
+       <DialogContent style={{maxWidth:'400px',minWidth:'400px'}}><LoginPage onClose={event=>handleLoginClose(event)}/></DialogContent>   
       </Dialog>
     </div>
   );
 }
-))
-export default Dashboard;
+//))
+//export default Dashboard;

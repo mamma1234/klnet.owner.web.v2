@@ -63,7 +63,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 //import Box from '@material-ui/core/box';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 //import { useCookies } from 'react-cookie';
 //import { observer, inject} from 'mobx-react'; // 6.x
 
@@ -175,7 +175,7 @@ export default function ScheduleList(props) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [detailParam, setDetailParam] = useState(null);
-  const {store} = props;
+  //const {token} = props;
 
 //console.log(">>>>",store);
   //const [cDate,setCDate] = useState(new Date());
@@ -185,7 +185,7 @@ export default function ScheduleList(props) {
   //const [cookies, setCookie] = useCookies(['name']); 
 
   const handleTapsClick = (e) => {
-	  //debugger;
+	  debugger;
 	setTapNum(e);
 	if(e==1) {
 		const nDate = new Date(sDate);
@@ -213,8 +213,9 @@ export default function ScheduleList(props) {
   useEffect(() => {
 		console.log('effect');
 		//debugger;
-		if(store.token) {
-		    axios.post("/sch/getCarrierInfo",{},{headers:{'Authorization':'Bearer '+store.token}}).then(res => setSelectData(res.data));
+		const token = userService.GetItem()?userService.GetItem().token:null;
+		if(token) {
+		    axios.post("/sch/getCarrierInfo",{},{headers:{'Authorization':'Bearer '+token}}).then(res => setSelectData(res.data));
 		    //.then(res => console.log(JSON.stringify(res.data)));
 		}
 	    return () => {
@@ -242,9 +243,10 @@ export default function ScheduleList(props) {
   
   const onPortSearchValue = (e) => {
 	    const values = e.target.value;
+	    const token = userService.GetItem()?userService.GetItem().token:null;
 	    if(values != undefined && values != "" && values.length >= 2) {
-	    	if(store.token) {
-		    	axios.post("/sch/getPortCodeInfo",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
+	    	if(token) {
+		    	axios.post("/sch/getPortCodeInfo",{ portCode:values},{headers:{'Authorization':'Bearer '+token}})
 			    .then(res => setPortData(res.data))
 			    .catch(err => {
 			        if(err.response.status === 403||err.response.status === 401) {
@@ -277,7 +279,7 @@ export default function ScheduleList(props) {
   const onSubmit = (e,sPDate,ePDate,eTabnum) => {
 
 	//debugger;
-	
+	const token = userService.GetItem()?userService.GetItem().token:null;
 	if(eTabnum == undefined && tapNum==2) {
 		getServiceCarrierList();
 	} else {
@@ -308,7 +310,7 @@ export default function ScheduleList(props) {
 	  //search
 	
 	//console.log("SUBMIT",store.token);
-		if(store.token) {
+		if(token) {
 		  
 		  axios.post("/sch/getScheduleList",{ carrierCode:carrierCode,
 			  								  startDate:moment(sPDate != undefined ? sPDate:sDate).format('YYYYMMDD'),
@@ -318,7 +320,7 @@ export default function ScheduleList(props) {
 			  								  endPort:ePort,
 												vesselName:vesselName,
 												direct:state.checkedA
-		  									},{headers:{'Authorization':'Bearer '+store.token}})
+		  									},{headers:{'Authorization':'Bearer '+token}})
 			.then(setScheduleData([])).then(res => setScheduleData(res.data))
 		    .catch(err => {
 		        if(err.response.status === 403||err.response.status === 401) {
@@ -335,14 +337,16 @@ export default function ScheduleList(props) {
   }
 
   function getServiceCarrierList() {
-	if(store.token) {
+	  
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
 		  return axios ({
 			url:'/sch/getServiceCarrierList',
 			method:'POST',
 			data: {startPort:sPort,
 				endPort:ePort
 				 },
-			headers:{'Authorization':'Bearer '+store.token}
+			headers:{'Authorization':'Bearer '+token}
 		  }).then(setTileData([])).then(res => setTileData(res.data))
 		  .catch(err => {
 			if(err.response.status === 403||err.response.status === 401) {
@@ -443,27 +447,16 @@ export default function ScheduleList(props) {
   
 
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-{/*         <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>FCL Schedule</h4>
-            <p className={classes.cardCategoryWhite}>
-              Here is a subtitle for this table
-            </p>
-          </CardHeader> */}
-        	<Card style={{marginBottom:'0px'}}>
+       <Card style={{marginBottom:'0px'}}>
   			<CardHeader color="info" icon style={{height:'10px'}}>
 			<CardIcon color="info" style={{padding:'0'}}>
 				<Assignment />
-			</CardIcon>
-			<h4 className={classes.cardTitleBlack}>FCL Sea Schedule</h4>				
+			</CardIcon>			
 		</CardHeader>
-          <CardBody style={{marginTop:'10px',paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
-		          <GridItem xs={12}>
-			      	<GridContainer>
-			      		<GridItem xs={12} sm={9} md={10}>
-			      			<GridContainer spacing={1}>
+        <CardBody >
+        	<Card style={{marginTop:'0',marginBottom:'5px'}}>
+				<CardBody style={{paddingTop:'5px',paddingBottom:'5px'}}>
+			      	<GridContainer spacing={1}>
 			      				<GridItem xs={12} sm={4}>
 								  <Autocomplete
 					        			options = {portData}
@@ -566,20 +559,26 @@ export default function ScheduleList(props) {
 								label="Direct Only">
 									</FormControlLabel>)}
 								</GridItem>
-				        	 </GridContainer>
-			        	 </GridItem>
-			        	<GridItem xs={12} sm={2} md={'auto'}>
-			        		{/*<Button color="info" onClick = {onSubmit}fullWidth>Search</Button>*/}
-			        		<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}  >Search</Button>
-			        		
-			        	</GridItem>
-		        	</GridContainer>
-		          </GridItem>    	
-
-					  <div>
+		        	</GridContainer>   	
+		          </CardBody>
+		          </Card>
+		          <GridItem xs={12} style={{paddingBottom:'10px',textAlign:'-webkit-right'}}>
+			      	<GridItem xs={12} sm={3} md={2} style={{textAlign:'center'}}>
+				      {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
+				      {/* <Button color="info" onClick = {onSubmit}  >조회</Button>*/}
+				      <Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}  fullWidth>Search</Button>
+				      {/* <Button color="info" >삭제</Button>
+				      <Button color="info" //onClick = {Download} 
+				        id='btnExport' >엑셀다운로드</Button> */}
+				    </GridItem>
+			    </GridItem>
+			    
+		          
+				<div>
 					<div style={{position:"absolute",zIndex:"1",right:"50px",top:"23px",display:"none"}}>
-				  <Button size="sm" color="linkedin" target="_blank" href={"https://new.portmis.go.kr/portmis/websquare/websquare.jsp?w2xPath=/portmis/w2/si/pmb/mbrp/info/UI-SI-MBRP-201-51.xml&menuCd=M9106&menuNm=%BC%B1%BB%E7%BA%B0%20%BF%EE%C0%D3%B0%F8%C7%A5%20%B8%AE%BD%BA%C6%AE&w2xHome=/portmis/w2/main/&w2xDocumentRoot="}>해양수산부 운임 공표 조회</Button>
-				  </div>
+				    <Button size="sm" color="linkedin" target="_blank" href={"https://new.portmis.go.kr/portmis/websquare/websquare.jsp?w2xPath=/portmis/w2/si/pmb/mbrp/info/UI-SI-MBRP-201-51.xml&menuCd=M9106&menuNm=%BC%B1%BB%E7%BA%B0%20%BF%EE%C0%D3%B0%F8%C7%A5%20%B8%AE%BD%BA%C6%AE&w2xHome=/portmis/w2/main/&w2xDocumentRoot="}>해양수산부 운임 공표 조회</Button>
+				    </div>
+				  
 				  <div style={{position:"relative",zIndex:"0"}}>
 					  <CustomTabs headerColor="info"
 					  handleTapsClick={handleTapsClick}
@@ -588,20 +587,21 @@ export default function ScheduleList(props) {
 							tabName: "List"
 							,tabIcon: (AssignmentOutlinedIcon)
 							,tabContent: (
-									<Card style={{marginTop:'10px',marginBottom:'10px'}}>
-									<CardBody style={{paddingTop:'0',paddingLeft:'0',paddingRight:'0'}}>
-									<div style={{textAlign: "end"}}><span style={{textAlign: "end",paddingBottom: '0px',color:"#000000", paddingRight:"10px", paddingTop:"0px"}}>Total:{scheduleData.length}건</span></div>
+									<div>
+									<div style={{textAlign: "end"}}>
+									<span style={{textAlign: "end",paddingBottom: '0px',color:"#000000", paddingRight:"10px", paddingTop:"0px"}}>Total:{scheduleData.length}건</span>
+									</div>
           			<GridContainer>
           			{/*<h5 style={{paddingBottom: '0px',paddingTop: '0px',paddingLeft: '15px',paddingRight: '15px',fontWeight:'bold',marginTop:'0px',marginBottom:'0px' }}>※ {scheduleData.length} 건 검색 완료</h5>*/}
 						
 						<GridItem xs={12}>
           					<ScheduleToggleTable 
 		                        tableHeaderColor="info"
-		                        tableHead={["Carrier", "Vessel Name", "Voyage No", "Origin", "Destination", "T/Time", "T/S", "Booking"]}
+		                        tableHead={["Carrier", "Vessel Name", "Voyage No", "Origin", "Destination", "Charge", "T/Time", "T/S", "Booking"]}
 								tableData={scheduleData}
 		                     /> 
 		                </GridItem>
-					</GridContainer></CardBody></Card>
+					</GridContainer></div>
 							)
 							},{
 								tabName: "Calendar"
@@ -662,7 +662,7 @@ export default function ScheduleList(props) {
 											transformOrigin={{vertical:'top',horizontal:'center',}}
 										>
 											<SchDetailPop
-												detailParam = {detailParam} store={store}
+												detailParam = {detailParam} //store={token}
 											/>
 										</Popover>
 										</CardBody>
@@ -685,7 +685,7 @@ export default function ScheduleList(props) {
         </GridListTile>
         {tileData.map((tile) => (
           <GridListTile key={tile.rownum} style={{ height: '150px',width:'400px'}}>
-<div align='center'>
+          <div align='center'>
 		<img src={require("assets/img/carrier/"+tile.img+".gif")} alt={tile.title} width='100' height='100' />
 		</div>
             <GridListTileBar  
@@ -701,7 +701,7 @@ export default function ScheduleList(props) {
               }
             />
           </GridListTile>
-))}
+        ))}
       </GridList>
     </div>
 	<Popover
@@ -714,7 +714,7 @@ export default function ScheduleList(props) {
                         transformOrigin={{vertical:'top',horizontal:'center',}}
                   >
 											<SchLinePicPop
-												detailParam = {state} store={store}
+												detailParam = {state} //store={token}
 											/>
                   </Popover>
 					</GridItem>
@@ -729,8 +729,7 @@ export default function ScheduleList(props) {
 
           </CardBody>
         </Card>
-      </GridItem>
-    </GridContainer>
+
   );
 }
 //))

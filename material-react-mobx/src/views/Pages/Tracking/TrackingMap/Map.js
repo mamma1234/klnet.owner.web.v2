@@ -18,7 +18,9 @@ import PropTypes from 'prop-types';
   import SearchIcon from '@material-ui/icons/Search';
   import {Filter, DirectionsBoat, Replay, YoutubeSearchedFor, Close, FindInPage, Check, ArrowDownward, ArrowUpward} from '@material-ui/icons';
   import { ToggleButton } from '@material-ui/lab';
-  import SubMap from 'views/Pages/TestPage/Satellite.js'
+  import SubMap from 'views/Pages/TestPage/Satellite.js';
+  import {userService} from 'views/Pages/Login/Service/Service.js';
+  
   function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
   }
@@ -162,6 +164,7 @@ const MyMapComponent = compose(
           
         </Paper>
       </MapControl>
+         
       {props.checkParameter.length !== 0 ? (
         <MapControl position = {window.google.maps.ControlPosition.LEFT_TOP}>
         <Collapse in={props.checked} collapsedHeight={26}>
@@ -858,10 +861,11 @@ export default class DemDetMap extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      paramCntr: props.location,
       setStyle: [], // GoogleMap 스킨 상태
       locationlat:0, // 현재 마우스 위치 Latitude 좌표
       locationlng:0, // 현재 마우스 위치 Longitude 좌표
-      token: props.store.token, // 토큰
+      token: userService.GetItem()?userService.GetItem().token:null, // 토큰
       portCode:"", //Port상세보기 파라메터
       shipList:[], // 선박데이터
       positions:[], // 선박의 이동경로 
@@ -892,6 +896,7 @@ export default class DemDetMap extends React.Component {
       nationEname:"", // 국가 영문명
       portEname:"", // 포트 국가영문명
       portName:"",  //포트명
+      cntrList:[], // 유저컨테이너목록
       //ImageSprite 선박 회전율에 따른 이미지
       shipRotate: {
         port:{x:5,y:5,width:15,height:17},
@@ -926,7 +931,19 @@ export default class DemDetMap extends React.Component {
   }
 
   componentWillMount() {
-
+    if((this.state.paramCntr.state ===null || this.state.paramCntr.state === undefined)){
+      if(this.state.paramCntr.search !== "") {
+        const findText = "?cntr_no=";
+        if(this.state.paramCntr.search.indexOf(findText) !== -1) {
+          this.onSearch(this.state.paramCntr.search.replace(findText,""))
+        }else {
+        
+        }
+      }
+    }else {
+      this.onSearch(this.state.paramCntr.state.param)
+    } 
+    
   }
   onMenuDisplay = (param1) => {
     this.setState(state => ({
@@ -1111,6 +1128,7 @@ export default class DemDetMap extends React.Component {
       toggleCarTimeStamp:false, // 차랑 타임스탬프 Show hide 마커 플래그 
       toggleShipTimeStamp:false, // 선박 타임스탬프 Show hide 마커 플래그
       checked:true,    //조회 상세정보 show hide 플래그
+      cntrChecked:true, //컨번 리스트 show hide 플래그
       isPortOver:false, // 포트 상세보기 Show hide 플래그
       errMessage:"", //Alert 에러메시지 내용
       nationCode:"", //포트 국가코드
@@ -1148,6 +1166,11 @@ export default class DemDetMap extends React.Component {
   toggleChecked = (param) => {
     this.setState(state => ({
       checked:!param
+    }))
+  }
+  cntrToggleChecked = (param) => {
+    this.setState(state => ({
+      cntrChecked:!param
     }))
   }
   carTimeStampChange = (param) => {
@@ -1233,7 +1256,9 @@ export default class DemDetMap extends React.Component {
           toggleCarTracking={this.state.toggleCarTracking}
           toggleShipTracking={this.state.toggleShipTracking}
           checked={this.state.checked}
+          cntrChecked={this.state.cntrChecked}
           toggleChecked={this.toggleChecked}
+          cntrToggleChecked={this.cntrToggleChecked}
           onPortToggle={this.onPortToggle}
           isPortOver={this.state.isPortOver}
           portCode={this.state.portCode}
@@ -1255,6 +1280,7 @@ export default class DemDetMap extends React.Component {
           shipTimeStampChange={this.shipTimeStampChange}
           toggleCarTimeStamp={this.state.toggleCarTimeStamp}
           toggleShipTimeStamp={this.state.toggleShipTimeStamp}
+          cntrList={this.state.cntrList}
           />
 
         <Snackbar open={this.state.alertOpen} autoHideDuration={6000} onClose={this.handleAlertClose}>

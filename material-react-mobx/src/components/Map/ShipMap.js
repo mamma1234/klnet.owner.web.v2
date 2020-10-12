@@ -19,14 +19,14 @@ const useStyles = makeStyles(theme => ({
   }));
   
 export default function ShipMap(props) {
+    console.log(props)
     const classes = useStyles();
     const [linkUrl,setLinkUrl] = useState("")
-    const [store] = useState(props.store);
     useEffect(() => {
         if(!props.parameter.allDay) {
           let url = "https://dev.seavantage.com/#/tracking/cargo?authToken=4f49d18d-bf06-4598-9849-726df2cca3a0&schedule=";
           let appendUrl = '[';
-          axios.post("/loc/getTsTracking",{reqseq:props.parameter.req_seq, carrierCode:props.parameter.carrier_code},{headers:{'Authorization':'Bearer '+store.token}})
+          axios.post("/loc/getTsTracking",{reqseq:props.parameter.req_seq, carrierCode:props.parameter.carrier_code},{headers:{'Authorization':'Bearer '+props.token}})
           .then(res => {
             if(res.data.length !== 0 ) {
               
@@ -87,7 +87,7 @@ export default function ShipMap(props) {
     return () => {
         console.log('cleanup');
         };
-    },[props, store.token]);
+    },[]);
     
   
 return (

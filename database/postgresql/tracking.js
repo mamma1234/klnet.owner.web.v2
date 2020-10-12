@@ -6,7 +6,10 @@ const sUser = require('../../models/sessionUser');
 
 const getTrackingList = (request, response) => {
 
-    request.session.sUser = sUser;
+   // sUser = sUser;
+	console.log("getTrackingList sUser");
+    console.log("getTrackingList sUser:",sUser);
+    
    let sqlText ="";
   //  sqlText += "select coalesce(bb.totalcnt,0) as totalcnt,coalesce(bb.full_out,0) as full_out, \n";
   //  sqlText += " coalesce(bb.mt_out,0) as mt_out,coalesce(bb.mt_in,0) as mt_in, \n";
@@ -35,7 +38,7 @@ const getTrackingList = (request, response) => {
   //  //sqlText += "  cast(to_date(pod_eta,'yyyymmdd')- to_date(pol_atd,'yyyymmdd') as integer) *100) end as percent \n";
   //  sqlText += " from \n";
   //  sqlText += " ( select a.book_mark,a.mbl_no,a.bkg_no, b.* from  \n";
-  //  sqlText += " ( select * from own_user_request  where user_no = '"+request.session.sUser.userno+"') a \n";
+  //  sqlText += " ( select * from own_user_request  where user_no = '"+sUser.userno+"') a \n";
   //  sqlText += " ,own_tracking_bl_new b \n";
   //  //sqlText += " on a.bl_bkg = b.bl_bkg \n";
   //  sqlText += " where a.req_seq = b.req_seq \n";
@@ -83,6 +86,36 @@ const getTrackingList = (request, response) => {
   sqlText += "                    limit 1),a.req_seq) req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
   sqlText += "       ,a.cntr_no ,a.mbl_no ,a.bkg_no ,a.bl_yy ,a.web_seq ,a.book_mark \n";
   sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod, a.pol_cd, a.pod_cd \n";
+  sqlText += "       ,coalesce((select coalesce(bb.vsl_name, bb.line_vsl) \n";
+  sqlText += "         from own_tracking_loc_new bb \n";
+  sqlText += "        where bb.req_seq = a.req_seq \n";
+  sqlText += "          and bb.user_no = a.user_no \n";
+  sqlText += "          and bb.bl_bkg = a.bl_bkg \n";
+  sqlText += "          and substring(move_time,1,8) >= to_char(now(), 'YYYYMMDD') \n";
+  sqlText += "          and (bb.vsl_name != '' or bb.line_vsl != '') \n";
+  sqlText += "          order by bb.move_time limit 1 \n";
+  sqlText += "         ),  (select coalesce(bb.vsl_name, bb.line_vsl) \n";
+  sqlText += "         from own_tracking_loc_new bb \n";
+  sqlText += "        where bb.req_seq = a.req_seq \n";
+  sqlText += "          and bb.user_no = a.user_no \n";
+  sqlText += "          and bb.bl_bkg = a.bl_bkg \n";
+  sqlText += "          and (bb.vsl_name != '' or bb.line_vsl != '') \n";
+  sqlText += "          order by bb.move_time desc limit 1),  \n";
+  sqlText += "          (select bb.vessel \n";
+  sqlText += "            from own_tracking_bl_ports_new bb  \n";
+  sqlText += "           where bb.req_seq = a.req_seq  \n";
+  sqlText += "             and bb.user_no = a.user_no  \n";
+  sqlText += "             and bb.bl_bkg = a.bl_bkg  \n";
+  sqlText += "             and substring(end_date_time,1,8) >= to_char(now(), 'YYYYMMDD')  \n";
+  sqlText += "             and bb.vessel != ''  \n";
+  sqlText += "             order by bb.end_date_time limit 1  \n";
+  sqlText += "            ),  (select bb.vessel  \n";
+  sqlText += "            from own_tracking_bl_ports_new bb  \n";
+  sqlText += "           where bb.req_seq = a.req_seq  \n";
+  sqlText += "             and bb.user_no = a.user_no  \n";
+  sqlText += "             and bb.bl_bkg = a.bl_bkg  \n";
+  sqlText += "             and bb.vessel != ''  \n";
+  sqlText += "             order by bb.end_date_time desc limit 1) )max_vsl_name \n";
   sqlText += "       ,a.pol_atd, a.pol_etd \n";
   sqlText += "       ,case when (a.pol_atd is null or a.pol_atd ='')  \n";
   sqlText += "             then case when to_timestamp(a.pol_etd,'yyyymmdd') < now()  \n";
@@ -131,8 +164,10 @@ const getTrackingList = (request, response) => {
   sqlText += "             else a.bl_bkg \n";
   sqlText += "        end as view_bl_bkg  \n";
   sqlText += "       ,c.image_yn ,c.line_code ,c.nm_kor as line_nm ,c.url as line_url \n";
-  sqlText += "       ,(select d.move_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1) as last_status \n";
-  sqlText += "       ,(select d.loc_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1) as last_location \n";
+  sqlText += "       ,coalesce((select d.move_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1), \n";
+  sqlText += "                  (select d.move_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' order by loc_seq asc limit 1)) as last_status \n";
+  sqlText += "       ,coalesce((select d.loc_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') order by loc_seq asc limit 1), \n";
+  sqlText += "                  (select d.loc_name from own_tracking_loc_new d where d.req_seq= a.req_seq and move_time is not null and move_time !='' order by loc_seq asc limit 1)) as last_location \n";
   sqlText += "       ,(select case when length(move_time)>=12 then to_char(to_timestamp(substring(move_time,0,12),'yyyymmddhh24mi'),'yyyy/mm/dd hh24:mi')   \n";
   sqlText += "                else to_char(to_timestamp(move_time,'yyyymmdd'),'yyyy/mm/dd') end  from own_tracking_loc_new d where d.req_seq = a.req_seq and move_time is not null and move_time !='' and substring(move_time, 0, 9) <= to_char(now(), 'YYYYMMDD')   \n";
   sqlText += "                order by loc_seq asc limit 1) as last_status_time \n";
@@ -147,8 +182,8 @@ const getTrackingList = (request, response) => {
   sqlText += "               ,a.cntr_no ,a.mbl_no ,a.bkg_no ,a.bl_yy ,a.web_seq ,a.book_mark \n";
   sqlText += "       ,a.vsl_code, a.vsl_name ,a.voyage ,a.pol, a.pod, a.pol_cd, a.pod_cd \n";
   sqlText += "       ,a.pol_atd, a.pol_etd,a.pod_ata, a.pod_eta \n";
-  sqlText += "               , floor(count(*) over()/10) as tot_page,count(*) over() as tot_cnt  \n";
-  sqlText += "               ,floor(((row_number() over()) -1) /10 +1) as curpage \n";
+  sqlText += "               , floor(count(*) over()/"+request.body.cur+") as tot_page, count(*) over() as tot_cnt  \n";
+  sqlText += "               ,floor(((row_number() over()) -1) /"+request.body.cur+" +1) as curpage \n";
   sqlText += "           from ( \n";
   sqlText += "                 select a.req_seq ,a.user_no ,a.carrier_code ,a.bl_bkg ,a.ie_type \n";
   sqlText += "                       ,row_number() over( partition by a.user_no, a.carrier_code, a.bl_bkg, a.ie_type order by a.web_seq desc) seq \n";
@@ -163,7 +198,8 @@ const getTrackingList = (request, response) => {
   sqlText += "       ,b.pol_atd, b.pol_etd,b.pod_ata, b.pod_eta \n";
   sqlText += "                   from own_user_request a \n";
   sqlText += "                  left outer join own_tracking_bl_new b on a.req_seq = b.req_seq and a.user_no = b.user_no and a.carrier_code = b.carrier_code and a.bl_bkg = b.bl_bkg \n";
-  sqlText += "                  where a.user_no = '"+request.session.sUser.userno+"' \n";
+  sqlText += "                  where a.user_no = '"+sUser.userno+"' \n";
+  sqlText += "                  and a.del_yn = 'N' \n";
   if(request.body.ietype != "" && request.body.ietype != "A") {
       sqlText += " and a.ie_type = '"+request.body.ietype+"' \n";
   }
@@ -213,7 +249,7 @@ if(request.body.initial == "Y") {
   sqlText += "                   ,count(case when ie_type='I' and mt_ingate_date is not null then 1 end ) as mt_in  \n";
   sqlText += "                   ,count(case when ie_type='E' and full_ingate_date is not null then 1 end ) as full_in,bl_bkg,ie_type  \n";
   sqlText += "               from own_dem_det d \n";
-  sqlText += "              where d.user_no = '"+request.session.sUser.userno+"' \n";
+  sqlText += "              where d.user_no = '"+sUser.userno+"' \n";
   if(request.body.ietype != "" && request.body.ietype != "A") {
       sqlText += " and d.ie_type = '"+request.body.ietype+"' \n";
   }
@@ -226,7 +262,7 @@ if(request.body.initial == "Y") {
   sqlText += "               group by bl_bkg,ie_type) d \n";
   sqlText += " on a.bl_bkg = d.bl_bkg  and a.ie_type= d.ie_type \n";
   sqlText += "where curpage = '"+request.body.num+"' \n";
-  sqlText += "order by case when a.book_mark='Y' then 0 else 1 end,start_day limit 10 \n";
+  sqlText += "order by case when a.book_mark='Y' then 0 else 1 end,start_day limit "+request.body.cur+" \n";
 
   // sqlText += "select aa.mbl_no ,aa.bkg_no \n";
   // sqlText += ",case when (aa.bkg_no is not null or aa.bkg_no != '') and (aa.mbl_no is not null or aa.mbl_no != '') then aa.bl_bkg \n";
@@ -275,7 +311,7 @@ if(request.body.initial == "Y") {
   //     sqlText += "inner join own_tracking_bl_new b on a.req_seq = b.req_seq \n";
   // }
   // sqlText += "left outer join own_code_cuship c on a.carrier_code = c.id \n";
-  // sqlText += "where a.user_no = '"+request.session.sUser.userno+"' \n";
+  // sqlText += "where a.user_no = '"+sUser.userno+"' \n";
 
   // if(request.body.ietype != "" && request.body.ietype != "A") {
   //     sqlText += " and a.ie_type = '"+request.body.ietype+"' \n";
@@ -319,20 +355,20 @@ if(request.body.initial == "Y") {
    
    
 console.log(sqlText);
-  pgsqlPool.connect(function(err,conn,release,done) {
+  pgsqlPool.connect(function(err,conn,release) {
       if(err){
           console.log("err" + err);
           response.status(400).send(err);
       } else {
           conn.query(sqlText, function(err,result){
             //   done();
+        	  release();
               if(err){
                   console.log(err);
-                  release();
                   response.status(400).send(err);
               } else {
                   //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-            	  release();
+            	  
                   response.status(200).json(result.rows);
                   // console.log(result.fields.map(f => f.name));
 
@@ -344,7 +380,7 @@ console.log(sqlText);
       }
 
 
-      // conn.release();
+      // conn.
   });
 }
 
@@ -373,7 +409,7 @@ const getMyBlList = (request, response) => {
     sql += " b.nm_kor"
     sql += " from own_user_request a left outer join (select nm_kor, id from own_code_cuship group by id,nm_kor)b on a.carrier_code = b.id ";
     sql += " where 1=1 ";
-    sql += " and user_no = '"+request.session.sUser.userno+"' ";
+    sql += " and user_no = '"+sUser.userno+"' ";
     if( '' != request.body.fromDate && '' != request.body.toDate ) {
         sql += " and to_char(insert_date , 'yyyymmdd') between '"+ request.body.fromDate +"' and  '" + request.body.toDate + "' " ;
     }
@@ -392,20 +428,20 @@ const getMyBlList = (request, response) => {
     sql += " and del_yn ='N' order by num";
     sql += " )a where curpage ='"+request.body.num+"'";
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
-                	release();
+                	
                     response.status(200).json(result.rows);
 
                 }
@@ -425,7 +461,7 @@ const getMyBlList = (request, response) => {
         sql += " select bl_bkg " ;
         sql += " from own_user_request ";
         sql += " where 1=1 ";
-        sql += " and user_no = upper('"+request.session.sUser.userno+"')";
+        sql += " and user_no = upper('"+sUser.userno+"')";
         sql += " and carrier_code = upper('"+request.body.carrierCode+"') ";
         sql += " and bl_bkg = upper('"+request.body.bl_bkg+"') ";
         sql += " and ie_type = upper('"+request.body.ie_type+"') ";
@@ -433,25 +469,25 @@ const getMyBlList = (request, response) => {
         sql += request.body.cntrNumber==""?" and cntr_no is null ":" and cntr_no = upper('"+cntrNumber+"')";
 
         console.log( sql );
-	    pgsqlPool.connect(function(err,conn,release,done) {
+	    pgsqlPool.connect(function(err,conn,release) {
             try{
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             if(result != null) {
-                            	release();
+                            	
                                 response.status(200).json(result.rows);
                             } else {
-                            	release();
+                            	
                                 response.status(200).json([]);
                             }
 
@@ -462,11 +498,11 @@ const getMyBlList = (request, response) => {
 
             }catch(e) {
                 console.log(e);
-                release();
+                
             	response.status(400).send(error);
             }
 
-	        // conn.release();
+	        // conn.
 	    });
   }
 
@@ -477,7 +513,7 @@ const getMyBlList = (request, response) => {
       text: "select bl_bkg "
       +" from own_user_request "
       +" where user_no = upper($1) and carrier_code = upper($2) and bl_bkg = upper($3) and ie_type = upper($4) and cntr_no = upper($5) ",
-        values: [request.session.sUser.userno
+        values: [sUser.userno
             ,carrierFormat
             ,request.body.params.bl_no
             ,request.body.params.ie_type
@@ -486,24 +522,24 @@ const getMyBlList = (request, response) => {
     }
     console.log( sql );
     try{
-        pgsqlPool.connect(function(err,conn,release,done) {
+        pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
+                
                 response.status(400).send(err);
             } else {
                 conn.query(sql, function(err,result){
-                    // done();
+                    release();
                     if(err){
                         console.log(err);
-                        release();
+                        
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
-                        	release();
+                        	
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
+                        	
                             response.status(200).json([]);
                         }
                     }
@@ -512,11 +548,11 @@ const getMyBlList = (request, response) => {
             }
 
 
-            // conn.release();
+            // conn.
         });
     }catch(e){
         console.log(e);
-        release();
+        
         response.status(400).send(error);
     }
 }
@@ -530,7 +566,7 @@ const getMyBlList = (request, response) => {
         console.log('request.body.sendData.cntr_no',request.body.sendData.cntr_no)
         sql += " update own_user_request ";
         sql += " set del_yn = 'Y' ";
-        sql += " ,update_user = upper('"+request.session.sUser.userno+"') ";
+        sql += " ,update_user = upper('"+sUser.userno+"') ";
         sql += " ,update_date = now() "
         sql += " where carrier_code = upper('"+request.body.sendData.carrier_code+"') "
         sql += " and ie_type = upper('"+request.body.sendData.ie_type+"') "
@@ -549,24 +585,24 @@ const getMyBlList = (request, response) => {
 
       console.log( sql );
       try{
-        pgsqlPool.connect(function(err,conn,release,done) {
+        pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
+                
                 response.status(400).send(err);
             } else {
                 conn.query(sql, function(err,result){
-                    // done();
+                    release();
                     if(err){
                         console.log(err);
-                        release();
+                        
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
-                        	release();
+                        	
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
+                        	
                             response.status(200).json([]);
                         }
                     }
@@ -576,7 +612,7 @@ const getMyBlList = (request, response) => {
         });
       }catch(e) {
         console.log(e);
-        release();
+        
         response.status(400).send(error);
       }
   }
@@ -586,25 +622,25 @@ const getBookMark = (request, response) => {
     const sql = {
         text: "select seq,vsl_name,ie_type,pol,pod from own_book_mark"+
         	  " where user_no =$1  and menu_code='T'  order by seq",
-        values: [request.session.sUser.userno,],
+        values: [sUser.userno,],
         rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                	release();
+                	
                     response.status(200).json(result.rows);
                     // console.log(result.fields.map(f => f.name));
 
@@ -615,7 +651,7 @@ const getBookMark = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -631,27 +667,35 @@ const getCntrList = (request, response) => {
                   " left outer join own_tracking_loc_new b "+
                   " on a.req_seq = b.req_seq and a.user_no = b.user_no and a.bl_bkg = b.bl_bkg and a.cntr_no = b.cntr_no "+
                   " where a.req_seq=$1 and a.carrier_code= $2 and a.bl_bkg= $3 and move_time is not null and move_time !='' "+
-                  " and substring(b.move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') ) a "+
-                  " where seq=1",
+                  " and substring(b.move_time, 0, 9) <= to_char(now(), 'YYYYMMDD') "+
+                  " union "+
+                  " select a.req_seq, a.carrier_code, a.bl_bkg, a.cntr_no "+
+                  "    ,(row_number() over( partition by a.req_seq, a.carrier_code, a.bl_bkg, a.cntr_no order by b.loc_seq asc)) as seq "+
+                  "   ,to_char(to_timestamp(substr(move_time,1,12),'YYYYMMDDhh24mi'),'YYYY-MM-DD hh24:mi') as move_time "+
+                  " ,vsl_name,voyage_no,loc_name,move_name "+
+                  " from own_tracking_cntr_new a "+
+                  " left outer join own_tracking_loc_new b "+
+                  " on a.req_seq = b.req_seq and a.user_no = b.user_no and a.bl_bkg = b.bl_bkg and a.cntr_no = b.cntr_no "+
+                  " where a.req_seq=$1 and a.carrier_code= $2 and a.bl_bkg= $3 and move_time is not null and move_time !='' "+
+                  " ) a where seq=1 limit 1",
             values: [request.body.reqseq, request.body.carriercode, request.body.blbk],
             //rowMode: 'array',
         }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                	release();
                     response.status(200).json(result.rows);
                     // console.log(result.fields.map(f => f.name));
                 }
@@ -661,7 +705,7 @@ console.log(sql);
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
   
@@ -673,28 +717,28 @@ const getUserSetting = (request, response) => {
               " notice_det_yn,notice_det_value,notice_dem_yn,notice_dem_value,"+
         	  " notice_inspect_yn,notice_inspect_off_yn,notice_email_yn,notice_email_value,"+
         	  " notice_sms_yn,notice_sms_value from own_user_ui_setting where user_no = $1",
-        values: [request.session.sUser.userno],
+        values: [sUser.userno],
         rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
@@ -706,7 +750,7 @@ const getUserSetting = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -724,24 +768,24 @@ const getCntrDetailList = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
@@ -754,7 +798,7 @@ const getCntrDetailList = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -785,20 +829,20 @@ const getCarrierInfo = (request, response) => {
         rowMode: 'array',
     }
     console.log("query == ",sql);    
-    pgsqlPool.connect(function(err,client,release,done) {
+    pgsqlPool.connect(function(err,client,release) {
       if(err){
         console.log("err" + err);
-        release();
+        
         response.status(400).send(err);
       } else {
           client.query(sql, function(err,result){
-            // done();
+            release();
             if(err){
               console.log(err);
-              release();
+              
               response.status(400).send(err);
             } else {
-            	release();
+            	
                 response.status(200).send(result.rows);
             }
           });
@@ -831,30 +875,30 @@ const setUserSetting = (request, response) => {
         values: [request.body.col0, request.body.col1, request.body.col2,request.body.col3,request.body.col4,
         		request.body.col5,request.body.col6,request.body.col7,request.body.col8,request.body.col9,
         		request.body.col10,request.body.col11,request.body.col12,request.body.col13,request.body.col14,
-        		request.body.col15,request.body.col16,request.body.col17,request.body.col18,request.body.col19,request.session.sUser.userno
+        		request.body.col15,request.body.col16,request.body.col17,request.body.col18,request.body.col19,sUser.userno
         		],
         rowMode: 'array',
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
 
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
@@ -866,7 +910,7 @@ console.log(sql);
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -879,7 +923,7 @@ const saveBlList = ( request, response ) => {
     let insertConditions = " INSERT INTO own_user_request(req_seq, user_no, carrier_code, bl_bkg, ie_type, cntr_no, mbl_no, bkg_no, start_date, insert_date, insert_user)";
     for( let i = 0; i < dataRows.length; i++ ){
         // $1 user_no
-        let userNo = request.session.sUser.userno;
+        let userNo = sUser.userno;
         // $2 carrier_code
         let ie_gubun = dataRows[i][0];
         // $3 bl_bkg
@@ -937,21 +981,21 @@ const saveBlList = ( request, response ) => {
         // values: multi_params,
     }
     console.log( sql );
-    pgsqlPool.connect( (err,conn,release,done) =>{
+    pgsqlPool.connect( (err,conn,release) =>{
         if(err){
             console.log("err" + err);
-            release();
+            
             // response.status(400).send(err);
         } else {
 
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 // console.log( result.command );
                 if(err){
                     error = err;
                     console.log(err);
                     // console.log(error);
-                    release();
+                    
                     response.status(200).send(err);
                     // response.status(400).send(err);
                 } else {
@@ -963,7 +1007,7 @@ const saveBlList = ( request, response ) => {
                     //     response.status(200).json(count+"건 처리되었습니다.");
                     // }
                     // if ( count == dataRows.length) {
-                    release();
+                    
                         response.status(200).json(count+"건 처리되었습니다.");
                     // }
                 }
@@ -987,38 +1031,38 @@ const insertBlRequest = ( request, response ) => {
         sql += " scrap_result, scrap_start_date, scrap_end_date, scrap_log, web_seq, start_date, ";
         sql += " to_oracle, del_yn, close_yn, insert_date, insert_user, update_date, update_user) ";
 
-        sql += " VALUES(to_char( now(), 'yyyymmddhh24miss' )||lpad(cast( nextval('user_request_seq') as varchar),6,'0'), upper('"+request.session.sUser.userno+"'), upper('"+request.body.carrierCode+"'), ";
+        sql += " VALUES(to_char( now(), 'yyyymmddhh24miss' )||lpad(cast( nextval('user_request_seq') as varchar),6,'0'), upper('"+sUser.userno+"'), upper('"+request.body.carrierCode+"'), ";
         sql += " upper('"+request.body.bl_bkg+"'), upper('"+request.body.ie_type+"'), ";
         sql += request.body.cntrNumber==""?"null,":"upper('"+request.body.cntrNumber+"'), ";
         sql += request.body.bl_no==""?"null,":" upper('"+request.body.bl_no+"'), ";
         sql += " '',";
         sql += request.body.bkg_no==""?"null,":" upper('"+request.body.bkg_no+"'), "
         sql += " 'Y', '', ";
-        sql += " 'Y', '', 'N', '', 'N', '', null, null, '', '', to_char(now(),'YYYYMMDD'), 'N', 'N', 'N', now(), upper('"+request.session.sUser.userno+"'), null, '') ",
+        sql += " 'Y', '', 'N', '', 'N', '', null, null, '', '', to_char(now(),'YYYYMMDD'), 'N', 'N', 'N', now(), upper('"+sUser.userno+"'), null, '') ",
 
     
     
     console.log('sql===',sql);
     
     try{
-        pgsqlPool.connect(function(err,conn,release,done) {
+        pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
+                
                 response.status(400).send(err);
             } else {
                 conn.query(sql, function(err,result){
-                    // done();
+                    release();
                     if(err){
                         console.log(err);
-                        release();
+                        
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
-                        	release();
+                        	
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
+                        	
                             response.status(200).json([]);
                         }
 
@@ -1031,7 +1075,7 @@ const insertBlRequest = ( request, response ) => {
     }catch(e) {
         console.log(e);
         //done();
-        release();
+        
         response.status(400).send(error);
     }
 }
@@ -1042,27 +1086,27 @@ const setUserBLUpdate = ( request, response ) => {
     const sql = {
         
         text: " UPDATE own_user_request set book_mark=$1 where req_seq=$2 and user_no=$3 and bl_bkg=$4",
-        values: [request.body.bookmark,request.body.reqseq,request.session.sUser.userno, request.body.blbk],
+        values: [request.body.bookmark,request.body.reqseq,sUser.userno, request.body.blbk],
     }
 console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -1087,24 +1131,24 @@ const getDemdetDtlCurrent = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -1164,24 +1208,24 @@ const getdemdetCurrent = (request, response) => {
         //rowMode: 'array',
     }
 console.log("emdet:",sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -1204,8 +1248,8 @@ console.log(request.body.at_terminal);
             " select row_number()over(partition by cntr_no order by unload_date > berth_date ) as num, cntr_no,type_size ,case when $9::varchar is not null and  unload_date is null then   \n"+
             " (select  terminal_kname from own_terminal_info where terminal= $9::varchar) else  \n"+
             " (select  terminal_kname from own_terminal_info where terminal= b.berth_terminal) end as berth_terminal,  \n"+
-            "  case when $9::varchar is not null and  unload_date is null then to_char(to_timestamp($10::varchar,'YYYYMMDDHH24'),'YYYY-MM-DD HH24') \n"+
-            "   else  to_char(to_timestamp(b.berth_date,'YYYYMMDDHH24'),'YYYY-MM-DD HH24')  end as berth_date, \n"+
+            "  case when $9::varchar is not null and  unload_date is null then to_char(to_timestamp($10::varchar,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI') \n"+
+            "   else  b.berth_date  end as berth_date, \n"+
             " to_char(to_timestamp(unload_date,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI') as unload_date,  \n"+
             "     to_char(to_date(substring(dem_date,1,8),'YYYYMMDD'),'YYYY-MM-DD') as dem_date,  \n"+
             "     to_char(to_timestamp(full_outgate_date,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI') as full_outgate_date,  \n"+
@@ -1236,7 +1280,7 @@ console.log(request.body.at_terminal);
             "       and a.ie_type = $3 \n"+
             "       and a.bl_bkg = $4 ) a \n"+
             " left outer join ( \n"+
-            "     select a.vessel_name, a.voyage_no, a.auth_port_code, coalesce(a.load_begin_date, a.atb) berth_date, a.terminal berth_terminal \n"+
+            "     select a.vessel_name, a.voyage_no, a.auth_port_code, coalesce(to_char(to_timestamp(a.atb,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI'), to_char(to_timestamp(a.load_begin_date,'YYYYMMDDHH24MI'),'YYYY-MM-DD HH24:MI')) berth_date, a.terminal berth_terminal \n"+
             "       from own_cal_sch a \n"+
             "  where a.vessel_name = case when $5::varchar is null or $5::varchar = '' \n "+
             "  then (select ship_nm from own_vsl_info where ship_imo = $6 and ship_nm is not null limit 1 ) \n "+
@@ -1251,7 +1295,7 @@ console.log(request.body.at_terminal);
             " on a.vessel_name = b.vessel_name \n"+
             " and case when  a.unload_date is not null then a.unload_date >= berth_date else null end )a where num =1 \n", //양하지 와 접안일 문제로 추가 
             // " and a.voyage_no = b.voyage_no \n",
-            values: [request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg
+            values: [sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg
                 , request.body.vsl_name, request.body.vsl_code, request.body.pod, request.body.eta,request.body.at_terminal,request.body.at_date],
         }
     } else {
@@ -1278,28 +1322,28 @@ console.log(request.body.at_terminal);
             "   and line_code = $2 \n"+
             "   and ie_type = $3 \n"+
             "   and bl_bkg = $4 \n",
-            values: [request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
+            values: [sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
         }
     }
     console.log( sql );
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -1343,24 +1387,24 @@ const getScrapManageList = (request, response) => {
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
@@ -1373,7 +1417,7 @@ const getScrapManageList = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
     
 }
@@ -1413,21 +1457,21 @@ const getTrackingTerminal = (request, response) => {
     sql += " and req_seq = '"+ request.body.req_seq +"' ";
 
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     // } else {
                     // 	response.status(200).json([]);
@@ -1442,7 +1486,7 @@ const getTrackingTerminal = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -1489,21 +1533,21 @@ const getImportTerminalActivity = (request, response) => {
     sqlText += "  on a.terminal = b.terminal \n ";
     const sql = {
         text: sqlText,
-        values: [request.body.req_seq, request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
+        values: [request.body.req_seq, sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
@@ -1512,7 +1556,7 @@ const getImportTerminalActivity = (request, response) => {
                             if ( null == result.rows[0].terminal ) {
                                 getImportTerminalActivityFromCalSch( request, response );
                             } else {
-                            	release();
+                            	
                                 response.status(200).json(result.rows);
                             }
                         } else {
@@ -1559,21 +1603,21 @@ const getImportTerminalActivityFromCalSch = (request, response) => {
         //rowMode: 'array',
     }
     console.log(sqlText);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     // } else {
                         // response.status(200).json([]);
@@ -1651,24 +1695,24 @@ const getExportTerminalActivity = (request, response) => {
     sqlText += "          limit 1 ) a \n ";
     sqlText += " left outer join own_terminal_info b  \n ";
     sqlText += " on a.terminal = b.terminal \n ";
-    console.log(sqlText, request.body.req_seq, request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg);
+    console.log(sqlText, request.body.req_seq, sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg);
     const sql = {
         text: sqlText,
-        values: [request.body.req_seq, request.session.sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
+        values: [request.body.req_seq, sUser.userno, request.body.carrier_code, request.body.ie_type, request.body.bl_bkg],
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
@@ -1678,7 +1722,7 @@ const getExportTerminalActivity = (request, response) => {
                             // mt_outgate_date > full_ingate_date > pol_ingate_time > load_date > departure
                             // BERTH 정보는 선석 스케줄에 있다
                             if ( null == result.rows[0].terminal ) {
-                            	release();
+                            	
                                 response.status(200).json([]);
                             } else {
                                 // activity 정보가 현재 시점 보다 과거의 경우 스케줄 정보를 보여준다.
@@ -1686,16 +1730,16 @@ const getExportTerminalActivity = (request, response) => {
                                 if (result.rows[0].activity_date < result.rows[0].today) {
                                     getExportTerminalActivityFromCalSch( request, response , result);
                                 } else {
-                                	release();
+                                	
                                     response.status(200).json(result.rows);
                                 }
                             }
                         } else {
-                        	release();
+                        	
                             response.status(200).json([]);
                         }
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                         // getTerminalActivityFromSch()
                     }
@@ -1759,35 +1803,35 @@ const getExportTerminalActivityFromCalSch = (request, response, beforeReuslt) =>
         //rowMode: 'array',
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     // 수출의 경우 선석이 마지막 이므로 데이터가 있는 경우 해당 정보 보여준다.
                     if(result != null) {
                         if (result.rows.length > 0 ) {
                             if ( null == result.rows[0].terminal ) {
-                            	release();
+                            	
                                 response.status(200).json(beforeReuslt.rows);
                             } else {
-                            	release();
+                            	
                                 response.status(200).json(result.rows);
                             }
                         } else {
-                        	release();
+                        	
                             response.status(200).json(beforeReuslt.rows);
                         }
                     } else {
-                    	release();
+                    	
                         // 데이터가 없는 경우 이전에 조회 했던 내용을 보내준다
                         response.status(200).json(beforeReuslt.rows);
                     }
@@ -1810,26 +1854,26 @@ const getTsTracking = (request, response) => {
     sql += " where 1=1 ";
     sql += " and req_seq = '"+ request.body.reqseq+"' ";
     sql += " and carrier_code = '" +request.body.carrierCode+ "' ";
-    sql += " and user_no = '"+request.session.sUser.userno+"'"
+    sql += " and user_no = '"+sUser.userno+"'"
     sql += " order by seq "
     console.log(sql);
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                     //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
@@ -1842,7 +1886,7 @@ const getTsTracking = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -1859,24 +1903,24 @@ const getScrapLineCodeList = (request, response) => {
         // values: params,
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -1911,24 +1955,24 @@ const getLineScrapingResultData = (request, response) => {
         values: params,
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -1957,24 +2001,24 @@ const getHeaderForLine = (request, response) => {
         values: params,
     }
 
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -2001,7 +2045,7 @@ const getTrackingDate = (req,res) => {
     // sql += " least(coalesce(b.eta, (select coalesce(c.pol_etd,c.pol_atd) from own_tracking_bl_new c where a.req_seq = c.req_seq)),coalesce(b.etd, (select coalesce(c.pod_eta,c.pod_ata) from own_tracking_bl_new c where a.req_seq = c.req_seq),to_char(to_date(eta,'yyyymmdd')-interval '90 day','yyyymmdd'))) as start_date, "
     // sql += " greatest(coalesce(b.eta, (select coalesce(c.pol_etd,c.pol_atd) from own_tracking_bl_new c where a.req_seq = c.req_seq)),coalesce(b.etd, (select coalesce(c.pod_eta,c.pod_ata) from own_tracking_bl_new c where a.req_seq = c.req_seq),to_char(to_date(eta,'yyyymmdd')-interval '90 day','yyyymmdd'))) as end_date, "
     sql += " case when a.ie_type = 'E' then coalesce(b.etd,(select coalesce(case when pol_atd = '' then null else pol_atd end, case when pol_etd = '' then null else pol_etd end) from own_tracking_bl_new c where a.req_seq = c.req_seq)) else coalesce((select coalesce(case when pol_atd = '' then null else pol_atd end, case when pol_etd = '' then null else pol_etd end) from own_tracking_bl_new c where a.req_seq = c.req_seq),coalesce(b.etd,to_char(to_date(b.eta, 'yyyymmdd')-interval '90 day', 'yyyymmdd'))) end as start_date, "
-    sql += " case when a.ie_type = 'E' then coalesce((select coalesce(case when pod_ata = '' then null else pod_ata end, case when pod_eta = '' then null else pod_eta end) from own_tracking_bl_new c where a.req_seq = c.req_seq),coalesce(b.eta,to_char(to_date(b.etd, 'yyyymmdd')+interval '90 day', 'yyyymmdd'))) else coalesce(b.eta,(select coalesce(case when pod_ata = '' then null else pod_ata end, case when pod_eta = '' then null else pod_eta end) from own_tracking_bl_new c where a.req_seq = c.req_seq)) end as end_date, "
+    sql += " case when a.ie_type = 'E' then to_char(now(), 'yyyymmdd') else coalesce(b.eta,(select coalesce(case when pod_ata = '' then null else pod_ata end, case when pod_eta = '' then null else pod_eta end) from own_tracking_bl_new c where a.req_seq = c.req_seq)) end as end_date, "
     sql += " (select float8(wgs84_x) from own_code_port ocp where ocp.port_code = b.pol) as pol_wgs84_x, (select float8(wgs84_y) from own_code_port ocp where ocp.port_code = b.pol) as pol_wgs84_y, (select port_name from own_code_port ocp where ocp.port_code = b.pol) as pol_name, (select nation_code from own_code_port ocp where ocp.port_code = b.pol) as pol_nation_code, "
     sql += " (select float8(wgs84_x) from own_code_port ocp where ocp.port_code = b.pod) as pod_wgs84_x, (select float8(wgs84_y) from own_code_port ocp where ocp.port_code = b.pod) as pod_wgs84_y, (select port_name from own_code_port ocp where ocp.port_code = b.pod) as pod_name, (select nation_code from own_code_port ocp where ocp.port_code = b.pod) as pod_nation_code, "
     sql += " (select coalesce(terminal_kname,terminal) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_name, (select float8(wgs84_x) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_x, (select float8(wgs84_y) from own_terminal_info oti where terminal = b.unload_terminal limit 1) as unload_y, "
@@ -2015,30 +2059,30 @@ const getTrackingDate = (req,res) => {
     sql += " and	  a.user_no = b.user_no "
     sql += " and   a.cntr_no = b.cntr_no "
     sql += " and a.cntr_no = upper('"+req.body.param+"') "
-    sql += " and a.user_no = upper('"+req.session.sUser.userno+ "') "
+    sql += " and a.user_no = upper('"+sUser.userno+ "') "
     sql += " order by a.insert_date desc "
     sql += " limit 1 "
     
     console.log(sql);
     
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             res.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
-                	release();
+                	
                     console.log(err);
                     res.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         res.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         res.status(200).json([]);
                     }
 
@@ -2051,7 +2095,6 @@ const getTrackingDate = (req,res) => {
 }
 const getContainerMovement = (req,res) => {
     
-    console.log(req.body.param[0]);
     if( req.body.param[0].start_dt === req.body.param[0].end_dt) {
         res.status(200).send({sendMessage:'NO DATA'});
         return;
@@ -2067,24 +2110,24 @@ const getContainerMovement = (req,res) => {
     sql += " order by trace_date asc"
     console.log(sql)
     
-    pgsqlPool.connect(function(err,conn,release,done) {
+    pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             res.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     res.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         res.status(200).send({sendMessage:'SUCCESS', result:result.rows});
                     } else {
-                    	release();
+                    	
                         res.status(200).send({sendMessage:'NO_DATA', result:[]});
                     }
 
@@ -2095,6 +2138,7 @@ const getContainerMovement = (req,res) => {
 
     });
 }
+
 
 module.exports = {
 	getTrackingList,

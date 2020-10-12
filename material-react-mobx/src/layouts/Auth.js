@@ -20,24 +20,36 @@ import pricing from "assets/img/bg-pricing.jpeg";
 import queryString from 'query-string';
 import { observer, inject } from 'mobx-react'; // 6.x
 import { useCookies  } from 'react-cookie';
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyles = makeStyles(styles);
-//export default function Pages(props) {
-const Pages = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props}) => {
+export default function Pages(props) {
+//const Pages = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props}) => {
   const { ...rest } = props;
   const query = queryString.parse(window.location.search);
-  const [cookies, setCookie, removeCookie] = useCookies(['name']);
-  
-  if(query.auth ==="social") {
-	  userStore.setUser('');
-	  userStore.setToken('');
-	  userStore.setUser(cookies['plismplus'].user);
-	  userStore.setToken(cookies['plismplus'].token);
-	  removeCookie('plismplus',{path:'/'});
+  const [cookies, setCookies, removeCookie] = useCookies(['name']);
+  //console.log("query",query);
+/*  if(query.auth ==="social") {
+	  //userStore.setUser('');
+	  //userStore.setToken('');
+	  //userStore.setUser(cookies['plismplus'].user);
+	  //userStore.setToken(cookies['plismplus'].token);
+	  //removeCookie('plismplus',{path:'/'});
+	  const user = ([cookies['socialKey'].user,cookies['socialKey'].token]);
+	  console.log("social set token value:",user);
+	  userService.SetItem(user);
+	  removeCookie('socialKey',{path:'/'});
   } else if(query.auth ==="register") {
-	  userStore.setUser('');
-	  userStore.setUser(cookies['plismplus'].user);
+	  //userStore.setUser('');
+	  //userStore.setUser(cookies['plismplus'].user);
 	  removeCookie('plismplus',{path:'/'});
+	  userService.removeToken();
+  }*/
+  
+  if(query) {
+	  //console.log("social set token value:",cookies['socialKey']);
+	  userService.SetItem(cookies['socialKey']);
+	  removeCookie('socialKey',{path:'/'});  
   }
 
   // ref for the wrapper div
@@ -119,6 +131,6 @@ const Pages = inject('userStore', 'trackStore')(observer(({ userStore, trackStor
   );
 }
 
-))
+//))
 
-export default Pages;
+//export default Pages;

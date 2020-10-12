@@ -33,7 +33,7 @@ export default function Baltic(props) {
 	const [getData, setGetData] = useState([])
 
 	useEffect(() => {
-		Axios.post('/com/balticApi',{},{headers:{'Authorization':'Bearer '+store.token}}).then(
+		Axios.post('/com/balticApi',{},{headers:{'Authorization':'Bearer '+store}}).then(
 			res => {
 				setGetData(res.data);
 			}

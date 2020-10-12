@@ -20,7 +20,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -55,7 +55,7 @@ function Alert(props) {
 
 export default function FrwrBrkd(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore, setUseStore] = useState(props.store);
+  //const [userStore, setUseStore] = useState(props.store);
   const classes = useStyless();
   const [frwrCode, setFrwrCode] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
@@ -81,7 +81,9 @@ export default function FrwrBrkd(props) {
     setFrwrCode(e.target.value);
   }
   const onSubmit = () => {
-    axios.post("/com/uniPassApiFrwrBrkd",{param:frwrCode}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
+    axios.post("/com/uniPassApiFrwrBrkd",{param:frwrCode}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message == "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -98,6 +100,9 @@ export default function FrwrBrkd(props) {
         	props.openLogin();
         }
         });
+	  } else {
+		  props.openLogin();
+	  }
   }
   return (
     <div>

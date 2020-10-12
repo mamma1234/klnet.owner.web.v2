@@ -37,14 +37,16 @@ import LoginPage from 'views/Pages/Login/LoginPage.js';
 import SignPage from 'views/Pages/Member/RegisterPage.js';
 import axios from 'axios';
 
+import {userService} from 'views/Pages/Login/Service/Service.js';
+
 import { observer, inject } from 'mobx-react'; // 6.x
 //import { useCookies  } from 'react-cookie';
 
 const useStyles = makeStyles(landingPageStyle);
 
 let numCnt =1;
-// export default function LandingPage() {
-const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore}) => { 
+ export default function LandingPage(props) {
+//const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore}) => { 
 
   const [open,setOpen] = React.useState(false);
   const [modalGb,setModalGb] = React.useState("login");
@@ -68,34 +70,42 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   React.useEffect(() => {
 	 // console.log(">>>>>main userStore.token",userStore.token);
 	  document.body.style.overflow = "unset";
-    if (userStore.token) {
-      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+userStore.token}})
+	  
+	const localStorageCheck =  userService.GetItem();
+		  
+	if (localStorageCheck) {
+		
+	//console.log("login check1");
+	//console.log("login check value:",localStorageCheck.token);
+      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+localStorageCheck.token}})
         //.then(res => console.log("return:",res.data))
         .then(res => 
           {if(res.data) {
-
+        	  console.log("login check ok");
            // console.log("res.data.user", res.data.user);
-            userStore.setUser(res.data.user);
-            userStore.setToken(res.data.token);
+        	 
+            //userStore.setUser(res.data.user);
+            //userStore.setToken(res.data.token);
 
             setIsAuthenticated(true);
             setUserData(res.data.user);
+            userService.SetItem(res.data);
           } else {
             setIsAuthenticated(false);
             setUserData([]);
           }}
         )
-        .catch(err => {
+        .catch(err => {console.log("login check error");
         setIsAuthenticated(false);
-	        axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
+	        axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+localStorageCheck.token}} )
 		    .then(res => {
 		        if (res.data.message){
 		        	alert(res.data.message);
 		        } else {
-		        	//localStorage.removeItem('plismplus');
+		        	localStorageCheck.removeItem();
 		        	//props.logOut();
-	                userStore.setUser('');
-	                userStore.setToken('');
+	                //userStore.setUser('');
+	                //userStore.setToken('');
 		        	props.history.push('/landing');
 		        }
 		        	//window.location.href = "/login"; //alert(res.data.userid + " �α��� ����");
@@ -156,7 +166,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
   
   const handleLogOut =() =>{
     setIsAuthenticated(false);
-    userStore.logout();
+    //userStore.logout();
 	  alertMessage('로그아웃 되었습니다.','success');
   }
   
@@ -230,7 +240,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
 
       </Parallax>
 
-      <div className={classNames(classes.main, classes.mainRaised)} style={{marginLeft:'19px',marginRight:'19px'}}>
+      <div className={classNames(classes.main, classes.mainRaised)} style={{marginLeft:'5px',marginRight:'5px'}}>
         <div className={classes.container}>
         <CommonSearch/>
 		  {/*<ProductSection />
@@ -241,7 +251,8 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
           <Board data={boardData} tableRownum={numCnt} onClickHandle ={handleAddRow} totPage={totpage}/>
         </div>
       </div>
-      <Footer store={userStore}/>
+      {/*<Footer store={userStore}/>*/}
+      <Footer />
 	   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
 		<Alert 
 			onClose={handleAlertClose}
@@ -252,7 +263,7 @@ const LandingPage = inject('userStore', 'trackStore')(observer(({ userStore, tra
     </div>
   );
 }
-))
+//))
 
 
-export default LandingPage;
+//export default LandingPage;

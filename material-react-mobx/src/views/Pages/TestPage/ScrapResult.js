@@ -24,6 +24,7 @@ import styles from "assets/jss/material-dashboard-pro-react/components/tableStyl
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import { observer, inject} from 'mobx-react'; // 6.x
 import Moment from 'moment'
 
@@ -95,8 +96,8 @@ function ScrapResultTable(props) {
   );
 }
 
-const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 	
-
+//const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 	
+export default function ScrapResultList(props) {
 	const {store} =props;
 
 	const [scrapLineCodeList,setScrapLineCodeList] = useState([]);
@@ -136,6 +137,8 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 		return false;
 	}
 	numCnt=1;
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
 	axios.post("/loc/getLineScrapingResultData",
 			{
 				num:numCnt
@@ -143,7 +146,7 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 				,scrapDate:Moment(scrapDate).format('YYYYMMDD')
 				,column_list:lineTableHeader
 			},
-			{headers:{'Authorization':'Bearer '+userStore.token}})
+			{headers:{'Authorization':'Bearer '+token}})
 				.then(setScrapingLineResultData([]))
 				// .then(res => setScrapingLineResultData(res.data))
 				.then(res => {
@@ -179,6 +182,9 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 			    .catch(err => {
 			    	// alert(err);
 			    });
+	} else {
+		props.openLogin();
+	}
   }
   
   const handleAddRow = () => {
@@ -188,7 +194,8 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 	}
 //     //page ++
 	    numCnt=numCnt+1;
-	    
+	    const token = userService.GetItem()?userService.GetItem().token:null;
+		if(token) {
 		axios.post("/loc/getLineScrapingResultData"
 			,{
 				num:numCnt
@@ -196,7 +203,7 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 				,scrapDate:Moment(scrapDate).format('YYYYMMDD')
 				,column_list:lineTableHeader
 			},
-	    		{headers:{'Authorization':'Bearer '+userStore.token}})
+	    		{headers:{'Authorization':'Bearer '+token}})
 			//   .then(res => setScrapingLineResultData([...scrapingLineResultData,...res.data]))
 			  .then(res => {
 				// console.log(res.data);
@@ -228,6 +235,9 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 		        	//props.openLogin();
 		        }
 	            });
+		} else {
+			props.openLogin();
+		}
    
   };
 
@@ -352,8 +362,8 @@ const ScrapResultList = inject('userStore', 'trackStore')(observer(({ userStore,
 	</GridContainer>
   );
 }
-))
-export default ScrapResultList;
+//))
+//export default ScrapResultList;
 
 
 

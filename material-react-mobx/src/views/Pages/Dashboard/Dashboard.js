@@ -42,7 +42,7 @@ import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 //import CardFooter from "components/Card/CardFooter.js";
 import Table from "views/Pages/Dashboard/ContainerTable/Table.js";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import EventAvailableOutlined from '@material-ui/icons/EventAvailableOutlined';
 import DirectionsBoatOutlined from '@material-ui/icons/DirectionsBoatOutlined';
 import Forward30Outlined from '@material-ui/icons/Forward30Outlined';
@@ -167,71 +167,16 @@ export default function Dashboard(props) {
   const classes = useStyles();
   const [imports, setImports] = React.useState(import_init);
   const [exports, setExports] = React.useState(export_init);
+  
 
   React.useEffect(() => {
+	  const token =  userService.GetItem()?userService.GetItem().token:null;
+	  if(token){
 	  
-	  if(!props.store.token){
-		  props.openLogin();
-		  return;
-	  }
-	  
-	  axios.post("/com/getImportingList",{ietype:'I'},{headers:{'Authorization':'Bearer '+props.store.token}})
+	  axios.post("/com/getImportingList",{ietype:'I'},{headers:{'Authorization':'Bearer '+token}})
 	  .then(res => {
-		  console.log("ui data:",res.data);
+		 // console.log("ui data:",res.data);
 		  setImports(res.data);
-		  /*setImports([
-			  {
-			    // First story
-			    inverted: true,
-			    badgeColor: "danger",
-			    badgeIcon: EventAvailableOutlined,
-			    title: "ESTIMATED DEPARTURE",
-			    titleColor: "danger",
-			    data: res.data.estimated
-			  },
-			  {
-			    // Second story
-				  inverted: true,  
-			    badgeColor: "success",
-			    badgeIcon: DirectionsBoatOutlined,
-			    title: "SHIPPING",
-			    titleColor: "success",
-			    data: res.data.shipping
-			  },
-			  {
-			    // Third story
-			    inverted: true,
-			    badgeColor: "info",
-			    badgeIcon: Forward30Outlined,
-			    title: "ETA D-1",
-			    titleColor: "info",
-			    data: res.data.eta
-			  },
-			  {
-			    // Fourth story
-				inverted: true,
-			    badgeColor: "warning",
-			    badgeIcon: SwapVertOutlined,
-			    title: "UNLOAD",
-			    titleColor: "warning",
-			    data: res.data.unload,
-			    footer: (
-			    	<p style={{marginBottom:'0',fontSize:"8px"}}>(BEFORE GATE OUT)</p>
-			    	    )
-			  },
-			  {
-				    // Fourth story
-					inverted: true,
-				    badgeColor: "primary",
-				    badgeIcon: LocalShippingOutlined,
-				    title: "GATE OUT/EMPTY IN",
-				    titleColor: "primary",
-				    data: res.data.gate,
-				    footer: (
-					    	<p style={{fontSize:"8px"}}>(LAST 7DAYS)</p>
-					    	    )
-				  }
-			]);*/
 	  	})
       .catch(err => {
         if(err.response.status === 403 || err.response.status === 401) {
@@ -239,6 +184,10 @@ export default function Dashboard(props) {
         	props.openLogin();
         }
         });
+	  } else {
+		  props.openLogin();
+		  return;
+	  }
 
 	    return () => {
 	      console.log('cleanup');
@@ -248,66 +197,19 @@ export default function Dashboard(props) {
   
  React.useEffect(() => {
 	  
-	  if(!props.store.token){
+	 
+	 const token =  userService.GetItem()?userService.GetItem().token:null;
+	 
+	  if(!props.token){
 		  props.openLogin();
 		  return;
 	  }
 	  
 	  
-	  axios.post("/com/getExportingList",{},{headers:{'Authorization':'Bearer '+props.store.token}})
+	  axios.post("/com/getExportingList",{},{headers:{'Authorization':'Bearer '+token}})
 	  .then(res => {
 		  console.log("export ui data:",res.data);
 		  setExports(res.data);
-		  /*setExports([
-			  {
-				    // First story
-				    inverted: true,
-				    badgeColor: "danger",
-				    badgeIcon: LocalShippingOutlined,
-				    title: "EMPTY OUT",
-				    titleColor: "danger",
-				    data: res.data.empty_out
-				  },
-				  {
-				    // Second story
-					  inverted: true,  
-				    badgeColor: "success",
-				    badgeIcon: LocalShipping,
-				    title: "FULL IN",
-				    titleColor: "success",
-				    data: res.data.full_in
-				  },
-				  {
-				    // Third story
-				    inverted: true,
-				    badgeColor: "info",
-				    badgeIcon: SwapVertOutlined,
-				    title: "LOAD",
-				    titleColor: "info",
-				    data: res.data.load_cnt
-				  },
-				  {
-				    // Fourth story
-					inverted: true,
-				    badgeColor: "warning",
-				    badgeIcon: DirectionsBoatOutlined,
-				    title: "SHIPPING",
-				    titleColor: "warning",
-				    data: res.data.shipping
-				  },
-				  {
-					    // Fourth story
-						inverted: true,
-					    badgeColor: "primary",
-					    badgeIcon: LanguageOutlined,
-					    title: "POD ARRIVAL  ",
-					    titleColor: "warning",
-					    data: res.data.pod_arrival,
-					    footer: (
-						    	<p style={{fontSize:"8px"}}>(LAST 7 DAYS)</p>
-						    	    )
-					  }
-				]);*/
 	  	})
       .catch(err => {
         if(err.response.status === 403 || err.response.status === 401) {
@@ -336,15 +238,15 @@ export default function Dashboard(props) {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>	
                 <Badge color="info">MY SHIPMENT BY CARRIER</Badge>
-                	{props.store.token?<Shipment {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+                	{props.token?<Shipment {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>    	
                 <Badge color="info">IMPORT</Badge>
-                	{props.store.token?<Import {...props} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+                	{props.token?<Import {...props} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
             	</GridItem>
 	            <GridItem xs={12} sm={12} md={4}>
 	            <Badge color="info">EXPORT</Badge>
-	            	{props.store.token?<Export {...props} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+	            	{props.token?<Export {...props} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
 	            </GridItem>
               </GridContainer>
             </CardBody>
@@ -370,7 +272,7 @@ export default function Dashboard(props) {
 				          	<Badge color="info">IMPORT</Badge>
 				          </CardHeader>
 				          <CardBody style={{padding:'0'}}>
-				          {props.store.token?<TimelineImp stories={imports} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+				          {props.token?<TimelineImp stories={imports} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
 				          </CardBody>
 				         </Card>
 		            </Grid>
@@ -380,7 +282,7 @@ export default function Dashboard(props) {
 				          	<Badge color="info">EXPORT</Badge>
 				          </CardHeader>
 				          <CardBody style={{padding:'0'}}>
-				          {props.store.token?<TimelineExp stories={exports} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+				          {props.token?<TimelineExp stories={exports} />:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
 				          </CardBody>
 				         </Card>
 		            </Grid>
@@ -399,11 +301,11 @@ export default function Dashboard(props) {
             <CardBody style={{paddingBottom:'16px',paddingLeft:'10px',paddingRight:'10px'}}>
             	<Badge color="info" style={{marginTop:'15px'}}>IMPORT</Badge>
             	<GridItem xs={12} sm={12} md={12} style={{marginBottom:'24px'}}>
-            	{props.store.token?<Table ietype="I" {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+            	{props.token?<Table ietype="I" {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
             	</GridItem>
             	<Badge color="info" >EXPORT</Badge>
             	<GridItem xs={12} sm={12} md={12} style={{marginBottom:'24px'}}>
-            	{props.store.token?<Table ietype="E" {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
+            	{props.token?<Table ietype="E" {...props}/>:<p style={{marginTop:'20px'}}>로그인후 확인 가능합니다.</p>}
             	</GridItem>
             </CardBody>
           </Card>

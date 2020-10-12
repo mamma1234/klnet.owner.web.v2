@@ -21,7 +21,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
 import CustomInput from "components/CustomInput/CustomInput.js";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -56,7 +56,7 @@ function Alert(props) {
 export default function SimlFxamtAplyNaplyEntsQty(props) {
 	
   const [severity, setSeverity] = useState("");
-  const {store} =props;
+ // const {store} =props;
   const classes = useStyless();
   const [cntrList, setCntrList] = useState([]);
   const [gubunCode, setGubunCode] = useState("A01");
@@ -93,10 +93,10 @@ export default function SimlFxamtAplyNaplyEntsQty(props) {
     }
   }
   const onSubmit = () => {
-
-	 if(store.token) {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	 if(token) {
 		 
-	    axios.post("/com/uniPassApiSimlFxamtQry",{param:ecm}, {headers:{'Authorization':'Bearer '+store.token}}).then(
+	    axios.post("/com/uniPassApiSimlFxamtQry",{param:ecm}, {headers:{'Authorization':'Bearer '+token}}).then(
 	      res => {
 	        if(res.data.message == "SUCCESS") {
 	          setGridData(res.data.infoData.data);

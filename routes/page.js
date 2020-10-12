@@ -24,7 +24,6 @@ const router = express.Router();
 //         loginError: req.flash('loginError'),
 //     });
 // });
- 
 
 router.get('/Forbidden', (req, res, next) => {
     return res.status(404).send('Forbidden');

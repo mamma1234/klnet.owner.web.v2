@@ -26,7 +26,9 @@ import styles from "assets/jss/material-dashboard-react/components/tableStyle.js
 import { slideDown, slideUp } from "components/Slide/Slide.js";
 import SchLinePicPop from "views/Pages/Schedule/SchLinePicPop.js";
 import TerminalSch from "views/Pages/Schedule/TerminalScheduleList.js";
+import ChargeSch from "views/Pages/Schedule/OceanFreightSearch.js";
 import ShipMap from "components/Map/ShipMap.js";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 
 import axios from 'axios';
@@ -123,8 +125,8 @@ TablePageinationActions.propTypes = {
     rowsPerPage:PropTypes.number.isRequired,
 }
 
-//export default function ToggleTable(props) {
-  const ToggleTable = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function ToggleTable(props) {
+//  const ToggleTable = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
   useEffect(() => {
     console.log('effect-detail');
@@ -178,7 +180,7 @@ TablePageinationActions.propTypes = {
         <TableBody>
            {(rowsPerPage > 0?tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :  tableData).map((prop, key) => {
                   return (
-                    <TableRows key={key} index={key + 1} data={prop} page={page} userStore={userStore}/> 
+                    <TableRows key={key} index={key + 1} data={prop} page={page} userStore={props.token}/> 
                   );
                 })}
            
@@ -188,7 +190,7 @@ TablePageinationActions.propTypes = {
         	<TableRow>
         		<TablePagination 
         			rowsPerPageOptions={[10,20,40,{label:'All',value:-1}]}
-        			colSpan={8}
+        			colSpan={9}
         			count={tableData.length}
         		    rowsPerPage={rowsPerPage}
         			page={page}
@@ -206,8 +208,9 @@ TablePageinationActions.propTypes = {
       </Table>
     </div>
   );
-}))
-export default ToggleTable;
+}
+//))
+//export default ToggleTable;
 
 ToggleTable.defaultProps = {
   tableHeaderColor: "gray"
@@ -228,7 +231,7 @@ ToggleTable.propTypes = {
 
 
  class TableRows extends React.Component {
-  state = { expanded: false , port: [], pop:false, pop2:false, openMap: false};
+  state = { expanded: false , port: [], pop:false, pop2:false, pop3:false, openMap: false};
 
 
   handleClick = () => {
@@ -236,11 +239,15 @@ ToggleTable.propTypes = {
   };
 
   handleClose = () => {
-    this.setState({pop:false,pop2:false,openMap:false});
+    this.setState({pop:false,pop2:false,pop3:false,openMap:false});
   };
 
   handleClick2 = () => {
     this.setState({pop2:true});
+  };
+
+  handleClick3 = () => {
+    this.setState({pop3:true});
   };
 
   handleClickMapOpen = () => {
@@ -264,6 +271,7 @@ ToggleTable.propTypes = {
 
   // 테이블 조회
   scheduleToSearch = () => {
+    const token = userService.GetItem()?userService.GetItem().token:null;
     this.setState({port:[]});
     return axios ({
 		url:'/sch/getScheduleDetailList',
@@ -277,7 +285,7 @@ ToggleTable.propTypes = {
          endDate : this.props.data.end_day,
          svc : this.props.data.svc
          },
-    headers:{'Authorization':'Bearer '+this.props.userStore.token}
+    headers:{'Authorization':'Bearer '+token}
   },).then(response => this.setState({port:response.data }));
 
     
@@ -325,6 +333,8 @@ ToggleTable.propTypes = {
         <TableCell onClick={this.toggleExpander}>{this.props.data.voyage_no}</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.start_port_name} ({this.props.data.start_day})</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.end_port_name} ({this.props.data.end_day})</TableCell>
+        {/* <TableCell onClick={this.toggleExpander}>{this.props.data.charge}</TableCell> */}
+        <TableCell><Tooltip title="Charge" onClick={this.handleClick3} style={{cursor: "pointer",textDecoration:"underline"}}><span>{this.props.data.charge}</span></Tooltip></TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.tt}</TableCell>
         <TableCell onClick={this.toggleExpander}>{this.props.data.ts}</TableCell>
         <TableCell >{this.props.data.line_url && ( <Button size="sm" target="_blank" href={this.props.data.line_url} color="info" >BOOKING</Button>)}</TableCell>
@@ -339,7 +349,7 @@ ToggleTable.propTypes = {
                         transformOrigin={{vertical:'top',horizontal:'center',}}
                   >
 											<SchLinePicPop
-												detailParam = {this.props.data} store={this.props.userStore}
+												detailParam = {this.props.data} //store={this.props.userStore}
 											/>
 
                   </Popover>
@@ -353,7 +363,21 @@ ToggleTable.propTypes = {
                         transformOrigin={{vertical:'top',horizontal:'center',}}
                   >
 											<TerminalSch
-												detailParam = {this.props.data} store={this.props.userStore}
+												detailParam = {this.props.data} //store={this.props.userStore} token ={this.props.token}
+											/>
+
+                  </Popover>
+                  <Popover
+                    id="pop3"
+                    open={this.state.pop3}
+                    onClose={this.handleClose}
+                    anchorReference="anchorPosition"
+                    anchorPosition={{top:0,left:550}}
+                        anchorOrigin={{vertical:'bottom',horizontal:'center',}}
+                        transformOrigin={{vertical:'top',horizontal:'center',}}
+                  >
+											<ChargeSch
+												detailParam = {this.props.data} 
 											/>
 
                   </Popover>
@@ -367,7 +391,8 @@ ToggleTable.propTypes = {
                     transformOrigin={{vertical:'top',horizontal:'center',}}>
                     <ShipMap
                     parameter={this.props.data} onClose={this.handleClose}
-                    store ={this.props.userStore}>
+                    //token ={this.props.token}
+                    >
                     </ShipMap>
                   </Popover>
       </TableRow>,

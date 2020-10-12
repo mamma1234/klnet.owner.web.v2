@@ -34,6 +34,7 @@ import CardBody from "components/Card/CardBody.js";
 import Icon from "@material-ui/core/Icon";
 import CardIcon from "components/Card/CardIcon.js";
 import Button from 'components/CustomButtons/Button.js';
+
 import Grid from '@material-ui/core/Grid';
 import BackupIcon from "@material-ui/icons/Backup";
 import StarIcon from "@material-ui/icons/Stars";
@@ -54,6 +55,8 @@ import leftPad from "left-pad";
 // import page
 import CarrierPage from "views/Pages/BLUpload/CarrierInfoPage.js";
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import { CircularProgress } from '@material-ui/core';
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 
 
@@ -105,11 +108,10 @@ function EnhancedTableHead(props) {
 
 
 
-
 return (
     <TableHead>
       <TableRow>
-	  	<TableCell padding="checkbox" style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}>
+	  	<TableCell padding="checkbox" style={{borderBottomWidth:'3px',fontWeight:'bold',color:'#717172',borderBottom:'2px solid #00b1b7'}}>
           <Checkbox
             indeterminate={numSelected > 0 }
             checked={numSelected > 0}
@@ -123,7 +125,7 @@ return (
             align={"left"}
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
-            style={{color:'#717172',textAlignLast:'center',paddingTop:'3px',paddingBottom:'3px',backgroundColor: "#f2fefd"}}
+            style={{borderBottomWidth:'3px',fontWeight:'bold',color:'#717172',borderBottom:'2px solid #00b1b7'}}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -180,7 +182,6 @@ const useStyles = makeStyles((theme) => ({
     width: 1,
   },
   marginRightForm: {
-	  paddingRight:'40px',
 	  right:0
   },
 
@@ -222,11 +223,6 @@ const useStyles = makeStyles((theme) => ({
   buttonClass: {
 	  margin: theme.spacing(1)
   },
-
-
-
-
-
   Cardroot: {
 	display: 'flex',
   },
@@ -255,8 +251,21 @@ const useStyles = makeStyles((theme) => ({
   tablecontainer: {
 	  width:'100%',
 	  maxHeight:590
+  },
+  buttonProgress: {
+	  color: '#00ACC1',
+	  position: 'absolute',
+	  top: '50%',
+	  left: '50%',
+	  marginTop: -12,
+	  marginLeft: -12
+  },
+  buttonSuccess: {
+	backgroundColor: '#00ACC1',
+	'&:hover': {
+		backgroundColor: '#00ACC1'
+	}
   }
-
 }));
 
 
@@ -291,12 +300,13 @@ export default function EnhancedTable(props) {
   };
 
   const setEndDate = new Date();
+  const timer = React.useRef();
   const [fromDate,setFromDate] = useState(new Date(setEndDate.setDate(setEndDate.getDate()-7)));
   const [toDate,setToDate] = useState(new Date());
   const [ieGubun, setIeGubun] = useState('');
   const [lineCode,setLineCode] = useState([]);
   const [searchKey,setSearchKey] = useState("");
-  const [store] = useState(props.store);
+  let token = useState(props.token);
   const [selectData,setSelectData] = useState([]);
 
   const [carrierCode,setCarrierCode] = useState("");
@@ -307,14 +317,16 @@ export default function EnhancedTable(props) {
   const [severity, setSeverity] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [bladdCard, setBladdCard] = useState(false);
-
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("ADD");
+  
   useEffect(() => {
-	  axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}}
-	  ).then(res => setLineCode(res.data));
+	  axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+props.token}}).then(res => setLineCode(res.data));
 	  return () => {
 		  
 	  };
-  }, [store]);
+  }, []);
 
   const carrier_open = Boolean(anchorE);
   const upload_open = Boolean(anchorU);
@@ -327,7 +339,9 @@ export default function EnhancedTable(props) {
 	setAnchorU(null);
 	setAnchorD(null);
 	};
-  
+  const buttonClassname = clsx({
+	  [classes.buttonSuccess]: success,
+  })
   const handleAlertClose = (event, reason) => {
 	if(reason ==='clickaway') {
 		return;
@@ -391,6 +405,7 @@ export default function EnhancedTable(props) {
 
 
   const onSubmit = () => {
+	  const token =  userService.GetItem()?userService.GetItem().token:null;
 	setNum(1)
 	let fromYMD = fromDate.getFullYear()+leftPad((fromDate.getMonth()+1), 2, "0")+leftPad((fromDate.getDate()), 2, "0");
 	let toYMD = toDate.getFullYear()+leftPad((toDate.getMonth()+1), 2, "0")+leftPad((toDate.getDate()), 2, "0");
@@ -407,9 +422,9 @@ export default function EnhancedTable(props) {
 		alert( "종료일자가 시작 일자보다 빠릅니다. 다시 확인하세요." );
 		return false;
 	}
-
+	if(token) {
 		//searchBefore();
-		axios.post("/loc/getMyBlList",{num:1, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
+		axios.post("/loc/getMyBlList",{num:1, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+token}})
 		.then(res => {
 			setSelectData(res.data)
 			if(res.data.length > 0) {
@@ -418,8 +433,13 @@ export default function EnhancedTable(props) {
 				setTotCnt(0)
 			}
 		})
+	} else {
+		props.openLogin();
+	}
   };
   const onMore = (param) => {
+	  const token =  userService.GetItem()?userService.GetItem().token:null;
+
 	setNum(param)
 
 
@@ -440,9 +460,12 @@ export default function EnhancedTable(props) {
 	}
 	if(num !== Number(selectData[0].tot_page)) {
 		
-		
-		axios.post("/loc/getMyBlList",{num:param, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+store.token}})
+		if(token) {
+		axios.post("/loc/getMyBlList",{num:param, carrierCode:carrierCode, fromDate:fromYMD, toDate:toYMD, typeGubun:typeGubun, searchKey:searchKey},{headers:{'Authorization':'Bearer '+token}})
 		.then(res => (setSelectData([...selectData,...res.data])));
+		} else {
+			props.openLogin();
+		}
 	}
 }
 
@@ -471,25 +494,48 @@ const onRowReset = () => {
 
 }
 const onRowAdd = () => {
+	
+	const token =  userService.GetItem()?userService.GetItem().token:null;
+	if(!loading) {
+		setSuccess(false);
+		setLoading(true);
+		setSaveMessage("Saving..")
+	}
+
 	initState();
 	if (insertCarrier === "") {
 		AlertMessage('선사(CARRIER)를 선택해주세요.','error');
+		setSuccess(true);
+		setLoading(false);
+		setSaveMessage("ADD")
 		return;
 	}
 	if (insertBlNo === "" && insertBkNo === "") {
 		AlertMessage('B/L No. 혹은 B/K No. 를 입력해주세요','error');
+		setSuccess(true);
+		setLoading(false);
+		setSaveMessage("ADD")
 		return;
 	}
 	if(insertBlNo !== "" && insertBlNo.length > 16) {
 		AlertMessage('B/L No.는 최대 16자리 입니다.','error');
+		setSuccess(true);
+		setLoading(false);
+		setSaveMessage("ADD")
 		return;
 	}
 	if(insertBkNo !== "" && insertBkNo.length > 35) {
 		AlertMessage('B/K No.는 최대 35자리 입니다.','error');
+		setSuccess(true);
+		setLoading(false);
+		setSaveMessage("ADD")
 		return;
 	}
 	if(insertCntrNo !== "" && insertCntrNo.length > 20) {
 		AlertMessage('Container No.는 최대 20자리입니다.','error');
+		setSuccess(true);
+		setLoading(false);
+		setSaveMessage("ADD")
 		return;
 	}
 	let bl_bkg = "";
@@ -501,8 +547,9 @@ const onRowAdd = () => {
 	}else if(insertBlNo !== "" && insertBkNo === "") {
 		bl_bkg = insertBlNo;
 	}
+	if(token){
 	axios.post("/loc/getPkMyBlList",
-		{carrierCode:insertCarrier,ie_type:insertIeType,bl_bkg:bl_bkg,cntrNumber:insertCntrNo},{headers:{'Authorization':'Bearer '+store.token}}).then(res => {
+		{carrierCode:insertCarrier,ie_type:insertIeType,bl_bkg:bl_bkg,cntrNumber:insertCntrNo},{headers:{'Authorization':'Bearer '+token}}).then(res => {
 			if(res.data.length > 0) {
 				
 				AlertMessage(' 이미 등록 되어있습니다.', 'error');
@@ -512,25 +559,38 @@ const onRowAdd = () => {
 												  bl_no:insertBlNo,
 												  bkg_no:insertBkNo,
 												  bl_bkg:bl_bkg,
-												  cntrNumber:insertCntrNo},{headers:{'Authorization':'Bearer '+store.token}}).then(res => {
+												  cntrNumber:insertCntrNo},{headers:{'Authorization':'Bearer '+token}}).then(res => {
 				AlertMessage(' 저장이 완료 되었습니다.', 'success');
 				onSubmit();
 				})
 
 			}
 		})
+		timer.current = setTimeout(() => {
+			setSuccess(true);
+			setLoading(false);
+			setSaveMessage("ADD")
+		},1000);
+	} else {
+		props.openLogin();
+	}
+	
 	}
 const rowDelete = () => {
+	const token =  userService.GetItem()?userService.GetItem().token:null;
 	const rowCount = selected.length;
 	if(selected.length === 0) {
 		AlertMessage('삭제할 행이 존재하지 않습니다.', 'error');
 		return;
 	}else {
-		
-		selected.forEach(element => {
-			axios.post("/loc/deleteMyBlNo",{ sendData:element},{headers:{'Authorization':'Bearer '+store.token}})
-										
-		})
+		if(token){
+			selected.forEach(element => {
+				axios.post("/loc/deleteMyBlNo",{ sendData:element},{headers:{'Authorization':'Bearer '+token}})
+											
+			})
+		} else {
+			props.openLogin();
+		}
 	AlertMessage(rowCount+ '개의 행을 삭제 하였습니다.', 'success');
 	setSelected([]);
 	handleClose();
@@ -658,7 +718,7 @@ const rowDelete = () => {
 								anchorReference="anchorPosition"
 								anchorPosition={{top:10,left:550}}
 								anchorOrigin={{vertical:'bottom',horizontal:'center',}}
-								transformOrigin={{vertical:'top',horizontal:'center',}}><Excel token={store}
+								transformOrigin={{vertical:'top',horizontal:'center',}}><Excel token={token}
 																								params={lineCode} />
 							</Popover>
 							<Popover
@@ -669,7 +729,7 @@ const rowDelete = () => {
 								anchorReference="anchorPosition"
 								anchorPosition={{top:80,left:550}}
 								anchorOrigin={{vertical:'bottom',horizontal:'center',}}
-								transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={store}/>
+								transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={token}/>
 							</Popover>
 							
 						</Grid>
@@ -759,9 +819,12 @@ const rowDelete = () => {
 								
 								variant="contained"
 								color="info" 
+								disabled={loading}
+								className= {buttonClassname}
 								onClick = {() => onRowAdd()}>
-								ADD
+								{saveMessage}
 							</Button>
+							{loading && <CircularProgress size={24} className={classes.buttonProgress}/>}
 						</FormControl>
 					</Grid>
 				</Grid>
@@ -872,7 +935,7 @@ const rowDelete = () => {
 							anchorPosition={{top:10,left:550}}
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
 							transformOrigin={{vertical:'top',horizontal:'center',}}>
-							<Excel token={store}
+							<Excel token={token}
 								params={lineCode}
 								returnFunction={() =>handleClose()}
 								returnMessage={(message, state)=> AlertMessage(message, state)}
@@ -898,7 +961,7 @@ const rowDelete = () => {
 							anchorReference="anchorPosition"
 							anchorPosition={{top:80,left:550}}
 							anchorOrigin={{vertical:'bottom',horizontal:'center',}}
-							transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={store}/>
+							transformOrigin={{vertical:'top',horizontal:'center',}}><CarrierPage token={token}/>
 						</Popover>
 						
 					</Grid>
@@ -922,6 +985,8 @@ const rowDelete = () => {
             size={'medium'}
             style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}
           >
+
+			  
             <EnhancedTableHead
               classes={classes}
               numSelected={selected.length}

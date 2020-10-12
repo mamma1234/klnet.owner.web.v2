@@ -23,6 +23,7 @@ import styles from "assets/jss/material-dashboard-pro-react/components/tableStyl
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
 import { observer, inject} from 'mobx-react'; // 6.x
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyles = makeStyles(styles);
 let numCnt =1;
@@ -86,8 +87,8 @@ function ScheduleTable(props) {
   );
 }
 
-const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 	
-//export default function ScheduleList() {
+//const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 	
+export default function ScheduleList(props) {
 
 
   //const [carrierCode,setCarrierCode] = useState("");
@@ -98,23 +99,30 @@ const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, tr
     
   const onSubmit = () => {
 	numCnt=1;
-	axios.post("/sch/getScheduleSample",{num:numCnt,carriercode:carrierCode,pol:pol,pod:pod},
-			{headers:{'Authorization':'Bearer '+userStore.token}})
-				.then(setSchData([]))
-			    .then(res => setSchData(res.data))
-			    .catch(err => {
-			    	alert(err);
-			    });
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
+		axios.post("/sch/getScheduleSample",{num:numCnt,carriercode:carrierCode,pol:pol,pod:pod},
+				{headers:{'Authorization':'Bearer '+token}})
+					.then(setSchData([]))
+				    .then(res => setSchData(res.data))
+				    .catch(err => {
+				    	alert(err);
+				    });
+
+  } else {
+	  props.openLogin();
+  }
   }
   
   const handleAddRow = () => {
 
     //page ++
-	    
+	  const token = userService.GetItem()?userService.GetItem().token:null;
 	    if(numCnt !== schData[0].tot_page) {
 	    	numCnt=numCnt+1;
+	    	if(token) {
 		    axios.post("/sch/getScheduleSample",{num:numCnt,carriercode:carrierCode,pol:pol,pod:pod},
-		    		{headers:{'Authorization':'Bearer '+userStore.token}})
+		    		{headers:{'Authorization':'Bearer '+token}})
 				  .then(res => setSchData([...schData,...res.data]))
 		   	      .catch(err => {
 		            if(err.response.status === 403 || err.response.status === 401) {
@@ -122,6 +130,9 @@ const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, tr
 			        	//props.openLogin();
 			        }
 		            });
+	    	} else {
+	    		 props.openLogin();
+	    	}
 	    }
    
   };
@@ -176,8 +187,8 @@ const ScheduleList = inject('userStore', 'trackStore')(observer(({ userStore, tr
     </GridContainer>
   );
 }
-))
-export default ScheduleList;
+//))
+//export default ScheduleList;
 
 
 

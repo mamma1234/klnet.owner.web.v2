@@ -18,6 +18,7 @@ import CardIcon from "components/Card/CardIcon.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle.js";
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import { observer, inject} from 'mobx-react'; // 6.x
 
 const useStyles = makeStyles(styles);
@@ -77,34 +78,43 @@ let numCnt =1;
 //     </div>
 //   );
 // }
-
-const ScrapManageList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {
+export default function ScrapManageList(props) {
+//const ScrapManageList = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {
 
 	const [carrierCode,setCarrierCode] = useState("");
 	const [schData,setSchData] = useState([]);
     
 	const onSubmit = () => {
 		numCnt=1;
+		const token = userService.GetItem()?userService.GetItem().token:null;
+		if(token) {
 		axios.post("/loc/getScrapManageList",{num:numCnt,carriercode:carrierCode},
-			{headers:{'Authorization':'Bearer '+userStore.token}})
+			{headers:{'Authorization':'Bearer '+token}})
 			.then(setSchData([]))
 			.then(res => setSchData(res.data))
 			.catch(err => {
 			alert(err);
 		});
+		} else {
+			props.openLogin();
+		}
 	}
   
 	const handleAddRow = () => {
 	numCnt=numCnt+1;
-
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
 		axios.post("/loc/getScrapManageList",{num:numCnt,carriercode:carrierCode},
-			{headers:{'Authorization':'Bearer '+userStore.token}})
+			{headers:{'Authorization':'Bearer '+token}})
 			.then(res => setSchData([...schData,...res.data]))
 			.catch(err => {
 			if(err.response.status === 403 || err.response.status === 401) {
 
 			}
 		});
+	} else {
+		props.openLogin();
+	}
 	};
   
   const classes = useStyles();
@@ -178,8 +188,8 @@ const ScrapManageList = inject('userStore', 'trackStore')(observer(({ userStore,
 		</div>
 	);
 }
-))
-export default ScrapManageList;
+//))
+//export default ScrapManageList;
 
 
 

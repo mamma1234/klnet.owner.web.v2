@@ -21,6 +21,7 @@ export default function CustomTabs(props) {
   const [value, setValue] = React.useState(0);
   const handleChange = (event, value) => {
     setValue(value);
+    props.handleTapsClick(value);
   };
   const classes = useStyles();
   const { headerColor, plainTabs, tabs, title, rtlActive } = props;
@@ -88,5 +89,6 @@ CustomTabs.propTypes = {
     })
   ),
   rtlActive: PropTypes.bool,
-  plainTabs: PropTypes.bool
+  plainTabs: PropTypes.bool,
+  handleTapsClick: PropTypes.func
 };

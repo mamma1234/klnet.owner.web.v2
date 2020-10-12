@@ -45,7 +45,7 @@ exports.isLoggedPass = (req, res, next) => {
 
 exports.isVerifyToken = (req, res, next) => {
     try {
-        // console.log(req);
+        //console.log(req);
 
         // var AUTH_HEADER = "authorization",
         // LEGACY_AUTH_SCHEME = "JWT", 
@@ -57,7 +57,7 @@ exports.isVerifyToken = (req, res, next) => {
             authorization = req.headers['authorization'];
         }
 
-        // console.log("req.headers", req.headers);
+        //console.log("req.headers", req.headers);
         //console.log("authorization", authorization);
 
         const re = /(\S+)\s+(\S+)/;
@@ -66,7 +66,7 @@ exports.isVerifyToken = (req, res, next) => {
         // console.log("matches[1]", matches[1]);
         // console.log("matches[2]", matches[2]);
         const clientToken = matches[2];
-        console.log("clientToken", clientToken);
+        //console.log("clientToken", clientToken);
         // const clientToken = req.cookies.user;
         // console.log("(middlewares.js) isVerifyToken clientToken", clientToken);
         const decoded = jwt.verify(clientToken, JWT_SECRET_KEY);
@@ -76,7 +76,7 @@ exports.isVerifyToken = (req, res, next) => {
             // res.locals.userId = decoded.user_id;
             console.log("(middlewares.js) decoded.userno", decoded.userno)
             sUser.userno = decoded.userno;
-            req.session.sUser = sUser;
+            //req.session.sUser = sUser;
             next();
         } else {
             console.log("(middlewares.js) isVerifyToken unauthorized");

@@ -10,9 +10,10 @@ import AccountBalance from "@material-ui/icons/AccountBalance";
 import ProfilePage from "views/Pages/Member/UserProfile.js";
 import SettingPage from "views/Pages/Member/UserServiceSetting.js";
 import BoardPage from "views/Pages/Board/BoardPage.js";
-import MainUploadBL from "views/Pages/BLUpload/UploadPage"
+import MainUploadBL from "views/Pages/BLUpload/UploadPage";
 import TestMap from "views/Pages/TestPage/TestMap";
-import ContainerTracking from 'views/Pages/Tracking/TrackingMap/Map.js'
+import ContainerTracking from 'views/Pages/Tracking/TrackingMap/Map.js';
+import OceanFreight from "views/Pages/Schedule/OceanFreightSearch.js";
 //import Info from "@material-ui/icons/Info";
 
 import DashPage from "views/Pages/Dashboard/Dashboard.js";
@@ -41,7 +42,7 @@ import Apipage from 'views/Pages/Customs/ScrollTapPage';
 
 import DirectionsBoatIcon from '@material-ui/icons/DirectionsBoat';
 import InsertChartOutlinedOutlinedIcon  from '@material-ui/icons/InsertChartOutlinedOutlined';
-import TestPage from 'views/Pages/TestPage/ExcelUpload';
+import PaymentIcon from '@material-ui/icons/Payment';
 
 
 
@@ -160,6 +161,15 @@ var ServiceRoutes = [
           component: CalPage,
           layout: "/svc"
         },
+        {
+          path: "/ofs",
+          name: "Ocean Freight",
+          rtlName: "해상 운임 조회",
+          icon: PaymentIcon,
+          component: OceanFreight,
+          layout: "/svc"
+        },
+        
     ]
   },
   {
@@ -205,15 +215,6 @@ var ServiceRoutes = [
 	   icon: Person,
 	component: BoardPage,
 	layout: "/svc"
-  },  
-  {
-		path: "/testpage",
-		name: "testpage",
-		rtlName: "게시판",
-		   icon: Person,
-		component: TestPage,
-		layout: "/svc"
-	  },    
-
+  },
 ];
 export default ServiceRoutes;

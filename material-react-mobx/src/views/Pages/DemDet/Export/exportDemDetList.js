@@ -16,6 +16,7 @@ import CardIcon from "components/Card/CardIcon.js";
 import DetailTable from "views/Pages/DemDet/Export/exportDetailTable.js";
 import Assignment from "@material-ui/icons/Assignment";
 import Checkbox from "@material-ui/core/Checkbox";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 
 import axios from 'axios';
@@ -34,7 +35,7 @@ export default function DemDetList(props) {
   const [lineCode, setLineCode] = useState("");
   const [mblNo,setMblNo] = useState("");
   const [cntrNo,setCntrNo] = useState("");
-  const [store] = useState(props.store);
+  const [token] = useState(props.token);
 
   const [onlyChecked, setOnlyChecked] = useState(false);
  
@@ -47,18 +48,19 @@ export default function DemDetList(props) {
 
 
 
-    if(store.token){
-     axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}})
-       .then(res => setLineData(res.data))
-       .catch(err => {
+   // if(token){
+     axios.post("/api/getCustomLineCode",{}//,{headers:{'Authorization':'Bearer '+token}}
+     ).then(res => setLineData(res.data));
+      /* .catch(err => {
     		        if(err.response.status === 403||err.response.status === 401) {
     		        	props.openLogin();
     				}
-       });
-    }
+       });*/
+    //}
     if(props.location.state !== null) {
       setOnlyChecked(true);
-        if(store.token) {
+      const localStorageCheck =  userService.GetItem()?userService.GetItem().token:null;
+        if(localStorageCheck) {
           numCnt=1;
           //search
           axios.post("/loc/getExportDemDetList",{
@@ -68,7 +70,7 @@ export default function DemDetList(props) {
             ,cntrNo:cntrNo
             ,num:numCnt
             ,onlyChecked:true
-          },{headers:{'Authorization':'Bearer '+store.token}})
+          },{headers:{'Authorization':'Bearer '+localStorageCheck}})
             .then(setDemDetList([]))
             .then(res => setDemDetList(res.data))
             .catch(err => {
@@ -86,13 +88,14 @@ export default function DemDetList(props) {
     return () => {
         //console.log('cleanup');
       };
-  },[lineCode,mblNo,cntrNo,store.token,props]);
+  },[]);
   const onlyHandleChange = (event) => {
     if (onlyChecked) {setOnlyChecked(false)} else {setOnlyChecked(true)};
   }
   const onSubmit = () => {
     // console.log("====> onlyChecked :"+onlyChecked);
-	  if(store.token) {
+	  const localStorageCheck =  userService.GetItem()?userService.GetItem().token:null;
+	  if(localStorageCheck) {
 	    numCnt=1;
       //search
 		  axios.post("/loc/getExportDemDetList",{
@@ -102,7 +105,7 @@ export default function DemDetList(props) {
 	      ,cntrNo:cntrNo
         ,num:numCnt
         ,onlyChecked:onlyChecked
-	    },{headers:{'Authorization':'Bearer '+store.token}})
+	    },{headers:{'Authorization':'Bearer '+localStorageCheck}})
 	    	.then(setDemDetList([]))
 		    .then(res => setDemDetList(res.data))
 		    .catch(err => {
@@ -120,7 +123,8 @@ export default function DemDetList(props) {
   //console.log(paramData);
 
   const handleAddRow = () => {
-	  if(store.token) {
+	  const localStorageCheck =  userService.GetItem()?userService.GetItem().token:null;
+	  if(localStorageCheck) {
 	    //page ++
 	    numCnt=numCnt+1;
       axios.post("/loc/getExportDemDetList",{
@@ -130,7 +134,7 @@ export default function DemDetList(props) {
 	      ,cntrNo:cntrNo
         ,num:numCnt 
         ,onlyChecked:onlyChecked
-	    },{headers:{'Authorization':'Bearer '+store.token}}) 
+	    },{headers:{'Authorization':'Bearer '+localStorageCheck}}) 
 	    .then(res => setDemDetList([...demDetList,...res.data]))
 	    .catch(err => {
 	      if(err.response.status === 403 || err.response.status === 401) {
@@ -144,10 +148,11 @@ export default function DemDetList(props) {
   
 
   const onCarrierSearchValue = (e) => {
+	  const localStorageCheck =  userService.GetItem()?userService.GetItem().token:null;
     const values = e.target.value;
     if(values !== undefined && values !== "" && values.length >= 2) {
-    	if(store.token) {
-	      axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}})
+    	if(localStorageCheck) {
+	      axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+localStorageCheck}})
 	      .then(res => setLineData(res.data))
 	      .catch(err => {
 	    		        if(err.response.status === 403||err.response.status === 401) {
@@ -170,19 +175,18 @@ export default function DemDetList(props) {
   }
   
   return (
-    <GridContainer>
-      <GridItem xs={12} xm={12}>
+
         <Card style={{marginBottom:'0px'}}>
           <CardHeader color="info" icon >
             <CardIcon color="info" style={{padding:'0'}}>
               <Assignment />
             </CardIcon>
 	        </CardHeader>
-          <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
-      
-          <Grid item xs={12} sm={12}>
+	          <CardBody >
+	          <Card style={{marginTop:'0',marginBottom:'5px'}}>
+	    		<CardBody style={{paddingTop:'0',paddingBottom:'0'}}>
             <Grid container spacing={1} direction = "row" alignItems="center">
-              <Grid item xs={1} sm={1} md={3} style={{paddingBottom:'10px'}}>	
+              <Grid item xs={12} sm={3} md={3} style={{paddingBottom:'10px'}}>	
                 <Autocomplete
                   inputRoot={{style:{marginBottom:'6px'}}}
                   options = {lineData}
@@ -197,14 +201,14 @@ export default function DemDetList(props) {
                   )}
                 />
               </Grid>
-              <Grid item xs={1} sm={1} md={2}>
+              <Grid item xs={12} sm={2} md={2}>
                 <CustomInput
                   labelText="B/L NO"
                   id="mblNo"
                   inputProps={{onChange:event => setMblNo(event.target.value)}}
                   formControlProps={{fullWidth:true}}/>
               </Grid>
-              <Grid item xs={1} sm={1} md={2}>
+              <Grid item xs={12} sm={2} md={2}>
                 <CustomInput
                   labelText="CNTR NO"
                   id="cntrNo"
@@ -213,7 +217,7 @@ export default function DemDetList(props) {
                 />
               </Grid>
 
-              <Grid item xs={1} sm={1} md={3} >
+              <Grid item xs={12} sm={3} md={3} >
                 <Checkbox
                   id="chargeOnly"
                   checked={onlyChecked}
@@ -223,24 +227,21 @@ export default function DemDetList(props) {
                   inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />비용 발생 컨테이너 보기
               </Grid>
-               
-              <Grid item xs={1} sm={1} md={2} style={{textAlignLast:'right'}}>
-                {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
-               {/* <Button color="info" onClick = {onSubmit}  >조회</Button>*/}
-                <Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} style={{width:'55%'}} >Search</Button>
-                {/* <Button color="info" >삭제</Button>
-                <Button color="info" //onClick = {Download} 
-                  id='btnExport' >엑셀다운로드</Button> */}
-              </Grid>
-              
-            </Grid>
             </Grid>
           </CardBody>
         </Card>
-      </GridItem>
-      <GridItem xs={12}>
-        <Card style={{marginTop:'5px',marginBottom:'5px'}}>
-          <CardBody style={{padding:'0px'}}>
+
+        <Grid item xs={12} style={{paddingBottom:'10px',textAlign:'-webkit-right'}}>
+    	<Grid item xs={12} sm={3} md={2} style={{textAlign:'center'}}>
+	      {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
+	      {/* <Button color="info" onClick = {onSubmit}  >조회</Button>*/}
+	      <Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} fullWidth >Search</Button>
+	      {/* <Button color="info" >삭제</Button>
+	      <Button color="info" //onClick = {Download} 
+	        id='btnExport' >엑셀다운로드</Button> */}
+	    </Grid>
+	    </Grid>
+     
             {/* <GridItem xm={12} sm={12} md={12} style={{textAlignLast:'right'}}>
               <Button color="info" onClick = {onSubmit}  >조회</Button>
               <Button color="info" onClick = {onSubmit}  >저장</Button>
@@ -254,9 +255,7 @@ export default function DemDetList(props) {
                 tableRownum={numCnt}
                 onClickHandle ={handleAddRow}
               />
-          </CardBody>
-        </Card> 
-      </GridItem>    
-    </GridContainer>
+              </CardBody>
+              </Card> 
   );
 }

@@ -15,26 +15,41 @@ import Grow from "@material-ui/core/Grow";
 import Hidden from "@material-ui/core/Hidden";
 import Popper from "@material-ui/core/Popper";
 import Divider from "@material-ui/core/Divider";
-
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import Card from "components/Card/Card.js";
+import CardHeader from "components/Card/CardHeader.js";
+import CardBody from "components/Card/CardBody.js";
+import HighlightOff from '@material-ui/icons/HighlightOff';
+import Icon from "@material-ui/core/Icon";
+import CardIcon from "components/Card/CardIcon.js";
+import Typography from '@material-ui/core/Typography';
 // @material-ui/icons
 import Person from "@material-ui/icons/Person";
 import Notifications from "@material-ui/icons/Notifications";
 import Dashboard from "@material-ui/icons/Dashboard";
 import Search from "@material-ui/icons/Search";
-
+import TablePageing from 'components/Navbars/ServiceNotiTable.js';
 // core components
 import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 import Cookies from "js-cookie";
 import axios from 'axios';
 import { observer, inject} from 'mobx-react'; // 6.x
+import {userService} from 'views/Pages/Login/Service/Service.js';
 import styles from "assets/jss/material-dashboard-pro-react/components/adminNavbarLinksStyle.js";
 
 const useStyles = makeStyles(styles);
 
-//export default function HeaderLinks(props) {
-const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {  
+export default function AdminHeaderLinks(props) {
+//const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {  
   const [openNotification, setOpenNotification] = React.useState(null);
+  const localStorageCheck =  userService.GetItem()||null;
+  const [msgCnt,setMsgCnt] = React.useState();
+  const [msg,setMsg] = React.useState([]);
+  const [openMsgMore, setOpenMsgMore] = React.useState(false);
+  const [msgMoreData,setMsgMoreData] = React.useState([]);
+  
   const handleClickNotification = event => {
     if (openNotification && openNotification.contains(event.target)) {
       setOpenNotification(null);
@@ -77,41 +92,145 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
   });
   
   const handleLogout = () => {
-	    //console.log(">>>logout button click");
-		    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
+		    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+localStorageCheck.token}} )
 		    .then(res => {
 		        if (res.data.message){
 		        	alert(res.data.message);
 		        } else {
-		        	//localStorage.removeItem('plismplus');
-		        	//props.logOut();
-	                userStore.setUser('');
-	                userStore.setToken('');
-		        	//props.history.push('/landing');
+		        	userService.removeToken();
 	                console.log("log out!");
 	                props.history.replace('/');
 		        }
-		        	//window.location.href = "/login"; //alert(res.data.userid + " �α��� ����");
 		    })
 		    .catch(err => {
 		        console.log(err);
 		        console.log(">>>>err>");
-		        //window.location.href = "/Landing";
 		    })
 
 	  }
   
+ React.useEffect(() => {
+	  console.log("admin layout localStorageCheck value:",localStorageCheck);
+	  msgCheck();
+	  
+	  return () => {
+	      console.log('cleanup');
+	    }; 
+	  
+  }, []);
+ 
+ 
+ const msgCheck = () => {
+	 if(localStorageCheck) {
+	 axios.post("/com/getUserNotice",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}})
+	    .then(res => setMsgCnt(res.data[0].noti_cnt))
+	    .catch(err => {
+	       console.log("HeaderLinks err",err);
+	    }); 
+	 }
+ }
+ 
+ const handleSelectMsg = (event) => {
+	 //console.log("msg",localStorageCheck.token);
+	  if(localStorageCheck) {
+		  axios.post("/com/getUserMessage",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}}
+			  )//.then(res=>console.log(res.data))
+		    .then(res => {
+		    	setMsg(res.data);
+		    	setMsgCnt(0);
+		    })
+		    .catch(err => {
+		       console.log("HeaderLinks err",err);
+		    });  
+	  }
+
+	  if (openNotification && openNotification.contains(event.target)) {
+	        setOpenNotification(null);
+	  } else {
+	    	setOpenNotification(event.currentTarget);
+	  }
+ }
+ 
+ const handleMoreMessage = () => {
+
+       axios.post("/com/getUserMoreNotice",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}})
+	    .then(res => { setMsgMoreData(res.data);setOpenNotification(null); setOpenMsgMore(true);})
+	    .catch(err => {
+	       console.log("HeaderLinks err",err);
+	    });
+	  
+ }
+ 
+ const handleClose = () => {
+	  setOpenMsgMore(false);
+ }
+ 
+ function DialogComponet(props) {
+	  return (	  
+		<Dialog
+			open={openMsgMore}
+		    onClose={handleClose}
+		    //PaperComponent={PaperComponent}
+		    aria-labelledby="draggable-dialog-title" 
+		>
+		<DialogContent style={{padding:'0',minWidth:'430px',maxWidth:'680px'}}>
+			<MsgMoreTable />
+		</DialogContent>
+		</Dialog>
+	  );
+ }
+
+ 
+ 
+ const MsgMoreTable = () => {
+	  return (
+			  <div>
+			  	<HighlightOff onClick={handleClose} style={{color:'#7a7a7a',top:'2',right:'2',position:'absolute'}}/>
+		        <Card className={classes.justifyContentCenter}>
+		        	<CardHeader color="info" stats icon style={{paddingBottom:'2px'}}>
+		        		<CardIcon color="info" style={{height:'56px'}}>
+		        			<Icon style={{width:'26px',fontSize:'20px',lineHeight:'26px'}}>content_copy</Icon>
+		        		</CardIcon>
+		        		 <Typography variant="h6" style={{flexGrow:'1',textAlign:'start',color:'#7a7a7a'}}>More then Notice</Typography>
+		        	</CardHeader>
+		        	<CardBody style={{paddingBottom:'2px'}}> 
+			            <TablePageing
+				            tableHeaderColor="info"
+				            tableHead={["no", "MSG","FROM","NOTI_DATE","EVENT"]}
+				            tableData={msgMoreData}
+			            	{...props}
+			            />
+		          </CardBody>
+		        </Card>
+		      </div>
+	  
+	  );
+ }
+		        	
+ const MsgView = (props) => {
+	  return (<h3> test  </h3>);
+ }
+ 
+ function handleListKeyDown(event) {
+	  if(event.key === 'Tab') {
+		  event.preventDefault();
+		  setOpenNotification(null);
+	  }
+ }
+  
   return (
     <div className={wrapper}>
-      
-      <div className={managerClasses}>
+    {localStorageCheck?(isAuthenticated && localStorageCheck.user.usertype=="A")?"ADMIN":isAuthenticated?localStorageCheck.user.username:null:null} {isAuthenticated?" 님 환영합니다.":null}
+    {isAuthenticated?  
+    <div className={managerClasses}>
         <Button
           color="transparent"
           justIcon
           aria-label="Notifications"
           aria-owns={openNotification ? "notification-menu-list" : null}
           aria-haspopup="true"
-          onClick={handleClickNotification}
+          //onClick={handleClickNotification}
+          onClick={handleSelectMsg}
           className={rtlActive ? classes.buttonLinkRTL : classes.buttonLink}
           muiClasses={{
             label: rtlActive ? classes.labelRTL : ""
@@ -126,7 +245,7 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
                 : classes.links)
             }
           />
-          <span className={classes.notifications}>5</span>
+          {msgCnt>0?<span className={classes.notifications}>{msgCnt}</span>:null}
           <Hidden mdUp implementation="css">
             <span
               onClick={handleClickNotification}
@@ -148,60 +267,41 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
             [classes.popperNav]: true
           })}
         >
-          {({ TransitionProps }) => (
-            <Grow
-              {...TransitionProps}
-              id="notification-menu-list"
-              style={{ transformOrigin: "0 0 0" }}
-            >
-              <Paper className={classes.dropdown}>
+          <Paper className={classes.dropdown}>
                 <ClickAwayListener onClickAway={handleCloseNotification}>
-                  <MenuList role="menu">
-                    <MenuItem
-                      onClick={handleCloseNotification}
+                {msg.length >0?
+                <MenuList  onKeyDown={(event)=>handleListKeyDown(event)}>
+			          {msg.map((data,key) => {
+			        	  return (
+			        			  
+			                      <MenuItem
+			                        key={key}
+			                        onClick={handleCloseNotification}
+			                        className={dropdownItem}
+			                        style={{whiteSpace:'unset',paddingTop:'3px',paddingBottom:'3px',paddingLeft:'10px',paddingRight:'10px'}}
+			                      >
+			                      <Typography variant="body2" style={{maxWidth:'400px',minWidth:'400px'}}>{data.message}<br/><font size="1">{data.message_from}({data.message_insert_date})</font></Typography>
+			                      <Divider />
+			                      </MenuItem>      
+			        	  );
+			          })}
+			          <MenuItem
+                      onClick={handleMoreMessage}
                       className={dropdownItem}
                     >
-                      {rtlActive
-                        ? "إجلاء أوزار الأسيوي حين بل, كما"
-                        : "Mike John responded to your email"}
+                      ... 더보기
                     </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive
-                        ? "شعار إعلان الأرضية قد ذلك"
-                        : "You have 5 new tasks"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive
-                        ? "ثمّة الخاصّة و على. مع جيما"
-                        : "You're now friend with Andrew"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive ? "قد علاقة" : "Another Notification"}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleCloseNotification}
-                      className={dropdownItem}
-                    >
-                      {rtlActive ? "قد فاتّبع" : "Another One"}
-                    </MenuItem>
-                  </MenuList>
+                  </MenuList>:
+                	  <MenuList >
+		              	<MenuItem className={dropdownItem}>메시지가 존재하지 않습니다.</MenuItem>
+		              </MenuList>}
                 </ClickAwayListener>
               </Paper>
-            </Grow>
-          )}
         </Popper>
-      </div>
+      </div>:null}
 
       <div className={managerClasses}>
+      {isAuthenticated?
         <Button
           color="transparent"
           aria-label="Person"
@@ -229,6 +329,30 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
             </span>
           </Hidden>
         </Button>
+        :
+            <Button
+              color="transparent"
+              justIcon
+              aria-label="Notifications"
+              aria-owns={openNotification ? "notification-menu-list" : null}
+              aria-haspopup="true"
+              onClick={props.onLoginPageOpen}
+              className={rtlActive ? classes.buttonLinkRTL : classes.buttonLink}
+              muiClasses={{
+                label: rtlActive ? classes.labelRTL : ""
+              }}
+            >
+              <Person
+                className={
+                  classes.headerLinksSvg +
+                  " " +
+                  (rtlActive
+                    ? classes.links + " " + classes.linksRTL
+                    : classes.links)
+                }
+              />
+            </Button>
+            }
         <Popper
           open={Boolean(openProfile)}
           anchorEl={openProfile}
@@ -250,7 +374,7 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
               <Paper className={classes.dropdown}>
                 <ClickAwayListener onClickAway={handleCloseProfile}>
                   <MenuList role="menu">
-                  {isAuthenticated && userStore.user.usertype=="A"?
+                  {isAuthenticated && (localStorageCheck?localStorageCheck.user.usertype:null)=="A"?
                      	 <MenuItem
                              component={Link}
                              to="/svc"
@@ -288,9 +412,9 @@ const AdminHeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore
   );
 }
 
-))
+//))
 
-export default AdminHeaderLinks;
+//export default AdminHeaderLinks;
 
 AdminHeaderLinks.propTypes = {
   rtlActive: PropTypes.bool

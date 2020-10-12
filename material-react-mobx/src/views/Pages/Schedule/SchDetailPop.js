@@ -103,7 +103,7 @@ export default function TableList(props) {
 	  }, []);
   
   function getSchDetailInfo() {
-	  if(store.token) {
+	  if(store) {
 		    return axios ({
 		      url:'/sch/getScheduleDetailList',
 		      method:'POST',
@@ -116,7 +116,7 @@ export default function TableList(props) {
 		           endDate : "",
 		           svc : ""
 		           },
-		      headers:{'Authorization':'Bearer '+store.token}
+		      headers:{'Authorization':'Bearer '+store}
 		    }).then(setSelectData([])).then(res => setSelectData(res.data));
 	  } else {
 		  

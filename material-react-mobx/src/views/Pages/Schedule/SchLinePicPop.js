@@ -21,6 +21,7 @@ import IconM from "@material-ui/core/Icon";
 import axios from 'axios';
 //import Icon from "@material-ui/core/Icon";
 //import { observer, inject} from 'mobx-react'; // 6.x
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 
 /*const useStyless = makeStyles(theme => ({
@@ -106,13 +107,14 @@ export default function TableList(props) {
 	  }, []);
   
   function getLinePicInfo() {
-	  if(store.token) {
+    const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
 		    return axios ({
 		      url:'/sch/getLinePicInfo',
 		      method:'POST',
 		      data: {carrierCode : detailParam.line_code
 		           },
-		      headers:{'Authorization':'Bearer '+store.token}
+		      headers:{'Authorization':'Bearer '+token}
 		    }).then(setSelectData([])).then(res => setSelectData(res.data));
 	  } else {
 		  

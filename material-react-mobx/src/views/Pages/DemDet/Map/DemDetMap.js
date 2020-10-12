@@ -15,6 +15,7 @@ import axios from 'axios';
 import TerminalList from './TerminalList.js';
 import FilterIcon from '@material-ui/icons/Filter';
 import {IconButton} from "@material-ui/core";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 dotenv.config();
 const MyMapComponent = compose(
   withProps({
@@ -155,7 +156,7 @@ export default class DemDetMap extends React.Component {
       setStyle: [],
       locationlat:0,
       locationlng:0,
-      token: props.store.token,
+      token: userService.GetItem()?userService.GetItem().token:null,
       portCode:[],
       portCodeCopy:[],
       markerVisible: true,

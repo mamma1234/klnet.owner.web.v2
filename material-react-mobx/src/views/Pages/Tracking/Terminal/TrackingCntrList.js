@@ -72,7 +72,7 @@ export default function TableList(props) {
   const {data,store,schData} = props;  
   const [cntrData,setCntrData] = useState([]);
   const [cospan,setCospan] = useState(1);
-  console.log(schData);
+  //console.log(schData);
  /* const onClickDelete = () => {
 	  confirm({description:'정말로 삭제 하시겠습니까?'}).then(()=>{});
 	  console.log(">>>>>");
@@ -105,19 +105,19 @@ export default function TableList(props) {
 	    		{ 
             req_seq : props.data.req_seq,
             ie_type: props.data.ie_type,
-            vsl_name :props.data.vsl_name,
-            voyage_no:props.data.voyage,
+            vsl_name :props.data.ie_type==="I"?props.data.max_vsl_name:props.data.vsl_name, 
+            voyage_no:props.data.ie_type==="I"?null:props.data.voyage, 
             etd:etd,
-            pol:props.data.pol,
+            pol:props.data.pol_cd,
             eta:eta,
-            pod:props.data.pod,
+            pod:props.data.pod_cd,
             carrier_code:props.data.carrier_code,
             ie_type:props.data.ie_type,
             bl_bkg:props.data.bl_bkg,
             at_terminal:act_terminal,
             at_date:act_date
           }
-	    ,{headers:{'Authorization':'Bearer '+store.token}}
+	    ,{headers:{'Authorization':'Bearer '+store}}
 	    )
 	    .then(res => setCntrData(res.data))
 	    //.then(res => console.log(JSON.stringify(res.data)));

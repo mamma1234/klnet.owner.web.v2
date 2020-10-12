@@ -10,7 +10,7 @@ import IconM from "@material-ui/core/Icon";
 import GridItem from "components/Grid/GridItem.js";
 import axios from 'axios';
 import { observer, inject} from 'mobx-react'; // 6.x
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const styles = {
     headerCell: {
       backgroundColor: "#f2fefd",
@@ -26,7 +26,9 @@ const styles = {
 
 const useStyles = makeStyles(styles);
   
-const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+
+export default function ImpPassLcaDetail(props) {
+//const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
   const classes = useStyles();  
 
   const [lcaInfoData,setLcaInfoData] = useState([]);
@@ -40,7 +42,9 @@ const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore
 	const searchData = {
         lcaSgn: props.dclrNo.substring(0,5)
       };
-	axios.post("/com/uniPassApiSelectLcaInfo",searchData, {headers:{'Authorization':'Bearer '+userStore.token}})
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
+	axios.post("/com/uniPassApiSelectLcaInfo",searchData, {headers:{'Authorization':'Bearer '+token}})
 	.then(res => {
 		if(res.data.message == "SUCCESS"){
 			setLcaInfoData(res.data.infoData);
@@ -54,6 +58,9 @@ const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore
         	props.openLogin();
         }
         });
+	} else{
+		props.openLogin();
+	}
   },[]);
 
 
@@ -90,5 +97,5 @@ const ImpPassLcaDetail = inject('userStore', 'trackStore')(observer(({ userStore
 	</Card>
   );
 }
-))
-export default ImpPassLcaDetail;
+//))
+//export default ImpPassLcaDetail;

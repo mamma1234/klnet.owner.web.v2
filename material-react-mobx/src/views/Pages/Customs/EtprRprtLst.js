@@ -16,6 +16,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyless = makeStyles(theme => ({
 
@@ -89,30 +90,35 @@ export default function EtprRprtLst(props) {
 
 
   const onSubmit = () => {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
     if (!shipCallImoNo & !mrnNo) {
 		  alert("제출번호 또는 호출부호 1가지는 필수 입력값입니다.");
 		  document.getElementById("shipCallImoNo").focus();
 		  return false;
 	  } else {
-      axios.post("/com/uniPassEtprRprtLst",{shipCallImoNo:shipCallImoNo,mrnNo:mrnNo}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
-      res => {
-          if(res.data.message == "SUCCESS") {
-            AlertMessage("조회가 완료되었습니다.","success");
-            setTCnt(res.data.infoData.cnt)
-            setGridData(res.data.infoData.data);
-          }else if (res.data.message == "NO_DATA") {
-            AlertMessage("조회결과가 없습니다.","error");
-            setTCnt("0")
-            setGridData([]);
-          }else {
-            AlertMessage(res.data.errMsg,"error")
-          }
-        }                                     
-      ).catch(err => {
-          if(err.response.status === 401) {
-	        	props.openLogin();
-	        }
-          });
+		  if(token) {
+	      axios.post("/com/uniPassEtprRprtLst",{shipCallImoNo:shipCallImoNo,mrnNo:mrnNo}, {headers:{'Authorization':'Bearer '+token}}).then(
+	      res => {
+	          if(res.data.message == "SUCCESS") {
+	            AlertMessage("조회가 완료되었습니다.","success");
+	            setTCnt(res.data.infoData.cnt)
+	            setGridData(res.data.infoData.data);
+	          }else if (res.data.message == "NO_DATA") {
+	            AlertMessage("조회결과가 없습니다.","error");
+	            setTCnt("0")
+	            setGridData([]);
+	          }else {
+	            AlertMessage(res.data.errMsg,"error")
+	          }
+	        }                                     
+	      ).catch(err => {
+	          if(err.response.status === 401) {
+		        	props.openLogin();
+		        }
+	          });
+		  } else {
+			  props.openLogin();
+		  }
     }
   }
   return (

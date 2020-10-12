@@ -3,7 +3,7 @@
 //const oraclePool = require("../pool.js").oraclePool
 const pgsqlPool = require("../pool.js").pgsqlPool
 // const oracledb = require('oracledb');
-
+const sUser = require('../../models/sessionUser');
 
 const getCarrierInfo = (request, response) => {
     console.log(">>>>>> CARRIER INFO log");
@@ -19,20 +19,20 @@ const getCarrierInfo = (request, response) => {
         pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
+                
                 response.status(400).send(err);
             } else {
                 console.log("sql : " + sql.text);
                 conn.query(sql, function(err,result){
-                    // done();
+                    release();
                     if(err){
                         console.log(err);
-                        release();
+                        
                         response.status(400).send(err);
                     } else {
                         //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
                         console.log(result);
-                        release();
+                        
                         response.status(200).json(result.rows);
                         // console.log(result.fields.map(f => f.name));
 
@@ -42,7 +42,7 @@ const getCarrierInfo = (request, response) => {
 
             }
     
-            // conn.release();
+            // conn.
         });
 }
 
@@ -72,7 +72,7 @@ const getScheduleList = (request, response) => {
     + "to_char(to_date(end_date,'YYYYMMDD'),'YYYY-MM-DD') as end_day, end_port_code as end_port, (select '[' || port_code || '] ' || port_name from own_code_port where port_code = end_port_code) as end_port_name, '[' || line_code || '] ' || vsl_name as title, to_date(start_date,'YYYYMMDD') as start, to_date(start_date,'YYYYMMDD') as end, \n"
     + "'true' as \"allDay\", (select image_yn from own_code_cuship cus where line_code = sch.line_code limit 1) as image_yn, (select url from own_code_cuship where line_code = sch.line_code limit 1) as line_url, coalesce((select nm_kor from own_code_cuship where line_code = sch.line_code limit 1),sch.line_code ) as line_nm, \n" 
     + "case when to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') in ('0','1') then to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Day' else to_date(end_date,'yyyymmdd') - to_date(start_date,'yyyymmdd') || ' Days' end as tt, \n" 
-    + "(select ts from own_code_ts where line_code = sch.line_code and start_port_code = sch.start_port_code and end_port_code = sch.end_port_code limit 1) as ts from own_vsl_sch sch \n"
+    + "(select ts from own_code_ts where line_code = sch.line_code and start_port_code = sch.start_port_code and end_port_code = sch.end_port_code limit 1) as ts, sf_get_sch_charge(line_code,start_port_code,end_port_code,start_date) as charge from own_vsl_sch sch \n"
     + "where (length(start_date) = 8 and length(end_date) = 8) and start_date >= to_char(now(),'yyyymmdd') and start_port_code = '"+request.body.startPort+"' and end_port_code = '"+request.body.endPort+"'  \n"
     //+ "and start_date >= '"+request.body.startDate+"' and start_date <= '"+request.body.endDate+"' \n"
     if(request.body.tapNum == "1") {
@@ -98,20 +98,20 @@ const getScheduleList = (request, response) => {
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log("sql : " + sql.text);
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
                             console.log(result);
-                            release();
+                            
                             response.status(200).json(result.rows);
                             // console.log(result.fields.map(f => f.name));
 
@@ -120,19 +120,19 @@ const getScheduleList = (request, response) => {
                     });
 
                 }
-                // conn.release();
+                // conn.
             });
 }
 
 
 const getScheduleDetailList = (request, response) => {
-	console.log(">>>>>> FCL_SCHEDULE_DETAIL log");
-	console.log (">>PARAM1:"+request.body.carrierCode);
-	console.log (">>PARAM2:"+request.body.vesselName);
-	console.log (">>PARAM3:"+request.body.voyage);
-	console.log (">>PARAM4:"+request.body.startDate);
-	console.log (">>PARAM5:"+request.body.endDate);
-	console.log (">>PARAM6:"+request.body.svc);
+	//console.log(">>>>>> FCL_SCHEDULE_DETAIL log");
+	//console.log (">>PARAM1:"+request.body.carrierCode);
+	//console.log (">>PARAM2:"+request.body.vesselName);
+	//console.log (">>PARAM3:"+request.body.voyage);
+	//console.log (">>PARAM4:"+request.body.startDate);
+	//console.log (">>PARAM5:"+request.body.endDate);
+	//console.log (">>PARAM6:"+request.body.svc);
 	
 //    let sql = "select line_Code,voyage_no,vsl_name,svc,eta,etd,port_code from own_vsl_Sch where line_code = '"+request.body.carrierCode+"' \n"
 //    + "and vsl_name = '"+request.body.vesselName+"' and voyage_no = '"+request.body.voyage+"' \n"
@@ -177,20 +177,20 @@ const getScheduleDetailList = (request, response) => {
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log("sql : " + sql.text);
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
                             console.log(result);
-                            release();
+                            
                             response.status(200).json(result.rows);
                             // console.log(result.fields.map(f => f.name));
 
@@ -200,14 +200,15 @@ const getScheduleDetailList = (request, response) => {
             
 
                 }
-                // conn.release();
+                // conn.
             });
 }
 
 const getPortCodeInfo = (request, response) => {
-	  let sql = "";
-	  const portCode=request.body.portCode.substr(0,3);
-	console.log("입력Keyword:"+portCode);
+	let sql = "";
+    const portCode=request.body.portCode.substr(0,3);
+    const Check = request.body.check!== undefined?true:false;
+    console.log("입력Keyword:"+portCode);
 
 /* 	    sql = "SELECT P.PORT_CODE,P.PORT_NAME FROM MFEDI.CODE_PORT P"
 		      +",MFEDI. TCS_CODE_PORT A "
@@ -218,30 +219,32 @@ const getPortCodeInfo = (request, response) => {
 		      +" AND A.LINE_CODE IN ( SELECT LINE_CODE FROM MFEDI.TCS_ESHIP_CONFIG)"
               +" GROUP BY P.PORT_CODE,P.PORT_NAME"; */
               
-              sql = "select distinct PORT_CODE, PORT_NAME from own_code_port "
+              sql = "select distinct PORT_CODE, PORT_NAME, NATION_CODE from own_code_port "
 		      +"where (PORT_CODE LIKE upper('%"+portCode+"%') or PORT_NAME LIKE upper('%"+portCode+"%')) "
 		      +" and COALESCE(PORT_TYPE,' ') LIKE (CASE WHEN NATION_CODE = 'KR' THEN 'P' ELSE '%%' END) "
-		      +" AND PORT_NAME IS NOT NULL ";
+              +" AND PORT_NAME IS NOT NULL ";
+              if(Check) {
+                  sql += "order by PORT_NAME ASC"
+              }
 	    
 	    console.log("쿼리:"+sql);
 
         pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
+                
                 response.status(400).send(err);
             } else {
-                console.log("sql : " + sql.text);
                 conn.query(sql, function(err,result){
-                    // done();
+                    release();
                     if(err){
                         console.log(err);
-                        release();
+                        
                         response.status(400).send(err);
                     } else {
                         //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                        console.log(result);
-                        release();
+                       // console.log(result);
+                        
                         response.status(200).json(result.rows);
                         // console.log(result.fields.map(f => f.name));
 
@@ -250,7 +253,7 @@ const getPortCodeInfo = (request, response) => {
                 });
 
             }
-            // conn.release();
+            // conn.
         });
 }
 
@@ -270,20 +273,20 @@ const getLinePicInfo = (request, response) => {
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log("sql : " + sql.text);
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                            console.log(result);
-                            release();
+                           // console.log(result);
+                            
                             response.status(200).json(result.rows);
                             // console.log(result.fields.map(f => f.name));
 
@@ -293,7 +296,7 @@ const getLinePicInfo = (request, response) => {
 
                 }
         
-                // conn.release();
+                // conn.
             });
 }
 
@@ -316,20 +319,20 @@ const getServiceCarrierList = (request, response) => {
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log("sql : " + sql.text);
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                            console.log(result);
-                            release();
+                            //console.log(result);
+                            
                             response.status(200).json(result.rows);
                             // console.log(result.fields.map(f => f.name));
 
@@ -338,7 +341,7 @@ const getServiceCarrierList = (request, response) => {
                     });
 
                 }
-                // conn.release();
+                // conn.
             });
 }
 
@@ -386,18 +389,18 @@ const getTerminalScheduleList = (request, response) => {
     pgsqlPool.connect(function(err,client,release) {
       if(err){
         console.log("err" + err);
-        release();
+        
         response.status(400).send(err);
       } else {
           client.query(sql, function(err,result){
-            // done();
+            release();
             if(err){
               console.log(err);
-              release();
+              
               response.status(400).send(err);
             } else {
-                console.log(result.rows);
-                release();
+                //console.log(result.rows);
+                
                 response.status(200).send(result.rows);
             }
           });
@@ -409,12 +412,12 @@ const getTerminalScheduleList = (request, response) => {
 
   const getTerminalCodeList = (request, response) => {
 	console.log(">>>>>> getTerminalCodeList log");
-    console.log (">>PARAM1:"+request.body.area);
+    //console.log (">>PARAM1:"+request.body.area);
 	
     const sql = {
         text: "SELECT DISTINCT B.TERMINAL AS CODE, a.cal_ter_nm AS NAME \n"
         + "FROM own_terminal_info A, own_code_berth B \n"
-        + "WHERE a.cal_yn = 'Y' and A.TERMINAL = B.TERMINAL AND case when $1 = 'GIN' then a.terminal = 'HJITC' else a.terminal != 'HJITC' and LOCATION_CODE = $1 end AND B.TERMINAL NOT LIKE 'BS%' AND B.WHARF_CODE NOT LIKE 'W%' \n"
+        + "WHERE a.cal_yn = 'Y' and A.TERMINAL = B.TERMINAL AND case when $1 = 'GIN' then a.terminal = 'HJGIC' else a.terminal != 'HJGIC' and LOCATION_CODE = $1 end AND B.TERMINAL NOT LIKE 'BS%' AND B.WHARF_CODE NOT LIKE 'W%' \n"
         + " ORDER BY NAME, CODE ",
         values: [request.body.area],
         //rowMode: 'array',
@@ -425,20 +428,20 @@ const getTerminalScheduleList = (request, response) => {
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     console.log("sql : " + sql.text);
                     conn.query(sql, function(err,result){
-                        // done();
+                        release();
                         if(err){
                             console.log(err);
-                            release();
+                            
                             response.status(400).send(err);
                         } else {
                             //response.status(200).send({'record':result.rows, 'field':result.fields.map(f => f.name)});
-                            console.log(result);
-                            release();
+                            //console.log(result);
+                            
                             response.status(200).json(result.rows);
                             // console.log(result.fields.map(f => f.name));
 
@@ -448,7 +451,7 @@ const getTerminalScheduleList = (request, response) => {
 
                 }
         
-                // conn.release();
+                // conn.
             });
 }
 
@@ -483,21 +486,21 @@ const getScheduleSample = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sqlText, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -508,7 +511,7 @@ const getScheduleSample = (request, response) => {
         }
 
 
-        // conn.release();
+        // conn.
     });
 }
 
@@ -531,21 +534,21 @@ const getSchedulePortCodeList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -573,21 +576,21 @@ const insertSchPortCode = ( request, response ) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -621,21 +624,21 @@ const updateSchPortCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -661,21 +664,21 @@ const deleteSchPortCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -708,21 +711,21 @@ const getTSCodeList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -741,7 +744,7 @@ const insertTSCode = ( request, response ) => {
         text: " INSERT INTO own_code_ts (line_code, start_port_code, end_port_code, ts, insert_user, insert_date)"
         +     " VALUES(upper($1), upper($2), upper($3), $4, $5, now()) ",
         values: [request.body.newData.line_code, request.body.newData.start_port_code, 
-            request.body.newData.end_port_code, request.body.newData.ts, request.session.sUser.userno],
+            request.body.newData.end_port_code, request.body.newData.ts, sUser.userno],
     }
 
 
@@ -750,21 +753,21 @@ const insertTSCode = ( request, response ) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -790,7 +793,7 @@ const updateTSCode = (request, response) => {
                 request.body.newData.start_port_code,
                 request.body.newData.end_port_code,
                 request.body.newData.ts,
-                request.session.sUser.userno,
+                sUser.userno,
                 request.body.oldData.line_code,
                 request.body.oldData.start_port_code,
                 request.body.oldData.end_port_code
@@ -800,21 +803,21 @@ const updateTSCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -839,21 +842,21 @@ const deleteTSCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -888,21 +891,21 @@ const getPicCodeList = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -922,7 +925,7 @@ const insertPicCode = ( request, response ) => {
         +     " VALUES(upper($1), $2, $3, $4, $5, $6, $7, $8, $9, now()) ",
         values: [request.body.newData.line_code, request.body.newData.pic_area, 
             request.body.newData.pic_dept, request.body.newData.pic_name, request.body.newData.pic_tel,
-            request.body.newData.pic_email, request.body.newData.pic_cell, request.body.newData.pic_remark, request.session.sUser.userno],
+            request.body.newData.pic_email, request.body.newData.pic_cell, request.body.newData.pic_remark, sUser.userno],
     }
 
 
@@ -931,21 +934,21 @@ const insertPicCode = ( request, response ) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
                 }
@@ -976,7 +979,7 @@ const updatePicCode = (request, response) => {
                 request.body.newData.pic_email,
                 request.body.newData.pic_cell,
                 request.body.newData.pic_remark,
-                request.session.sUser.userno,
+                sUser.userno,
                 request.body.oldData.line_code,
                 request.body.oldData.pic_area,
                 request.body.oldData.pic_dept,
@@ -987,21 +990,21 @@ const updatePicCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
-            release();
+            
             response.status(400).send(err);
         } else {
             conn.query(sql, function(err,result){
-                // done();
+                release();
                 if(err){
                     console.log(err);
-                    release();
+                    
                     response.status(400).send(err);
                 } else {
                     if(result != null) {
-                    	release();
+                    	
                         response.status(200).json(result.rows);
                     } else {
-                    	release();
+                    	
                         response.status(200).json([]);
                     }
 
@@ -1028,6 +1031,87 @@ const deletePicCode = (request, response) => {
     pgsqlPool.connect(function(err,conn,release) {
         if(err){
             console.log("err" + err);
+            
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                release();
+                if(err){
+                    console.log(err);
+                    
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	
+                        response.status(200).json(result.rows);
+                    } else {
+                    	
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });
+}
+
+const shipChargeList = (request, response) => {
+    console.log('request.body : ',request.body)
+    let tsYn = request.body.tsYn;
+    let sql = "";
+
+
+
+
+
+    sql += " select b.num, b.total_cnt,b.tot_page,b.curpage,b.line_code, b.carrier, b.line_name ,to_char(to_date(b.effect_date,'YYYYMMDD'),'YYYY-MM-DD') as effect_date, (b.of_total + b.baf_total + b.lss_total + ebs_total) as total_amt, b.cntr_size, b.cntr_type, b.image_yn, "
+    sql += " b.ts, b.coc_soc, b.goods, b.of_amt, b.of_unit, b.baf_unit, b.baf_amt, b.lss_unit, b.lss_amt "
+    sql += " ,b.of_amt, b.of_unit ,b.baf_unit, b.baf_unit ,b.lss_amt, b.lss_unit, b.ebs_amt, b.ebs_unit, b.caf_amt, b.caf_unit, b.othc_amt, b.othc_unit, b.dthc_amt, b.dthc_unit "
+    sql += " ,b.docu_amt, b.docu_unit, b.do_amt, b.do_unit, b.whf_amt, b.whf_unit, b.csf_amt, b.csf_unit, b.etc_amt, b.etc_unit, etc_remark, remark "
+    sql += " from ( select count(*) over()/10+1 as tot_page, (row_number() over()) as num, count(*) over() total_cnt,floor(((row_number() over()) -1) /10 +1) as curpage, a.line_code, (select line_code from own_code_cuship occ where occ.id = a.line_code limit 1) as carrier, (select image_yn from own_code_cuship occ where occ.id = a.line_code limit 1) as image_yn, a.line_name, a.effect_date, "
+    sql += " a.pol as origin, a.pol_nm, a.pld as destination, a.pld_nm, a.coc_soc, (case when of_unit ='미국 달러' then cast(of_amt as int) else 0 end) as of_total, (case when baf_unit ='미국 달러' then cast(baf_amt as int) else 0 end) as baf_total, "
+    sql += " (case when lss_unit ='미국 달러' then cast(lss_amt as int) else 0 end) as lss_total, (case when ebs_unit ='미국 달러' then cast(ebs_amt as int) else 0 end) as ebs_total, a.cntr_size, a.cntr_type, a.goods, a.ts, "
+    sql += " of_amt, of_unit, baf_unit, baf_amt, lss_unit, lss_amt, ebs_unit, ebs_amt, caf_unit, caf_amt, othc_unit, othc_amt, dthc_unit, dthc_amt, docu_unit, docu_amt, "
+    sql += " do_unit, do_amt, whf_unit, whf_amt, csf_unit, csf_amt, etc_unit, etc_amt, etc_remark, remark from own_ship_charge a "
+    sql += " where (line_code,effect_date, public_date, pol, pld, coc_soc, cntr_type, goods, ts) in( select b.line_code, b.effect_date, b.public_date, b.pol, b.pld, b.coc_soc, b.cntr_type, b.goods, b.ts from ( select row_number() over (partition by line_code, pol, pld, goods, coc_soc, cntr_type, cntr_size, ts order by effect_date desc, public_date desc) row_num, * from own_ship_charge osc "
+    sql += " where effect_date < '"+request.body.startDate+"'"
+    sql += " and line_code  <> '' )b where row_num = 1) "
+    sql += request.body.carrierCode !==""? " and line_code = '"+request.body.carrierCode+"'":""
+    sql += request.body.size !==""? " and cntr_size in("+request.body.size.substr(0,request.body.size.length-1)+")":""
+    sql += request.body.type !==""? " and cntr_type in("+request.body.type.substr(0,request.body.type.length-1)+")":""
+    sql += request.body.item !==""? " and goods in("+request.body.item.substr(0,request.body.item.length-1)+")":""
+    sql += tsYn ==="TSY"? " and ts= 'Y' ":""
+    sql += tsYn ==="TSN"? " and ts= 'N' ":""
+    sql += request.body.cocNsoc !==""? " and coc_soc in("+request.body.cocNsoc.substr(0,request.body.cocNsoc.length-1)+")":""
+    sql += request.body.origin !==""?" and pol = '"+request.body.origin+"'":""
+    sql += request.body.destination !==""?" and pld = '"+request.body.destination+"'":""
+    sql += " )b where curpage ='"+request.body.num+"'" 
+
+
+
+
+
+
+
+
+
+
+
+
+    // sql += " and line_code ='"+request.body.carrierCode+"'"
+
+    // sql += request.body.origin ===""?"":" and pol = '"+request.body.origin+"'"
+    // sql += request.body.destination ===""?"":" and pld = '"+request.body.destination+"'"
+    
+    
+
+
+    console.log(sql)
+
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
             release();
             response.status(400).send(err);
         } else {
@@ -1051,6 +1135,7 @@ const deletePicCode = (request, response) => {
         }
 
     });
+
 }
 
 module.exports = {
@@ -1074,5 +1159,6 @@ module.exports = {
         getPicCodeList,
         insertPicCode,
         updatePicCode,
-        deletePicCode
+        deletePicCode,
+        shipChargeList
 	}

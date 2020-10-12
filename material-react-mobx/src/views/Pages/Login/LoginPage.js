@@ -36,6 +36,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
 import { observer, inject } from 'mobx-react'; // 6.x
 //import { useCookies  } from 'react-cookie';
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 dotenv.config();
 
@@ -43,8 +44,8 @@ const useStyles = makeStyles(styles);
 
 
 
-// export default function LoginPage(props) {
-const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+ export default function LoginPage(props) {
+//const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 /*  const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
   const [cookies, setCookie] = useCookies(['name']);
   
@@ -96,8 +97,9 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
 		        			localStorage.removeItem('plismplus');
 		        		}
 		        		localStorage.setItem('plismplus',res.data.token);*/
-                userStore.setUser(res.data.user);
-                userStore.setToken(res.data.token);
+		        		userService.SetItem(res.data);
+                //userStore.setUser(res.data.user);
+                //userStore.setToken(res.data.token);
                 props.onClose(res.data.user);
                 
 
@@ -127,8 +129,8 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
     
   };
   const clean = () => {
-	  userStore.setUser('');
-	  userStore.setToken('');
+	  //userStore.setUser('');
+	  //userStore.setToken('');
   }
   
   const socialReady=() => {
@@ -231,6 +233,6 @@ const LoginPage = inject('userStore', 'trackStore')(observer(({ userStore, track
     </div>
   );
 }
-))
+//))
 
-export default LoginPage;
+//export default LoginPage;

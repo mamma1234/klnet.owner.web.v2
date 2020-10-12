@@ -27,6 +27,10 @@ import VectorMap from "views/Maps/VectorMap.js";
 import Widgets from "views/Widgets/Widgets.js";
 import Wizard from "views/Forms/Wizard.js";*/
 
+import ImportPage from 'views/Pages/TestPage/ImportPage.js';
+import BoardDataPage from 'views/Pages/TestPage/BoardData.js';
+import DemDetOscPage from 'views/Pages/TestPage/DemDetOsc.js';
+import ThreadManage from 'views/Pages/TestPage/ThreadManage.js';
 import RegularForms from "views/Forms/RegularForms.js";
 import SampleData from "views/Pages/TestPage/SamplePage.js";
 import SampleData2 from "views/Pages/TestPage/SamplePage2.js";
@@ -77,6 +81,15 @@ var dashRoutes = [
     state: "ExcelCollapse",
     // layout: "/admin"
     views: [
+       {
+    			path: "/importdata",
+    			name: "EXCEL DATA IMPORT",
+    			rtlName: "게시판",
+    			mini: "ID",
+    			rtlMini: "ID",
+    			component: ImportPage,
+    			layout: "/admin"
+    		  },
       {
       path: "/schedule",
       name: "EXCEL SCH ROW DATA",
@@ -184,7 +197,7 @@ var dashRoutes = [
         path: "/own_thread_manage",
         name: "OWN THREAD MANAGE",
         rtlName: "ThreadManage",
-        //component:
+        component:ThreadManage,
         mini: "OT",
         rtlMini: "OT",
         layout: "/admin"
@@ -263,7 +276,7 @@ var dashRoutes = [
         rtlName: "Board Data",
         mini: "BD",
         rtlMini: "BD",
-        //component: SampleData,
+        component: BoardDataPage,
         layout: "/admin"
       },
       {
@@ -272,7 +285,7 @@ var dashRoutes = [
         rtlName: "DEM&DET&OSC Data",
         mini: "DD",
         rtlMini: "DD",
-        component: SampleData,
+        component: DemDetOscPage,
         layout: "/admin"
       },
         {
@@ -315,7 +328,7 @@ var dashRoutes = [
       },
     ]
   },
-  {
+  {/*{
     collapse: true,
     name: "MANAGE",
     rtlName: "회원관리",
@@ -333,6 +346,6 @@ var dashRoutes = [
       },
       
     ]
-  },  
+  },  */}
 ];
 export default dashRoutes;

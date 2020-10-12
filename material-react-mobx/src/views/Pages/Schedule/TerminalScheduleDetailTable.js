@@ -116,8 +116,8 @@ TablePageinationActions.propTypes = {
     rowsPerPage:PropTypes.number.isRequired,
 }
 
-//export default function ToggleTable(props) {
-  const ToggleTable = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+export default function ToggleTable(props) {
+//  const ToggleTable = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
 
   useEffect(() => {
     console.log('effect-detail');
@@ -144,7 +144,7 @@ TablePageinationActions.propTypes = {
   
   
   return (
-    <div className={classes.tableResponsive}>
+    <div className={classes.tableResponsive} style={{marginTop:'5px'}}>
       <Table className={classes.table} size="small" stickyHeader={true} style={{borderTop:'2px solid #00b1b7', borderBottom:'2px solid #00b1b7'}}>
         {tableHead !== undefined ? (
           <TableHead className={classes[tableHeaderColor + "TableHeader"]} >
@@ -165,7 +165,7 @@ TablePageinationActions.propTypes = {
         <TableBody>
            {(rowsPerPage > 0?tableData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) :  tableData).map((prop, key) => {
                   return (
-                    <TableRows key={key} index={key + 1} data={prop} page={page} userStore={userStore}/> 
+                    <TableRows key={key} index={key + 1} data={prop} page={page} userStore={props.token}/> 
                   );
                 })}
            
@@ -193,8 +193,9 @@ TablePageinationActions.propTypes = {
       </Table>
     </div>
   );
-}))
-export default ToggleTable;
+}
+//))
+//export default ToggleTable;
 
 ToggleTable.defaultProps = {
   tableHeaderColor: "gray"

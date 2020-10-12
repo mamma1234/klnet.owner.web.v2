@@ -38,13 +38,13 @@ import styles from "assets/jss/material-dashboard-pro-react/components/adminNavb
 //import Cookies from "js-cookie";
 import { observer, inject} from 'mobx-react'; // 6.x
 import TablePageing from 'components/Navbars/ServiceNotiTable.js';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyles = makeStyles(styles);
 
 
-//export default function HeaderLinks(props) {
+export default function HeaderLinks(props) {
 	
-const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {  
+//const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {  
 
   const [openNotification, setOpenNotification] = React.useState(null);
   const [openMsg, setOpenMsg] = React.useState(false);
@@ -53,31 +53,33 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
   const [severity, setSeverity] = React.useState("");
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [errMessage, setErrmessage] = React.useState("");
-  
+  const localStorageCheck =  userService.GetItem();
   const { rtlActive , isAuthenticated } = props;
   
   const [msgCnt,setMsgCnt] = React.useState();
   const [msg,setMsg] = React.useState([]);
-
   
-
-	
+//console.log("isAuthenticated:",isAuthenticated);
 	
   React.useEffect(() => {
 	  
-	  if(userStore.token) {
-		  axios.post("/com/getUserNotice",{},{headers:{'Authorization':'Bearer '+userStore.token}})
-		    .then(res => setMsgCnt(res.data[0].noti_cnt))
-		    .catch(err => {
-		       console.log("HeaderLinks err",err);
-		    });  
-	  }
+	  msgCheck();
 	  
 	  return () => {
 	      console.log('cleanup');
 	    }; 
 	  
   }, []);
+  
+  const msgCheck = () => {
+		 if(localStorageCheck) {
+		 axios.post("/com/getUserNotice",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}})
+		    .then(res => setMsgCnt(res.data[0].noti_cnt))
+		    .catch(err => {
+		       console.log("HeaderLinks err",err);
+		    }); 
+		 }
+	 }
   
   function Alert(props) {
 		return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -137,36 +139,19 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
   const managerClasses = classNames({
     [classes.managerClasses]: true
   });
-
- /* const handleLogout = () => {
-
-	    axios.get("/auth/logout")
-	    .then(res => {
-	        if (res.data.message) {
-            alert(res.data.message);
-          } else {
-            setOpenProfile(null);
-            localStorage.removeItem('plismplus');
-            alert("로그아웃 되었습니다.");
-            props.history.push('/landing');
-          }
-	    })
-	    .catch(err => {
-	        console.log(err);
-	    })
-  }*/
   
   const handleLogout = () => {
+	  
 	    //console.log(">>>logout button click");
-		    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
+		    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+localStorageCheck.token}} )
 		    .then(res => {
 		        if (res.data.message){
 		        	alert(res.data.message);
 		        } else {
-		        	//localStorage.removeItem('plismplus');
+		        	userService.removeToken();
 		        	alertMessage('로그아웃이 되었습니다. 메인화면으로 이동됩니다.','info');
-	                userStore.setUser('');
-	                userStore.setToken('');
+	                //userStore.setUser('');
+	               // userStore.setToken('');
 	                //setTimeout(()=>{
 			        	props.history.push('/landing');
 	               // },1500);
@@ -181,8 +166,8 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
 
 	  }
   const handleSelectMsg = (event) => {
-	  if(userStore.token) {
-		  axios.post("/com/getUserMessage",{},{headers:{'Authorization':'Bearer '+userStore.token}}
+	  if(localStorageCheck) {
+		  axios.post("/com/getUserMessage",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}}
 			  )//.then(res=>console.log(res.data))
 		    .then(res => {
 		    	setMsg(res.data);
@@ -202,7 +187,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
   
   const handleMoreMessage = () => {
 
-        axios.post("/com/getUserMoreNotice",{},{headers:{'Authorization':'Bearer '+userStore.token}})
+        axios.post("/com/getUserMoreNotice",{},{headers:{'Authorization':'Bearer '+localStorageCheck.token}})
 	    .then(res => { setMsgMoreData(res.data);setOpenNotification(null); setOpenMsgMore(true);})
 	    .catch(err => {
 	       console.log("HeaderLinks err",err);
@@ -315,7 +300,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
         </Hidden>
       </Button>*/}
       <div className={managerClasses}>
-      	{isAuthenticated && userStore.user.usertype=="A"?"ADMIN":isAuthenticated?userStore.user.username:null} {isAuthenticated?" 님 환영합니다.":null}
+      	{localStorageCheck?isAuthenticated && localStorageCheck.user.usertype=="A"?"ADMIN":isAuthenticated?localStorageCheck.user.username:null:null} {isAuthenticated?" 님 환영합니다.":null}
         {isAuthenticated?
         <Button
           color="transparent"
@@ -464,7 +449,7 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
               <Paper className={classes.dropdown}>
                 <ClickAwayListener onClickAway={handleCloseProfile}>
                   <MenuList role="menu">
-                	{isAuthenticated && userStore.user.usertype=="A"?
+                	{isAuthenticated && (localStorageCheck?localStorageCheck.user.usertype:null)=="A"?
                 	 <MenuItem
                         component={Link}
                         to="/admin"
@@ -515,9 +500,9 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
   );
 }
 
-))
+//))
 
-export default HeaderLinks;
+//export default HeaderLinks;
 
 HeaderLinks.propTypes = {
   rtlActive: PropTypes.bool

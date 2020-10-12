@@ -10,5 +10,5 @@ module.exports.pgtracking = require('./postgresql/tracking.js');
 module.exports.pgdemdet = require('./postgresql/demdet.js');
 module.exports.pgboard = require('./postgresql/board.js');
 module.exports.pgstat = require('./postgresql/stat.js');
-
+module.exports.push = require('./postgresql/push.js')
 // module.exports = require('./postgresql/template.js');

@@ -11,7 +11,7 @@ module.exports = (passport) => {
 		jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 		secretOrKey : process.env.JWT_SECRET_KEY
 	}, function(jwtPayload, done) {
-		//console.log("jwtPayload", jwtPayload);
+		console.log("jwtPayload", jwtPayload);
 
 		// test용 pdk ship
 		// sUser.provider = 'local';
@@ -23,13 +23,20 @@ module.exports = (passport) => {
 		// return done(null,sUser);
 
 
-		pgsqlPool.connect(function(err,conn) {
+		pgsqlPool.connect(function(err,conn,release) {
 			//console.log("sql:",jwtPayload);
 
-			console.log("jwtPayload.userno", jwtPayload.userno);
-
+			console.log("jwtPayload.userno >>>>>>>>>>>>>>>>>>>>", jwtPayload.userno);
+/*			console.log("jwtPayload.exp >>>>>>>>>>>>>>>>>>>>", jwtPayload.exp);
+			
+			var expirationDate = new Date(jwtPayload.exp * 1000);
+			
+			console.log("jwtPayload date >>>>>>>>>>>>>>>>>>>>", expirationDate);
+			console.log("new date >>>>>>>>>>>>>>>>>>>>", new Date() );*/
+			
 			if(err) {console.log("err",err);}
 			conn.query("select user_no,user_email,user_name, local_id,user_type from own_comp_user where user_no='"+jwtPayload.userno+"'",function(err,result) {
+				release();
 				if(err) {console.log(err);}
 				//console.log("ROW CNT:",result.rowCount);
 	            if(result.rowCount > 0) {
@@ -42,7 +49,6 @@ module.exports = (passport) => {
 					sUser.displayName = 'web',
 					sUser.email = sUser.email?sUser.email:result.rows[0].user_email;
 
-					conn.release();
 					return done(null,sUser);
 				} else {
 					// return done(null,{message:false});

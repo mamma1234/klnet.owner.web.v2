@@ -20,6 +20,7 @@ import LoginPage from 'views/Pages/Login/LoginPage.js';
 import routes from "service_routes.js";
 import axios from 'axios';
 import styles from "assets/jss/material-dashboard-pro-react/layouts/adminStyle.js";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 //import Cookies from "js-cookie";
 import { observer, inject } from 'mobx-react'; // 6.x
 // import Button from "components/CustomButtons/Button.js";
@@ -42,9 +43,9 @@ const useStyles = makeStyles(styles);
 	},
 }));*/
 
-//export default function Dashboard(props) {
-const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
-
+export default function Dashboard(props) {
+//const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+//console.log("props:",props);
  const { ...rest } = props;
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -62,7 +63,8 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   const [isAuthenticated,setIsAuthenticated] =React.useState(false);
   const [open,setOpen] = React.useState(false);
   const [userData,setUserData] =React.useState([]);
-  const store =userStore;
+  const token =  userService.GetItem()?userService.GetItem().token:null;
+  //const store =userStore;
   // styles
   const classes = useStyles();
   const mainPanelClasses =
@@ -80,18 +82,22 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
   React.useEffect(() => {
 
 	    /*if (userStore.token) {*/
-
-	      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+store.token}})
+	  // 로컬 스토리지에 값이 있는지 확인 
+	  
+	      axios.get("/auth/user",{headers:{'Authorization':'Bearer '+token}})
 	        //.then(res => console.log("return:",res.data))
 	        .then(res => 
 	          {if(res.data) {
 
 	           // console.log("res.data.user", res.data.user);
 	           // console.log("res.data.token", res.data.token);
-	            userStore.setUser(res.data.user);
-	            userStore.setToken(res.data.token);
-
+	            //userStore.setUser(res.data.user);
+	            //userStore.setToken(res.data.token);
+	        	//토큰 저장
+	        	userService.SetItem(res.data);
+	        	//로그인상태
 	            setIsAuthenticated(true);
+	            //유저정보
 	            setUserData(res.data.user);
 	          } else {
             setIsAuthenticated(false);
@@ -174,6 +180,12 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
     }
     return activeRoute;
   };
+  
+  const onOpenHandle = () => {
+	  setOpen(true);
+	  setIsAuthenticated(false);
+  }
+  
   const getRoutes = routes => {
     return routes.map((prop, key) => {
       if (prop.collapse) {
@@ -185,7 +197,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
           <Route
             path={prop.layout + prop.path}
             //component={prop.component}
-          	render={() =><prop.component openLogin={()=>setOpen(true)} loginClose={handleLoginClose} store={store} {...props}/>}
+          	render={() =><prop.component openLogin={onOpenHandle} loginClose={event=>handleLoginClose(event)} token={token} {...rest}/>}
             key={key}
           />
         );
@@ -203,10 +215,18 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
     }
   };
   
-  const handleLoginClose=() => {
+  const handleLoginClose=user => {
 	  setOpen(false);
-	  setIsAuthenticated(true);
-	  setUserData(userStore.user);
+	  console.log("popup close:",user);
+	  if(user) {
+		  setIsAuthenticated(true);
+		  setUserData(user);
+	  } else {
+		  setIsAuthenticated(false);
+		  setUserData([]); 
+	  }
+	  //setIsAuthenticated(true);
+	  //setUserData(user);
   }
   
 /*  const handleClick = (event) => {
@@ -245,7 +265,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
         {/*<div id="scroll_top"></div>*/}
         {/* On the /maps/full-screen-maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
         {getRoute() ? (
-          <div className={classes.content} style={{paddingTop:'0px',paddingBottom:'0px'}}>
+          <div className={classes.content} style={{padding:'0px'}}>
             <div className={classes.container}>
               <Switch>
                 {getRoutes(routes)}
@@ -261,7 +281,7 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
             </Switch>
           </div>
         )}
-        <Footer fluid store={store} />
+        <Footer fluid store={token} />
         
 {/*      <div className={"fixed-plugin"} style={{top:'85%',width:'35px'}}>
 	    <div onClick={handleClick}>
@@ -274,12 +294,12 @@ const Dashboard = inject('userStore', 'trackStore')(observer(({ userStore, track
       	open={open}
         onClose={()=>setOpen(false)}
       >
-       <DialogContent style={{maxWidth:'400px',minWidth:'350px'}}><LoginPage onClose={handleLoginClose}/></DialogContent>   
+       <DialogContent style={{maxWidth:'400px',minWidth:'350px'}}><LoginPage onClose={event=>handleLoginClose(event)}/></DialogContent>   
       </Dialog>
       </div> 
     </div>
   );
 }
 
-))
-export default Dashboard;
+//))
+//export default Dashboard;

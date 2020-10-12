@@ -23,7 +23,7 @@ import Assignment from "@material-ui/icons/Assignment";
 import CustomInput from "components/CustomInput/CustomInput.js";
 import CalendarBox from "components/CustomInput/CustomCalendar.js";
 import Moment from 'moment';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -57,7 +57,7 @@ function Alert(props) {
 
 export default function SimlXamrttXtrnUserQry(props) {
   const [severity, setSeverity] = useState("");
-  const {store} =props;
+  //const {store} =props;
   const classes = useStyless();
   //const [cntrList, setCntrList] = useState([]);
   const [cntrCnt, setCntrCnt] = useState('0');
@@ -88,11 +88,11 @@ export default function SimlXamrttXtrnUserQry(props) {
   };
   
   const onSubmit = () => {
-
-	  if(store.token) {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
 			 
 		    axios.post("/com/uniPassApiSimlXamrttQry",{param1:Moment(baseDt).format('YYYYMMDD') , param2:hsSgn}, 
-		    		{headers:{'Authorization':'Bearer '+store.token}}).then(
+		    		{headers:{'Authorization':'Bearer '+token}}).then(
 		      res => {
 		        if(res.data.message == "SUCCESS") {
 		          setCntrCnt(res.data.infoData.cnt);

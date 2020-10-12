@@ -16,7 +16,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyless = makeStyles(theme => ({
 
@@ -50,7 +50,7 @@ function Alert(props) {
 
 export default function ExpFfmnPridShrtTrgtPrlst(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+  //const [userStore] = useState(props.store);
   const classes = useStyless();
   const [param, setParam] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
@@ -71,22 +71,27 @@ export default function ExpFfmnPridShrtTrgtPrlst(props) {
     setParam(e.target.value);
   }
   const onSubmit = () => {
-    axios.post("/com/uniPassExpFfmnPridShrtTrgtPrlst",{param:param}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
-      res => {
-        if(res.data.message === "SUCCESS") {
-          AlertMessage("조회가 완료되었습니다.","success");
-          setGridData(res.data.infoData.data);
-        }else if (res.data.message === "NO_DATA") {
-          AlertMessage("조회결과가 없습니다.","error");
-        }else {
-          AlertMessage(res.data.errMsg,"error")
-        }
-      }
-    ).catch(err => {
-        if(err.response.status === 401) {
-        	props.openLogin();
-        }
-        });
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
+	    axios.post("/com/uniPassExpFfmnPridShrtTrgtPrlst",{param:param}, {headers:{'Authorization':'Bearer '+token}}).then(
+	      res => {
+	        if(res.data.message === "SUCCESS") {
+	          AlertMessage("조회가 완료되었습니다.","success");
+	          setGridData(res.data.infoData.data);
+	        }else if (res.data.message === "NO_DATA") {
+	          AlertMessage("조회결과가 없습니다.","error");
+	        }else {
+	          AlertMessage(res.data.errMsg,"error")
+	        }
+	      }
+	    ).catch(err => {
+	        if(err.response.status === 401) {
+	        	props.openLogin();
+	        }
+	        });
+	  } else {
+		  props.openLogin();
+	  }
   }
   return (
     <div>

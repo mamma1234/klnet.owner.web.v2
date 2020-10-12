@@ -23,7 +23,7 @@ import LastPageIcon from "@material-ui/icons/LastPage";
 import {Snackbar,Tooltip} from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
 import axios from 'axios';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyles = makeStyles(theme => ({
 
 	  headerCell: {
@@ -70,7 +70,7 @@ function Alert(props) {
 function Row(props: { row: ReturnType<typeof createData> }) {
 
   const { row } = props;
-  console.log("props:",props);
+  //console.log("props:",props);
   const [open, setOpen] = React.useState(props.onOpen);
   const [list, setList] = React.useState([]);
   const [errMessage, setErrmessage] = React.useState("");
@@ -79,12 +79,12 @@ function Row(props: { row: ReturnType<typeof createData> }) {
   const [changeColor, setChangeColor] = React.useState("white");
   
   const openView =() => {
-
-  	  if(props.store.token) {
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+  	  if(token) {
       //API014
   		  if(!open) {
   		    axios.post("/com/uniPassRetrieveLcaDt",{param1:row.lcaSgn._text,param2:row.cstmSgn._text}, 
-  		    		{headers:{'Authorization':'Bearer '+props.store.token}})
+  		    		{headers:{'Authorization':'Bearer '+token}})
   		    		.then(setList([]))
   		    		.then(
   		      res => {

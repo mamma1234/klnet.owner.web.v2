@@ -23,6 +23,28 @@ const MyMapComponent = compose(
     <GoogleMap
     id = {props.map}
     defaultZoom={10}
+    defaultOptions={{
+      fullscreenControl:true,
+      scrollwheel: true,
+      zoomControl: true,
+      disableDefaultUI: true,
+      keyboardShortcuts: true,
+      mapTypeControl: false,
+     
+      zoomControlOptions: {
+        position: window.google.maps.ControlPosition.RIGHT_CENTER
+      }
+    }}
+    options={{
+      fullscreenControl:true,
+      scrollwheel: true,
+      zoomControl: true,
+      disableDefaultUI: true,
+      keyboardShortcuts: true,
+      zoomControlOptions: {
+        position: window.google.maps.ControlPosition.RIGHT_CENTER
+      }
+    }}
     mapTypeId={window.google.maps.MapTypeId.HYBRID}
     defaultCenter={{lat:props.lat,lng:props.lng}}>
         {props.gubun==="ship"?

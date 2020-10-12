@@ -16,7 +16,7 @@ import CalendarBox from "components/CustomInput/CustomCalendar.js";
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import Table from "views/Pages/Tracking/TrackingDetail.js";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 //icon
 import SearchIcon from '@material-ui/icons/Search';
 import ExpandMore from "@material-ui/icons/ExpandMore";
@@ -37,9 +37,9 @@ export default function TrackingList(props) {
 
   const query = queryString.parse(window.location.search);
 	
-  const {store} =props;
-  const setStartDate = new Date();
-  const setEndDate = new Date();
+  const {token} =props;
+  let setStartDate = new Date();
+  let setEndDate = new Date();
   const setStartDateOld = new Date();
   const setEndDateOld = new Date();
   const [dategb,setDategb] = useState(query.dategb?query.dategb:"D");
@@ -72,6 +72,7 @@ export default function TrackingList(props) {
   const [severity, setSeverity] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [errMessage, setErrmessage] = useState("");
+  const [selectCurpage,setSelectCurpage] = useState(10);
 
   //const [fixedClasses, setFixedClasses] = React.useState("dropdown");
   //const [optionData,setOptionData] = useState([]);
@@ -154,8 +155,8 @@ useEffect(() => {
   const onPortSearchValue = (e) => {
 	    const values = e.target.value;
 	    if(values !== undefined && values !== "" && values.length >= 2) {
-	    	if(store.token) {
-		    	axios.post("/com/getTrackingPortCode",{ portCode:values},{headers:{'Authorization':'Bearer '+store.token}})
+	    	if(token) {
+		    	axios.post("/com/getTrackingPortCode",{ portCode:values},{headers:{'Authorization':'Bearer '+token}})
 		    	.then(setPortData([]))
 			    .then(res => setPortData(res.data))
 			    .catch(err => {
@@ -172,8 +173,8 @@ useEffect(() => {
   const onLineSearchValue = (e) => {
 	    const values = e.target.value;
 	    if(values != undefined && values != "" && values.length >= 1) {
-	    	if(store.token) {
-		    	axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+store.token}})
+	    	if(token) {
+		    	axios.post("/loc/getCustomLineCode",{},{headers:{'Authorization':'Bearer '+token}})
 		    	.then(setLineCode([]))
 			    .then(res => setLineCode(res.data))
 			    .catch(err => {
@@ -197,11 +198,12 @@ useEffect(() => {
 			updateCount = updateCount++; // 변경 이력 카운트
 			initialValue = "N";
 		}
-	  
-	  if(store.token) {
+	 const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
   
 	  //search
 	  numCnt=1;
+	  setSelectCurpage(10);
 	  axios.post("/loc/getTrackingList",{
 		  ietype:ietype,
 		  dategb:dategb,
@@ -212,7 +214,8 @@ useEffect(() => {
 		  end:ePort,
 		  line:carrierCode,
 		  initial:initialValue,
-		  num:numCnt},{headers:{'Authorization':'Bearer '+store.token}}
+		  cur:10,
+		  num:numCnt},{headers:{'Authorization':'Bearer '+token}}
 		  )
 		.then(setTrackingList([]))
 		.then(setTotCnt(0))
@@ -237,13 +240,14 @@ useEffect(() => {
 				setTrackingList([]);		
 			}
 	        
-	    });
+	    });  
 	  } else {
 		  props.openLogin();
 	  }
   }
 
-   const handleAddRow = () => {
+   const handleAddRow = (curpage) => {
+        
 		// 초기값 구분 initialValue
 		if(ietype === ietypeOld && dategb === dategbOld && fromDate === fromDateOld && toDate === toDateOld 
 				&& searchKey === searchKeyOld && sPort === sPortOld && ePort === ePortOld && carrierCode === carrierCodeOld && updateCount === 0) {
@@ -251,11 +255,12 @@ useEffect(() => {
 		} else {
 			initialValue = "N";
 		}
-		
-	  if(store.token) {
+		const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
 		  if(numCnt != trackingList[0].tot_page) {
 			//page ++
-		    numCnt=numCnt+1; 
+		    numCnt=numCnt+1;
+		    setSelectCurpage(curpage);
 		    axios.post("/loc/getTrackingList",{
 			    	  ietype:ietype,
 					  dategb:dategb,
@@ -266,7 +271,8 @@ useEffect(() => {
 					  end:ePort,
 					  line:carrierCode,
 					  initial:initialValue,
-					  num:numCnt},{headers:{'Authorization':'Bearer '+store.token}})
+					  cur:curpage,
+					  num:numCnt},{headers:{'Authorization':'Bearer '+token}})
 				  .then(res => setTrackingList([...trackingList,...res.data]))
 		          .catch(err => {
 		            if(err.response.status === 403 || err.response.status === 401) {
@@ -306,6 +312,8 @@ useEffect(() => {
 		  setFromDate(null);
 		  setToDate(null);
 	  } else {
+		  setStartDate = new Date();
+		  setEndDate = new Date();
 		  setDategb(event.target.value);
 		  setFromDate(setStartDate.setDate(setStartDate.getDate()-3));
 		  setToDate(setEndDate.setDate(setEndDate.getDate()+3));
@@ -322,7 +330,7 @@ useEffect(() => {
   //const classs = klnetStyles();
   return (
     <GridContainer>
-    	<GridItem xs={12} sm={12} style={{marginBottom:'5px'}}>
+    	<GridItem xs={12} sm={12} style={{marginBottom:'5px',padding:'0'}}>
         	<Card style={{marginBottom:'0px'}}>
       			<CardHeader color="info" icon >
 					<CardIcon color="info" style={{padding:'0'}}>
@@ -330,12 +338,13 @@ useEffect(() => {
 					</CardIcon>
 				{/*<h5 className={classes.cardTitleBlack}>Search To Tacking Info </h5>*/}				
 	  		</CardHeader>
-          	<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
+          	<CardBody>
+          		<Card style={{marginTop:'0',marginBottom:'5px'}}>
+          		<CardBody>
           		<Grid item xs={12} sm={12}>
 		     	<Grid container spacing={3}>
-	     		<Grid item xs={12} sm={12} md ={9}>
-	      			<Grid container spacing={1}>
-	      			<Grid item xs={12} sm={12}>
+
+	      			<Grid item xs={12} sm={12} md={12}>
 	    			<Grid container spacing={2}>
 	    				<Grid item xs={12} sm={12} md={2} >
 	    					<FormControl fullWidth>
@@ -373,7 +382,7 @@ useEffect(() => {
 									<option value="I">등록일자</option>
 							        </Select>
 							 </FormControl>
-    				</Grid>
+					    </Grid>
 	    				<Grid item xs={12} sm={12} md={5}>
 	    					<Grid container spacing={1}>
 	    						<Grid item xs={12} sm={12} md ={6}> 
@@ -406,13 +415,12 @@ useEffect(() => {
 	    						</Grid>
 	    					</Grid>
 	    				</Grid>
-	    				
 	    			</Grid>
 	    		</Grid>	
 						<Collapse in={expanded} timeout="auto" unmountOnExit style={{width:'100%'}}>
 							<Grid item xs={12} sm={12}>
 								<Grid container spacing={1}>
-									<Grid item xs={12} md={12} sm={12}>
+									<Grid item xs={12} md={12} sm={12} style={{paddingLeft:'12px',paddingRight:'12px'}}>
 										<Grid container spacing={1}>
 											<Grid item xs={12} sm={12} md={4}style={{paddingLeft:'8px',paddingRight:'8px'}}>
 												<Autocomplete
@@ -460,41 +468,41 @@ useEffect(() => {
 								</Grid>
 							</Grid>
 						</Collapse>
-						
-		        		</Grid>
-	        		</Grid> 
-	        	<Grid item xs={12} sm={12} md={3} style={{paddingTop:'6px',paddingBottom:'10px',alignSelf:'flex-end',textAlign:'center'}}>
-	        		<Tooltip title="B/L(B/K) Upload">
-	        			<Button 
-	        				color="info" //onClick={() => setAnchorE1(true)}  
-	        				component={Link} to="/svc/uploadbl"
-	        				endIcon={<Assignment />}
-	        				style={{paddingTop:'11px',width:'35%'}}>B/L(B/K)</Button>
-	        		</Tooltip>&nbsp;&nbsp;&nbsp;
-					<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} style={{width:'55%'}} >Search</Button>							
-				</Grid>
+
+	        	
 			</Grid>
 		  </Grid> 
 		  <Grid container spacing={1}>
-		      	<Grid item xs={12} style={{textAlignLast:'center',height:'30px',paddingTop:'5px'}}>
-		      		{expanded?<ExpandLess onClick = {handleExpandClick} style={{color:'#00acc1'}}/>:<ExpandMore onClick = {handleExpandClick} style={{color:'#00acc1'}}/>}
+		      	<Grid item xs={12} style={{textAlignLast:'center',height:'30px',paddingTop:'15px',paddingLeft:'20px',paddingRight:'20px'}} onClick = {handleExpandClick}>
+		      		{expanded?<ExpandLess style={{color:'#00acc1'}}/>:<ExpandMore  style={{color:'#00acc1'}}/>}
 		      	</Grid>
 		  </Grid>
-          </CardBody>
-        </Card>
-	   </GridItem>
-      <GridItem xs={12}>
-      	
-		    <Card style={{marginTop:'5px',marginBottom:'5px'}}>
-		    <span style={{textAlign: "end",color:"#000000", paddingRight:"20px", paddingTop:"5px"}}>[ Data Count: {trackingList.length}건 / {totCnt}건 ]</span>
-				<CardBody style={{padding:'0px'}}>
+	  		</CardBody>
+	  		</Card>
+	   <Grid item xs={12} style={{textAlign:'-webkit-right'}}>
+	   <Grid item xs={12} sm={12} md={3} style={{textAlign:'center'}}>
+			<Tooltip title="B/L(B/K) Upload">
+				<Button 
+					color="info" //onClick={() => setAnchorE1(true)}  
+					component={Link} to="/svc/uploadbl"
+					endIcon={<Assignment />}
+					style={{paddingTop:'11px',width:'35%'}}>B/L(B/K)</Button>
+			</Tooltip>&nbsp;&nbsp;
+		<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>} style={{width:'55%'}} >Search</Button>							
+	   </Grid>
+	   </Grid>
+
+
+      				<span style={{color:"#000000"}}>[ Data Count: {trackingList.length}건 / {totCnt}건 ]</span>
+
 					<Table
 						tableHeaderColor="info"
 						tableRownum={numCnt}
 						tableData={trackingList}
-						onClickHandle ={handleAddRow}
+						onClickHandle ={(event)=>handleAddRow(event)}
 						onLoginPage ={handelLoginOpen}
-						store={store}
+						token={token}
+					    curpage = {selectCurpage}
 		            />
 		            {trackingList.length > 0?
 		            <div className={"fixed-plugin"} style={{top:'85%',width:'45px',right:'2%',borderRadius:'8px'}}>
@@ -505,9 +513,10 @@ useEffect(() => {
 					    </div>
 					</div>:null
 		            }
-				</CardBody>
-			</Card>
-		</GridItem>
+
+		</CardBody>
+		</Card>
+		   </GridItem>
 		   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
 			<AlertComponent 
 				onClose={handleAlertClose}

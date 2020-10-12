@@ -30,12 +30,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function Teurank(props) {
+	console.log(props)
 	const classes = useStyles();
 	const [store] = useState(props.param.store);
 	const [getData, setGetData] = useState([])
 
 	useEffect(() => {
-		Axios.post('/com/teuApi',{},{headers:{'Authorization':'Bearer '+store.token}}).then(
+		Axios.post('/com/teuApi',{},{headers:{'Authorization':'Bearer '+store}}).then(
 			res => {
 				setGetData(res.data);
 			}

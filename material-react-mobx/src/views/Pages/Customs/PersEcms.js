@@ -15,6 +15,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import MaskedInput from 'react-text-mask';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -48,7 +49,7 @@ function Alert(props) {
 
 export default function PersEcms(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+ // const [userStore] = useState(props.store);
   const classes = useStyless();
   const [persEcm, setPersEcm] = useState("");
   const [pltxNm, setPltxNm] = useState("");
@@ -94,7 +95,9 @@ export default function PersEcms(props) {
       AlertMessage("납세의무자명 자릿수가 너무 깁니다.","error");
       return;
     }
-    axios.post("/com/uniPassPersEcms",{persEcm:persEcm,pltxNm:pltxNm}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+    const token = userService.GetItem()?userService.GetItem().token:null;
+    if(token) {
+    axios.post("/com/uniPassPersEcms",{persEcm:persEcm,pltxNm:pltxNm}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
 
         if(res.data.message === "SUCCESS") {
@@ -112,6 +115,9 @@ export default function PersEcms(props) {
         	props.openLogin();
         }
         });
+  } else {
+	  props.openLogin();
+  }
   }
   return (
     <div>

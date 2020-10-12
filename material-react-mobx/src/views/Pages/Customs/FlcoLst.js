@@ -21,6 +21,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 const useStyless = makeStyles(theme => ({
 
@@ -79,7 +80,9 @@ export default function FlcoLst(props) {
   }
 
   const onSubmit = () => {
-    axios.post("/com/uniPassApiFlcoLst",{param:flcName}, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+	  const token = userService.GetItem()?userService.GetItem().token:null;
+	  if(token) {
+    axios.post("/com/uniPassApiFlcoLst",{param:flcName}, {headers:{'Authorization':'Bearer '+token}}).then(
       res => {
         if(res.data.message == "SUCCESS") {
           AlertMessage("조회가 완료되었습니다.","success");
@@ -98,6 +101,9 @@ export default function FlcoLst(props) {
         	props.openLogin();
         }
         });
+	  } else {
+		  props.openLogin();
+	  }
   }
   return (
     <div>

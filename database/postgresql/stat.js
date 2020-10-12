@@ -4,6 +4,7 @@ const pgsqlPool = require("../pool.js").pgsqlPool
 const basicauth = require("basic-auth");
 const multer = require('multer');
 const fs = require('fs');
+const sUser = require('../../models/sessionUser');
 
   const getStatInfo = (request, response) => {
 
@@ -42,29 +43,29 @@ const fs = require('fs');
                 "   and a.user_no = $1 \n"+
                 "   group by b.stat_month,b.carrier \n"+
                 " order by b.stat_month; \n",
-                values: [request.session.sUser.userno],
+                values: [sUser.userno],
 	        // rowMode: 'array',
         }
         console.log( sql )
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
-							release();
+							
 							response.status(200).json(result.rows);
 						} else {
 							// response.status(200).json([]);
-							release();
+							
 							response.status(200).json({error:"No Found Data"});
 						}
 					}
@@ -100,28 +101,28 @@ const fs = require('fs');
         	  "where user_no=$1 \n"+
         	  " and to_char(insert_date,'MM') = to_char(now(),'MM') \n"+
         	  " and ie_Type= $2 \n",
-              values: [request.session.sUser.userno,request.body.ietype],
+              values: [sUser.userno,request.body.ietype],
 	          rowMode: 'array',
       }
       console.log( sql )
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
-							release();
+							
 							response.status(200).json(result.rows);
 						} else {
-							release();
+							
 							response.status(200).json([]);
 						}
 					}
@@ -159,28 +160,28 @@ const fs = require('fs');
       		" and ie_type='I' \n"+
       		" group by stat_month)b \n"+
       		" on a.stat_month = b.stat_month \n",
-            values: [request.session.sUser.userno],
+            values: [sUser.userno],
 	          //rowMode: 'array',
     }
     console.log( sql )
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
-							release();
+							
 							response.status(200).json(result.rows);
 						} else {
-							release();
+							
 							response.status(200).json([]);
 						}
 
@@ -219,28 +220,28 @@ const fs = require('fs');
     		" and ie_type='E' \n"+
     		" group by stat_month)b \n"+
     		" on a.stat_month = b.stat_month \n",
-          values: [request.session.sUser.userno],
+          values: [sUser.userno],
 	          //rowMode: 'array',
   }
   console.log( sql )
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
-							release();
+							
 							response.status(200).json(result.rows);
 						} else {
-							release();
+							
 							response.status(200).json([]);
 						}
 					}
@@ -264,28 +265,28 @@ const fs = require('fs');
 		  		"   group by carrier \n" +
 		  		"   ) a where car_rank < 6 union all \n" +
 		  		"   select '6' as car_rank,'기타'as k_name \n",
-		  values: [request.session.sUser.userno],
+		  values: [sUser.userno],
 	          //rowMode: 'array',
 	    }
 console.log("getCarrierStatList SQL:",sql);
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
-							release();
+							
 							response.status(200).json(result.rows);
 						} else {
-							release();
+							
 							response.status(200).json([]);
 						}
 
@@ -300,7 +301,7 @@ console.log("getCarrierStatList SQL:",sql);
  
   
   const getCarrierStatInfo = (request, response) => {
-    const user_no = request.session.sUser.userno;
+    const user_no = sUser.userno;
 	let sql = "select case when b.stat_month ='01' then 'JAN' when b.stat_month ='02' then 'FEB' when b.stat_month ='03' then 'MAR' \n";
 	sql += " when b.stat_month ='04' then 'APR' when b.stat_month ='05' then 'MAY' when b.stat_month ='06' then 'JUN' \n";
 	sql += " when b.stat_month ='07' then 'JUL' when b.stat_month ='08' then 'AUG' when b.stat_month ='09' then 'SEP' \n";
@@ -331,7 +332,7 @@ console.log("getCarrierStatList SQL:",sql);
 	sql +=  		"       select '10' as stat_month union all select '11' as stat_month union all select '12' as stat_month )b \n";
 	sql +=  		"  on a.stat_month = b.stat_month \n";
 	sql +=  		"   order by b.stat_month \n";
-    //values: [request.session.sUser.userno],
+    //values: [sUser.userno],
     //rowMode: 'array',
     //}
     console.log("getCarrierStatInfo SQL:", sql);
@@ -340,26 +341,26 @@ console.log("getCarrierStatList SQL:",sql);
 	
 		if (err) {
 			console.log("getCarrierStatInfo err" + err);
-			release();
+			
 			response.status(400).send(err);
 		} else {
 			// console.log("getCarrierStatInfo query");
 			conn.query(sql, function(err, result) {
-		// done();
+		release();
 				if (err) {
 					console.log(err);
-					release();
+					
 					response.status(400).send(err);
 				} else {
 					console.log("getCarrierStatInfo result", result);
 
 					if (result != null) {
 						console.log("getCarrierStatInfo 200");
-						release();
+						
 						response.status(200).json(result.rows);
 					} else {
 					//   response.status(200).json([]);
-						release();
+						
 						response.status(200).json({ status: "error", error: "No Found Data" });
 					}
 				}
@@ -408,29 +409,29 @@ console.log("sql>>>>getImportingList");
 		  		"   			and b.mt_ingate_date is not null \n"+
 		  		"   			and b.mt_ingate_date between to_char(to_date(to_char(now(),'YYYYMMDD'),'YYYYMMDD')-7,'YYYYMMDD') \n"+
 		  		"  				and to_char(to_date(to_char(now(),'YYYYMMDD'),'YYYYMMDD'),'YYYYMMDD')) as gate \n",
-		  values: [request.session.sUser.userno, request.body.ietype],
+		  values: [sUser.userno, request.body.ietype],
 	          //rowMode: 'array',
 	    }
 	  
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 				conn.query(sql, function(err,result){
-					// done();
+					release();
 					if(err){
 						console.log(err);
-						release();
+						
 						response.status(400).send(err);
 					} else {
 						if(result != null) {
 							console.log("data::",result.rows);
-							release();
+							
 							response.status(200).json(result.rows[0]);
 						} else {
-							release();
+							
 							response.status(200).json([]);
 						}
 
@@ -479,29 +480,29 @@ console.log("sql>>>>getImportingList");
 	  		  		"   			and b.eta is not null \n"+
 	  		  		"   			and b.eta between to_char(to_date(to_char(now(),'YYYYMMDD'),'YYYYMMDD')-7,'YYYYMMDD') \n"+
 	  		  		"   			and to_char(to_date(to_char(now(),'YYYYMMDD'),'YYYYMMDD'),'YYYYMMDD')) as pod_arrival \n",
-	  		  values: [request.session.sUser.userno],
+	  		  values: [sUser.userno],
 	  	          //rowMode: 'array',
 	  	    }
 	  	    //console.log("sql>>>>",sql);
 	  	    pgsqlPool.connect(function(err,conn,release) {
 	  	        if(err){
 	  	            console.log("err" + err);
-	  	          release();
+	  	          
 	  	            response.status(400).send(err);
 	  	        } else {
 					conn.query(sql, function(err,result){
-						// done();
+						release();
 						if(err){
 							console.log(err);
-							release();
+							
 							response.status(400).send(err);
 						} else {
 							if(result != null) {
 								console.log("data::",result.rows);
-								release();
+								
 								response.status(200).json(result.rows[0]);
 							} else {
-								release();
+								
 								response.status(200).json([]);
 							}
 						}
@@ -513,7 +514,9 @@ console.log("sql>>>>getImportingList");
 	  	    });
 	  }
 
+
   
+    
 module.exports = {
 	getStatInfo,
 	getDemdetStatInfo,

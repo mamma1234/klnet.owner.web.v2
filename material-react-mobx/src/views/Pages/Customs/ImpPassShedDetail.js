@@ -10,7 +10,7 @@ import IconM from "@material-ui/core/Icon";
 import GridItem from "components/Grid/GridItem.js";
 import axios from 'axios';
 import { observer, inject} from 'mobx-react'; // 6.x
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const styles = {
     headerCell: {
       backgroundColor: "#f2fefd",
@@ -26,17 +26,19 @@ const styles = {
 
 const useStyles = makeStyles(styles);
   
-const ImpPassShedDetail = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => { 
+//const ImpPassShedDetail = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {
+export default function ImpPassShedDetail(props) {
   const classes = useStyles();  
-
+  const token = userService.GetItem()?userService.GetItem().token:null;
   const [shedInfoData,setShedInfoData] = useState([]);
 
   useEffect(() => {
-  
+    
 	const searchData = {
         snarSgn: props.snarSgn
       };
-	axios.post("/com/uniPassApiSelectShedInfo",searchData, {headers:{'Authorization':'Bearer '+userStore.token}})
+	if(token) {
+	axios.post("/com/uniPassApiSelectShedInfo",searchData, {headers:{'Authorization':'Bearer '+token}})
 	.then(res => {
 		if (res.data.message == "SUCCESS"){
 			setShedInfoData(res.data.infoData);
@@ -50,6 +52,9 @@ const ImpPassShedDetail = inject('userStore', 'trackStore')(observer(({ userStor
         	props.openLogin();
         }
         });
+	} else {
+		props.openLogin();
+	}
   },[]);
 
 
@@ -84,5 +89,5 @@ const ImpPassShedDetail = inject('userStore', 'trackStore')(observer(({ userStor
 	</Card>
   );
 }
-))
-export default ImpPassShedDetail;
+//))
+//export default ImpPassShedDetail;

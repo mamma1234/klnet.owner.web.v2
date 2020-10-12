@@ -16,6 +16,7 @@ import MaskedInput from 'react-text-mask';
 import SearchIcon from '@material-ui/icons/Search';
 import Assignment from "@material-ui/icons/Assignment";
 import CustomSelect from "components/CustomInput/CustomSelect.js";
+import {userService} from 'views/Pages/Login/Service/Service.js';
 const useStyless = makeStyles(theme => ({
 
   headerCell: {
@@ -86,7 +87,7 @@ function TextMaskCustom2(props) {
 
 export default function DclrCrfnVrfc(props) {
   const [severity, setSeverity] = useState("");
-  const [userStore] = useState(props.store);
+  //const [userStore] = useState(props.store);
   const classes = useStyless();
   const [impDclrCrfnPblsNo,setImpDclrCrfnPblsNo] = useState("");
   const [impDclrNo,setImpDclrNo] = useState("");
@@ -130,7 +131,7 @@ export default function DclrCrfnVrfc(props) {
   
   const onSubmit = () => {
 
-
+	  const token = userService.GetItem()?userService.GetItem().token:null;
       // let number = pltxIdfyNo.replace(/-/gi,'');
       // number = number.replace(/(\s*)/gi,'');
       // if(impDclrCrfnPblsNo.length === 0) {
@@ -208,6 +209,7 @@ export default function DclrCrfnVrfc(props) {
       //   AlertMessage("총 세액합계의 자릿수가 너무 깁니다.","error");
       //   return;
       // }   
+	  if(token) {
       axios.post("/com/uniPassDclrCrfnVrfc",{
         impDclrCrfnPblsNo:impDclrCrfnPblsNo,
         impDclrNo:impDclrNo,
@@ -218,7 +220,7 @@ export default function DclrCrfnVrfc(props) {
         dclrWghtUtCd:dclrWghtUtCd,
         txPrcWncrTamt:txPrcWncrTamt,
         impPayQxmt:impPayQxmt,
-      }, {headers:{'Authorization':'Bearer '+userStore.token}}).then(
+      }, {headers:{'Authorization':'Bearer '+token}}).then(
           res => {
             if(res.data) {
               AlertMessage("조회가 완료되었습니다.","success");
@@ -232,6 +234,9 @@ export default function DclrCrfnVrfc(props) {
               props.openLogin();
             }
       });
+	  } else {
+		  props.openLogin();
+	  }
     
   }
   return (

@@ -21,7 +21,7 @@ import Public from "@material-ui/icons/Public";
 import LinkIcon from "@material-ui/icons/Link";
 import LocalShipping from "@material-ui/icons/LocalShipping";
 import ImportExport from "@material-ui/icons/ImportExport";
-
+import SettingIcon from '@material-ui/icons/Settings'
 //import Build from "@material-ui/icons/Build";
 //import ListIcon from "@material-ui/icons/List";
 //import People from "@material-ui/icons/People";
@@ -73,7 +73,7 @@ import LocationOn from "@material-ui/icons/LocationOnOutlined";
 import AttachMoney from "@material-ui/icons/AttachMoneyOutlined";
 import Store from "@material-ui/icons/StoreOutlined";
 import AccountCircle from "@material-ui/icons/AccountCircleOutlined";
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 
 import ShoppingBasket from "@material-ui/icons/ShoppingBasketOutlined";
 
@@ -82,11 +82,11 @@ import Error from "@material-ui/icons/ErrorOutlined";
 const useStyles = makeStyles(styles);
 
 
-// export default function HeaderLinks(props) {
-const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {   
+ export default function HeaderLinks(props) {
+//const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, trackStore, ...props }) => {   
 //console.log("header prop:",props);
 	const { dropdownHoverColor ,isAuthenticated, userData} = props;
-
+	const localStorageCheck =  userService.GetItem();
   const easeInOutQuad = (t, b, c, d) => {
     t /= d / 2;
     if (t < 1) return (c / 2) * t * t + b;
@@ -131,14 +131,14 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
    
   const logout = () => {
     //console.log(">>>logout button click");
-	    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+userStore.token}} )
+	    axios.get("/auth/logout",{headers:{'Authorization':'Bearer '+localStorageCheck.token}} )
 	    .then(res => {
 	        if (res.data.message){
 	        	alert(res.data.message);
 	        } else {
-	        	localStorage.removeItem('plismplus');
-                userStore.setUser('');
-                userStore.setToken('');
+	        	userService.removeToken();
+                //userStore.setUser('');
+                //userStore.setToken('');
 	        	props.logOut();
 	        }
 	    })
@@ -150,8 +150,8 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
   }
   
   const clean = () => {
-	  userStore.setUser('');
-	  userStore.setToken('');
+	  //userStore.setUser('');
+	  //userStore.setToken('');
   }
 
   return (
@@ -306,7 +306,12 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
           ]}
         />
       </ListItem>
-        
+
+      <ListItem className={classes.listItem}>
+	     <Link   to="/svc/setting"  className={classes.dropdownLink}>
+       <SettingIcon className={classes.dropdownIcons} /> Setting
+      </Link>
+	    </ListItem>        
       {isAuthenticated==false?<div>
 	  <ListItem className={classes.listItem}>
 	     <Link to="#" 
@@ -336,9 +341,9 @@ const HeaderLinks = inject('userStore', 'trackStore')(observer(({ userStore, tra
     </List>
   );
 }
-))
+//))
 
-export default HeaderLinks;
+//export default HeaderLinks;
 
 HeaderLinks.defaultProps = {
   hoverColor: "primary"

@@ -12,8 +12,10 @@ const { Pool } = require('pg');
 //try {
 const pool = new Pool({
     connectionString:  "postgresql://owner:!ghkwn_20@172.19.1.22:5432/owner",
-    max: 30,
-    min: 10
+    max: 20,
+    min: 4,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 10000
 });
 
 

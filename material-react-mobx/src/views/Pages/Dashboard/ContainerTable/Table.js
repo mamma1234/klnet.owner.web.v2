@@ -19,9 +19,10 @@ export default function CustomTable(props) {
   const [tableData , setTableData] = React.useState([]);
   
   React.useEffect(() => {
-		  axios.post("/com/getDemdetStatInfo",{ietype:ietype},{headers:{'Authorization':'Bearer '+props.store.token}})
+
+		  axios.post("/com/getDemdetStatInfo",{ietype:ietype},{headers:{'Authorization':'Bearer '+props.token}})
 	  	  .then(setTableData([]))
-		  .then(res => {console.log("data:",res.data);setTableData(res.data);});
+		  .then(res => {setTableData(res.data);});
 	    return () => {
 	      console.log('cleanup');
 	     // window.removeEventListener("touchmove",handleTouchMove);

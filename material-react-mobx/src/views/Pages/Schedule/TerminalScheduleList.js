@@ -30,7 +30,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import SearchIcon from '@material-ui/icons/Search';
-
+import {userService} from 'views/Pages/Login/Service/Service.js';
 //import CardIcon from "components/Card/CardIcon.js";
 // other import
 import axios from 'axios';
@@ -158,8 +158,8 @@ class Clock extends React.Component {
 
 export default function ScheduleList(props) {
 
-  const {detailParam,store} = props;
-  console.log(">>>>admin:",store);
+  const {detailParam} = props;
+  //console.log(">>>>admin:",store);
   //const [carrierCode,setCarrierCode] = useState("");
   const [vesselName,setVesselName] = useState(detailParam?detailParam.vsl_name:"");
   const [terSchLogData,setTerSchLogData] = useState([]);
@@ -173,7 +173,7 @@ export default function ScheduleList(props) {
   const [selectData,setSelectData] = useState([]);
   const [terminal,setTerminal] = useState("");
   const [value,setValue] = useState([]);
-  const [displayYn,setDisplayYn] = useState(detailParam?"none":"true");
+  //const [displayYn,setDisplayYn] = useState(detailParam?"none":"true");
   const [state, setState] = React.useState({
     checkedA: false,
   });
@@ -208,19 +208,20 @@ export default function ScheduleList(props) {
   
   useEffect(() => {
 	console.log('effect');
+	const token = userService.GetItem()?userService.GetItem().token:null;
 	//debugger;
-	if(store.token) {
-		axios.post("/sch/getTerminalCodeList",{area},{headers:{'Authorization':'Bearer '+store.token}})
+	//if(token) {
+		axios.post("/sch/getTerminalCodeList",{area},{headers:{'Authorization':'Bearer '+token}})
 		.then(res => setTerminalCode(res.data)).then(setValue([]))
 		//.then(res => console.log(JSON.stringify(res.data)));
 		.catch(err => {
-			if(err.response.status === 403||err.response.status === 401) {
+			/*if(err.response.status === 403||err.response.status === 401) {
 				props.openLogin();
-			}
+			}*/
 		});
-	} else {
+/*	} else {
 		props.openLogin();
-	}
+	}*/
 	return () => {
 	  console.log('cleanup');
 	};
@@ -249,8 +250,8 @@ export default function ScheduleList(props) {
 }
   
   const onSubmit = () => {
-
-	if(store.token) {
+	const token = userService.GetItem()?userService.GetItem().token:null;
+	if(token) {
 			  axios.post("/sch/getTerminalScheduleList",{
 			      vesselName:vesselName,
 				  startDate:moment(sDate).format('YYYYMMDD'),
@@ -258,7 +259,7 @@ export default function ScheduleList(props) {
 				  terminal:terminal,
 				  working:state.checkedA,
 				  area:area
-				},{headers:{'Authorization':'Bearer '+store.token}})
+				},{headers:{'Authorization':'Bearer '+token}})
 				.then(setTerSchLogData([]))
 			    .then(res => setTerSchLogData(res.data)).then(setUpdateDate(new Date())).then(setRemainTime("reset"))
 			    .catch(err => {
@@ -318,128 +319,134 @@ if(remainTime < 0) {
   const classes = useStyles();
   
   return (
-    <GridContainer>
-    	<GridItem xs={12} sm={12} md={12}>
-        	<Card style={{marginBottom:'0px'}}>
+        <Card style={{marginBottom:'0px'}}>
   			<CardHeader color="info" icon >
 			<CardIcon color="info" style={{padding:'0'}}>
 				<Assignment />
 			</CardIcon>
-			<h4 className={classes.cardTitleBlack}>Terminal Schedule</h4>
 		</CardHeader>
-          	<CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
-          		<Grid item xs={12} sm={9} md={12}>
-			     	<Grid container spacing={1}>
-					 <Grid item xs={12} md={'auto'}>
-					 <FormControl fullWidth>
-									<InputLabel >Port</InputLabel>
-									<Select 
-									native
-									id = "areaSelect"
-									//disabled={tapNum != 0}
-									value={area}
-									label=""
-									onChange={handleArea}
-									>
-									<option value="PUS">부산</option>
-									<option value="INC">인천</option>
-									<option value="KAN">광양</option>
-									<option value="PTK">평택</option>
-									<option value="KUV">군산</option>
-									<option value="USN">울산</option>
-									<option value="GIN">경인</option>
-									<option value="TSN">대산</option>
-									<option value="KPO">포항</option>
-									<option value="MAS">마산</option>
-									{/* <option value="">DONGHAE</option> */}
-									{/* <option value="MOK">MOKPO</option> */}
-									</Select>
-									</FormControl>
-									</Grid>
-									<Grid item xs={12} md={3} >
-									<Autocomplete 
-										size="medium"
-										//disabled={tapNum == 2}
-										multiple
-										options = {selectData}
-										disableCloseOnSelect
-										limitTags={1}
-										getOptionLabel = { option => option.name}
-										id="terminalCode"
-										value={value}
-										onChange={onTerminalChange}
-										renderTags={(value, getTagProps) =>
-											value.map((option, index) => (
-											  <Chip
-												variant="outlined"
-												label={option.name}
-												size="small"
-												{...getTagProps({ index })}
-											  />
-											))
-										  }
-					        			renderInput={params => (
-					        				<TextField {...params} label="Terminal" fullWidth/>
-										)}
-										renderOption={(option, { selected }) => (
-											<React.Fragment>
-											  <Checkbox   size="small" 
-												icon={icon}
-												checkedIcon={checkedIcon}
-												style={{ marginRight: 8}}
-												checked={selected}
-											  />
-											  {option.name}
-											</React.Fragment>
-										  )}
-					        		/>
-									</Grid>
-						<Grid item xs={12} md={2}>
-						 <TextField id="cntrNo" label="선박명" onChange={event => setVesselName(event.target.value)} value={vesselName} fullWidth />
-						 </Grid>
-			     		<Grid item xs={12} md={2}>
+        <CardBody>
+        	<Card style={{marginTop:'0',marginBottom:'5px'}}>
+        		<CardBody style={{paddingTop:'10px',paddingBottom:'10px'}}>
+	          		<Grid item xs={12} sm={9} md={12}>
+				     	<Grid container spacing={1}>
+						 <Grid item xs={12} md={'auto'}>
+						 <FormControl fullWidth>
+										<InputLabel >Port</InputLabel>
+										<Select 
+										native
+										id = "areaSelect"
+										//disabled={tapNum != 0}
+										value={area}
+										label=""
+										onChange={handleArea}
+										>
+										<option value="PUS">부산</option>
+										<option value="INC">인천</option>
+										<option value="KAN">광양</option>
+										<option value="PTK">평택</option>
+										<option value="KUV">군산</option>
+										<option value="USN">울산</option>
+										<option value="GIN">경인</option>
+										<option value="TSN">대산</option>
+										<option value="KPO">포항</option>
+										<option value="MAS">마산</option>
+										{/* <option value="">DONGHAE</option> */}
+										{/* <option value="MOK">MOKPO</option> */}
+										</Select>
+										</FormControl>
+										</Grid>
+										<Grid item xs={12} md={3} >
+										<Autocomplete 
+											size="medium"
+											//disabled={tapNum == 2}
+											multiple
+											options = {selectData}
+											disableCloseOnSelect
+											limitTags={1}
+											getOptionLabel = { option => option.name}
+											id="terminalCode"
+											value={value}
+											onChange={onTerminalChange}
+											renderTags={(value, getTagProps) =>
+												value.map((option, index) => (
+												  <Chip
+													variant="outlined"
+													label={option.name}
+													size="small"
+													{...getTagProps({ index })}
+												  />
+												))
+											  }
+						        			renderInput={params => (
+						        				<TextField {...params} label="Terminal" fullWidth/>
+											)}
+											renderOption={(option, { selected }) => (
+												<React.Fragment>
+												  <Checkbox   size="small" 
+													icon={icon}
+													checkedIcon={checkedIcon}
+													style={{ marginRight: 8}}
+													checked={selected}
+												  />
+												  {option.name}
+												</React.Fragment>
+											  )}
+						        		/>
+										</Grid>
+							<Grid item xs={12} md={2}>
+							 <TextField id="cntrNo" label="선박명" onChange={event => setVesselName(event.target.value)} value={vesselName} fullWidth />
+							 </Grid>
+				     		<Grid item xs={12} md={2}>
+								 <CalendarBox
+						        			labelText ="도착예정일(ETB)"
+						      				id="portDate"
+						      				format="yyyy-MM-dd"
+						      				setValue={sDate}
+						        			onChangeValue={date => setSDate(date)}
+						        			formControlProps={{fullWidth: true}}
+						        />
+				     		</Grid>	
+				     		<Grid item xs={12} md={2}>
 							 <CalendarBox
-					        			labelText ="도착예정일(ETB)"
-					      				id="portDate"
-					      				format="yyyy-MM-dd"
-					      				setValue={sDate}
-					        			onChangeValue={date => setSDate(date)}
-					        			formControlProps={{fullWidth: true}}
-					        />
-			     		</Grid>	
-			     		<Grid item xs={12} md={2}>
-						 <CalendarBox
-					        			labelText =" "
-					        			id="portDate"
-					        			format="yyyy-MM-dd"
-					        			setValue={eDate}
-					        		    onChangeValue={
-											date => setEDate(date)
-										}
-					        			formControlProps={{fullWidth: true}}
-					        		/>
-						</Grid>
-						<Grid item xs={12} md={1}>
-						<FormControlLabel style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '0px',paddingRight: '0px'}}
-								control={
-								<Checkbox checked={state.checkedA} color="default" size="small"
-								onChange={handleChange} name="checkedA" />}
-								label="작업중">
-						</FormControlLabel>
-						</Grid>
-						<Grid item xs={12} md={1} >
-							<Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}
-							fullWidth>Search</Button>			
-						</Grid>
-		      		</Grid>
-		      	</Grid>
-		     </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem xs={12}>
-	  <Card style={{marginBottom:'0px',marginTop:'10px',display:displayYn}}>
-	  <CardBody style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
-	  <Grid item xs={12} sm={9} md={12}>
+						        			labelText =" "
+						        			id="portDate"
+						        			format="yyyy-MM-dd"
+						        			setValue={eDate}
+						        		    onChangeValue={
+												date => setEDate(date)
+											}
+						        			formControlProps={{fullWidth: true}}
+						        		/>
+							</Grid>
+							<Grid item xs={12} md={2}>
+							<FormControlLabel style={{paddingBottom: '0px',paddingTop: '10px',paddingLeft: '0px',paddingRight: '0px'}}
+									control={
+									<Checkbox checked={state.checkedA} color="default" size="small"
+									onChange={handleChange} name="checkedA" />}
+									label="작업중">
+							</FormControlLabel>
+							</Grid>
+			      		</Grid>
+			      	</Grid>
+			     </CardBody>
+			   </Card>
+      
+       <Grid item xs={12} style={{paddingBottom:'10px',textAlign:'-webkit-right'}}>
+	    	<Grid item xs={12} sm={3} md={2} style={{textAlign:'center'}}>
+		      {/* <Button color="info" onClick = {onSubmit} startIcon={<CancelIcon/>}>초기화</Button> */}
+		      {/* <Button color="info" onClick = {onSubmit}  >조회</Button>*/}
+		      <Button color="info" onClick = {onSubmit} endIcon={<SearchIcon/>}
+				fullWidth>Search</Button>	
+		      {/* <Button color="info" >삭제</Button>
+		      <Button color="info" //onClick = {Download} 
+		        id='btnExport' >엑셀다운로드</Button> */}
+		    </Grid>
+	    </Grid>
+      
+
+
+	  {detailParam?null:(<Grid item xs={12} sm={9} md={12}>
 			     	<Grid container spacing={1}>
 	  <Grid item xs={12} md={2}>			
 					 <FormControl fullWidth>
@@ -462,15 +469,14 @@ if(remainTime < 0) {
 										</Grid>
 										{/* <Grid item xs={12} md={5}></Grid> */}
 										<Grid item xs={12} md={1} >
-							<Button color="info" component={Link} to={{pathname:"/svc/customImp",search:"?gubun="+ gubun +"&param="+ uniParam}} endIcon={<SearchIcon/>}
+							<Button color="info" component={Link} to={{pathname:"/svc/unipassapi",search:"?gubun="+ gubun +"&param="+ uniParam}} endIcon={<SearchIcon/>}
 							fullWidth>Search</Button>							
 						</Grid>
 										</Grid>
-										</Grid>
-	  </CardBody>
-		  </Card>
-	  <Card style={{marginBottom:'0px',marginTop:'10px'}}>
-	  <CardBody style={{paddingBottom: '10px',paddingTop: '10px',paddingLeft: '15px',paddingRight: '15px'}}>
+										</Grid>)}
+
+		  
+
 	  <Grid item xs={12} sm={9} md={12}>
 	  	<Grid container spacing={1}>
 	  		<Grid item xs={12} md={3} style={{paddingTop: '10px'}}>최종 업데이트 : {moment(updateDate).format('YYYY-MM-DD HH:mm')}</Grid>
@@ -497,13 +503,11 @@ if(remainTime < 0) {
 	    </Grid>
 	</Grid>
 	  <TerminalSchTable
-	                      tableHeaderColor="info"
-	                      tableHead={[  "Port","Terminal","선박명","항차","접안예정일시","Closing Time","출항예정일시","선사","양하","적하","Shift","상태"]}
-	                      tableData={terSchLogData}
-	                  />
+	  	tableHeaderColor="info"
+	    tableHead={[  "Port","Terminal","선박명","항차","접안예정일시","Closing Time","출항예정일시","선사","양하","적하","Shift","상태"]}
+	    tableData={terSchLogData}
+	  />
 		</CardBody>
 		</Card>
-		</GridItem>
-    </GridContainer>
   );
 }

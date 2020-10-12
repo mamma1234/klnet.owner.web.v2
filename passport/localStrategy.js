@@ -16,7 +16,7 @@ module.exports = (passport) => {
         passReqToCallback: true
     }, async (req, id, password, done) => {
         console.log('Sign (localStrategy.js) provider:email:', id, 'req:',req.body);
-    	req.session.sUser = null;
+    	//req.session.sUser = null;
     	
     	try {
     		
@@ -25,10 +25,11 @@ module.exports = (passport) => {
     			const inputpassword = crypto.pbkdf2Sync(req.body.password, 'salt', 100000, 64, 'sha512').toString('hex');
 
             	if(id) {  
-            	    pgsqlPool.connect(function(err,conn) {
+            	    pgsqlPool.connect(function(err,conn,release) {
 
             	        if(err){
             	            console.log("err" + err);
+            	            //release();
             	        }
             	        
             	        const sql = {
@@ -39,13 +40,14 @@ module.exports = (passport) => {
             	    	    }
 
             	        conn.query(sql, function(err,result){
-            	        	//done();
+            	        	
             	            if(err){
+            	            	release();
             	                console.log(err);
             	            }
 
             	            if(result.rowCount > 0) {
-            	            	conn.release();
+            	            	release();
             	            	console.log("이미 등록되어 있음.");
             	            	done(null, false, { message: 'Use Another user id Please.(Dup Check error)' });
             	            } else {
@@ -63,6 +65,7 @@ module.exports = (passport) => {
             	            	conn.query(setsql, function(err,result){
             	            		
             	            		 if(err){
+            	            			    release();
             	            	            console.log("err" + err);
             	            	        }
             	            		 
@@ -76,14 +79,13 @@ module.exports = (passport) => {
                               	    	    }
                      	            	 
                      	            	 conn.query(loginsql, function(err,result){
-                              	        	//done();
+                     	            		release();
                               	            if(err){
                               	                console.log(err);
                               	            }
                      	            	
                               	           if(result.rowCount > 0) {
                               	        	 console.log("[success] user data check: ok");
-                              	        	conn.release();
          	 	                            sUser.provider = 'local';
          		                            sUser.userid = result.rows[0].local_id;
          		                            sUser.userno = result.rows[0].user_no;
@@ -91,7 +93,7 @@ module.exports = (passport) => {
          		                            sUser.displayName = 'web';
          		                            sUser.email = result.rows[0].user_email;
          		                            sUser.usertype = result.rows[0].user_type;
-         	                            	req.session.sUser = sUser;
+         	                            	//req.session.sUser = sUser;
          	               	                done(null, sUser);
                               	           } else {
                             	            	console.log("등록되어 있지 않음.");
@@ -99,6 +101,7 @@ module.exports = (passport) => {
                               	           }
                      	            	 }); 
             	            		 } else {
+            	            			 release();
             	            			 done(null, sUser,{ message: 'Contact the administrator.(System error:Data insert fail)' });
             	            		 }
             	            		 
@@ -117,9 +120,10 @@ module.exports = (passport) => {
 
             	if(id) {  
 	    			
-            	    pgsqlPool.connect(function(err,conn) {
+            	    pgsqlPool.connect(function(err,conn,release) {
             	    	
             	        if(err){
+            	        	release();
             	            console.log("err" + err);
             	        }
 
@@ -130,8 +134,9 @@ module.exports = (passport) => {
             	    	        values: [id]
             	    	    }
             	        conn.query(sql1, function(err,result) {
-            	        	//done();
+            	        	
             	            if(err){
+            	            	release();
             	                console.log(err);
             	            }
 
@@ -164,12 +169,13 @@ module.exports = (passport) => {
 			      	    	              sql2 += "limit 1 ";
 
 					      	        conn.query(sql2, function(err,result) {
-					      	        	//done();
+					      	        	
 					      	            if(err){
 					      	                console.log(err);
 					      	            }
 					
 					      	            if(result.rowCount > 0) {
+					      	            	release();
 					      	            	console.log("3. [error] klnet id find: ok / socail dup error");
 					      	            	done(null, sUser, { message: '소셜 정보가 다른 아이디에  등록되어 있음.' });
 					      	            } else {
@@ -188,8 +194,9 @@ module.exports = (passport) => {
 					      	            	   updatesql+="WHERE upper(local_id)=upper('"+id+"') \n";
 	
 			            	            	conn.query(updatesql, function(err,result) {
-			                    	        	//done();
+			            	            		
 			                    	            if(err){
+			                    	            	release();
 			                    	                console.log(err);
 			                    	                done(null, sUser, { message: 'DataBase error' });
 			                    	            }
@@ -228,19 +235,19 @@ module.exports = (passport) => {
 			                    	            	   }   
 
 			                    	            	        conn.query(socialsql, function(err,result) {
+			                    	            	        	release();
 			                    	            	        	 if(err){
 			                    	             	                console.log(err);
 			                    	             	               done(null, sUser, { message: 'DataBase error' });
 			                    	             	            }
 			                    	            	        	 if(result.rowCount > 0) {
-
 			                         	            				sUser.provider = req.body.provider;
 			                         	                            sUser.userid = result.rows[0].user_id;
 			                         	                            sUser.userno = result.rows[0].user_no;
 			                         	                            sUser.username = result.rows[0].user_name;
 			                         	                            sUser.email = result.rows[0].user_email;
 			                         	                            sUser.usertype = result.rows[0].user_type;
-			                                                     	req.session.sUser = sUser;
+			                                                     	//req.session.sUser = sUser;
 			                                        	            done(null, sUser);
 			                    	            	        	 } else {
 			                    	            	        		 done(null, sUser, { message: 'DataBase error' });
@@ -248,6 +255,7 @@ module.exports = (passport) => {
 			                    	            	        });
 
 			                    	            } else {
+			                    	            	release();
 			                    	            	done(null, sUser, { message: 'DataBase error' });
 			                    	            }
 					      	               }); //update conn
@@ -255,11 +263,13 @@ module.exports = (passport) => {
 					      	            
 					      	        });
 	            	            } else {
+	            	            	release();
 	            	            	//console.log("2-1.[error] klnet id check: not found");
 	            	            	console.log("2-2.[error] klnet login check: error");
 	            	            	done(null, false, { message: '아이디 또는 비밀번호가 잘못 되었습니다.' });
 	            	            }
             	            } else {
+            	            	release();
             	            	console.log("2-1.[error] klnet id check: not found");
             	            	done(null, false, { message: '아이디 또는 비밀번호가 잘못 되었습니다.' });
             	            }
@@ -278,9 +288,10 @@ module.exports = (passport) => {
 
             	if(id) {  
 	    			
-            	    pgsqlPool.connect(function(err,conn) {
+            	    pgsqlPool.connect(function(err,conn,release) {
             	    	
             	        if(err){
+            	        	release();
             	            console.log("err" + err);
             	        }
 
@@ -291,8 +302,9 @@ module.exports = (passport) => {
             	    	        values: [id]
             	    	    }
             	        conn.query(sql1, function(err,result) {
-            	        	//done();
+
             	            if(err){
+            	            	release();
             	                console.log(err);
             	            }
 
@@ -318,12 +330,14 @@ module.exports = (passport) => {
 			      	    	              sql2 += "limit 1 ";
 
 					      	        conn.query(sql2, function(err,result) {
-					      	        	//done();
+					      	        	
 					      	            if(err){
+					      	            	release();
 					      	                console.log(err);
 					      	            }
 					
 					      	            if(result.rowCount > 0) {
+					      	            	release();
 					      	            	console.log("3. [error] klnet id find: ok / socail dup error");
 					      	            	done(null, sUser, { message: '소셜 정보가 다른 아이디에  등록되어 있음.' });
 					      	            } else {
@@ -338,9 +352,10 @@ module.exports = (passport) => {
 			            	                   }
 			            	            	
 			            	            	conn.query(setsql, function(err,result) {
-			                    	        	//done();
+			            	            		
 			                    	            if(err){
 			                    	                console.log(err);
+			                    	                release();
 			                    	                done(null, sUser, { message: 'DataBase error' });
 			                    	            }
 
@@ -377,7 +392,9 @@ module.exports = (passport) => {
 			                    	            	   }   
 
 			                    	            	        conn.query(socialsql, function(err,result) {
+			                    	            	        	release();
 			                    	            	        	 if(err){
+			                    	            	        		 
 			                    	             	                console.log(err);
 			                    	             	               done(null, sUser, { message: 'DataBase error' });
 			                    	             	            }
@@ -388,7 +405,7 @@ module.exports = (passport) => {
 			                         	                            sUser.username = result.rows[0].user_name;
 			                         	                            sUser.email = result.rows[0].user_email;
 			                         	                            sUser.usertype = result.rows[0].user_type;
-			                                                     	req.session.sUser = sUser;
+			                                                     	//req.session.sUser = sUser;
 			                                        	            done(null, sUser);
 			                    	            	        	 } else {
 			                    	            	        		 done(null, sUser, { message: 'DataBase error' });
@@ -396,6 +413,7 @@ module.exports = (passport) => {
 			                    	            	        });
 
 			                    	            } else {
+			                    	            	release();
 			                    	            	done(null, sUser, { message: 'DataBase error' });
 			                    	            }
 					      	               }); //update conn
@@ -404,6 +422,7 @@ module.exports = (passport) => {
 					      	        });
 
             	            } else {
+            	            	release();
             	            	console.log("2-1.[error] klnet id check: used");
             	            	done(null, false, { message: '이미 등록된 아이디 입니다.' });
             	            }
@@ -433,6 +452,7 @@ module.exports = (passport) => {
     }, async (req, userid, password, done) => {
                 console.log('(localStrategy.js) userid:', userid, 'password:', password);
                 const inputpassword = crypto.pbkdf2Sync(password, 'salt', 100000, 64, 'sha512').toString('hex');
+                console.log(inputpassword);
                 
             try {
 
@@ -466,15 +486,11 @@ module.exports = (passport) => {
 		                await pgsqlPool.connect(function(err,conn, release) { 
 		                    if(err){
 		                        console.log("err" + err);
-								if (conn)
-								{
-									release();
-								}
 		                    } else {
                             console.log("2.DB Select");
 		                    conn.query("select  * from own_comp_user where upper(local_id) = upper('"+userid+"')", function(err,result) {
+		                    	release();
 		                        if(err){
-		                        	release();
 		                            console.log(err);
 		                        } else {
 			                        if(result.rows[0] != null) {
@@ -494,17 +510,14 @@ module.exports = (passport) => {
 			    	                            sUser.displayName = 'web',
 			    	                            sUser.email = result.rows[0].user_email;
 			    	                            sUser.usertype = result.rows[0].user_type;
-			                                	req.session.sUser = sUser;
-			                                	release();
+			                                	//req.session.sUser = sUser;
 			                                    done(null, sUser);
 			                                 } else {
 			                                    console.log('아이디 또는 비밀번호가 일치하지 않습니다.');
-			                                    release();
 			                                    done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
 			                                 }   
 			                        } else {
 			                            console.log('가입되지 않은 회원입니다.');
-			                            release();
 			                            done(null, false, { message: '아이디 또는 비밀번호가 일치하지 않습니다.' });
 			                        }
 		                        }

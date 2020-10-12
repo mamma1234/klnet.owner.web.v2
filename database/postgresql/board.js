@@ -4,6 +4,7 @@ const pgsqlPool = require("../pool.js").pgsqlPool
 const basicauth = require("basic-auth");
 const multer = require('multer');
 const fs = require('fs');
+const sUser = require('../../models/sessionUser');
 
   const getBoardList = (request, response) => {
       //순번","제목", "작성자", "조회수", "작성일"
@@ -17,22 +18,19 @@ const fs = require('fs');
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
+	            
 	            response.status(400).send(err);
 	        } else {
 
                 conn.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
-                        	release();
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
                             response.status(200).json([]);
                         }
                     }
@@ -56,21 +54,17 @@ const fs = require('fs');
 	    pgsqlPool.connect(function(err,conn,release) {
 	        if(err){
 	            console.log("err" + err);
-	            release();
 	            response.status(400).send(err);
 	        } else {
                 conn.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
-                        	release();
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
                             response.status(200).json([]);
                         }
                     }
@@ -99,23 +93,19 @@ const fs = require('fs');
       pgsqlPool.connect(function(err,conn,release) {
           if(err){
               console.log("err" + err);
-              release();
               response.status(400).send(err);
           } else {
 
               conn.query(sql, function(err,result){
-                  //done();
+            	  release();
                   if(err){
                       console.log(err);
-                      release();
                       response.status(400).send(err);
                   } else {
                       if(result != null) {
                           console.log(result.rows);
-                          release();
                           response.status(200).json(result.rows);
                       } else {
-                    	  release();
                           response.status(200).json([]);
                       }
                   }
@@ -138,7 +128,6 @@ const fs = require('fs');
         pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else  {
 
@@ -154,7 +143,7 @@ const fs = require('fs');
     const saveBoard = (request, response) => {
 
         let sql = {};
-        if(request.session.sUser == undefined){
+        if(sUser == undefined){
             response.status(400).send("error");
         } else{
             if(request.body.board_id != null && request.body.board_id != undefined && request.body.board_id != ""){
@@ -176,7 +165,7 @@ const fs = require('fs');
                 +" (user_no, title, content, hit_count, author_name, insert_date) "
                 +" values ( $1, $2, $3, 0, $4, now() )"
                 + " returning board_id ",
-                values: [request.session.sUser.userno,
+                values: [sUser.userno,
                         request.body.title,
                         request.body.content,
                         request.body.author_name],
@@ -186,27 +175,23 @@ const fs = require('fs');
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
                     response.status(400).send(err);
                 } else {
 
                     conn.query(sql, function(err,result){
-                        // done();
+                    	release();
                         if(err){
                             console.log(err);
-                            release();
                             response.status(400).send(err);
                         } else {
                             if(result != null) {
                                 if( request.body.fileStateList != undefined && request.body.fileStateList != null ) {
                                     deleteAttach( request, response, result.rows );
                                 }else {
-                                	release();
                                     response.status(200).json(result.rows);
                                 }
         
                             } else {
-                            	release();
                                 response.status(200).json([]);
                             }
                         }
@@ -227,21 +212,17 @@ const fs = require('fs');
       pgsqlPool.connect(function(err,conn,release) {
           if(err){
               console.log("err" + err);
-              release();
               response.status(400).send(err);
           } else {
               conn.query(sql, function(err,result){
-                  //done();
+            	  release();
                   if(err){
                       console.log(err);
-                      release();
                       response.status(400).send(err);
                   } else {
                       if(result != null) {
-                    	  release();
                           response.status(200).json(result.rows);
                       } else {
-                    	  release();
                           response.status(200).json([]);
                       }
                   }
@@ -274,25 +255,21 @@ const fs = require('fs');
           pgsqlPool.connect(function(err,conn,release) {
               if(err){
                   console.log("err" + err);
-                  release();
                   response.status(400).send(err);
               } else {
                   conn.query(sql, function(err,result){
-                      //done();
+                	  release();
                       if(err){
                           console.log(err);
-                          release();
                           response.status(400).send(err);
                       } else {
                           if(result != null) {
                               for(var i = 0; i < result.rows.length; i++){
                                   result.rows[i]['content'] = result.rows[i]['content'].split('\n');
                               }
-                              release();
                               console.log(result.rows[0]['content']);
                               response.status(200).json(result.rows);
                           } else {
-                        	  release();
                               response.status(200).json([]);
                           }
                       }
@@ -388,14 +365,12 @@ const fs = require('fs');
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     conn.query(sql, function(err,result){
-                        //done();
+                    	release();
                         if(err){
                             console.log("err" + err);
-                            release();
                             response.status(400).send(err);
                         }
                     });
@@ -418,22 +393,18 @@ const fs = require('fs');
         pgsqlPool.connect(function(err,conn,release) {
             if(err){
                 console.log("err" + err);
-                release();
                 response.status(400).send(err);
             } else {
                 conn.query(sql, function(err,result){
-                    // done();
+                	release();
                     if(err){
                         console.log(err);
-                        release();
                         response.status(400).send(err);
                     } else {
                         if(result != null) {
                             console.log(result.rows);
-                            release();
                             response.status(200).json(result.rows);
                         } else {
-                        	release();
                             response.status(200).json([]);
                         }
                     }
@@ -467,14 +438,12 @@ const fs = require('fs');
             pgsqlPool.connect(function(err,conn,release) {
                 if(err){
                     console.log("err" + err);
-                    release();
                     response.status(400).send(err);
                 } else {
                     conn.query(sql, function(err,result){
-                        // done();
+                    	release();
                         if(err){
                             console.log(err);
-                            release();
                             response.status(400).send(err);
                         } else {
                             if(result != null) {
@@ -484,10 +453,8 @@ const fs = require('fs');
                                         response.status(400).send(error);
                                     });
                                 });*/
-                            	release();
                                 response.status(200).json(rows);
                             } else {
-                            	release();
                                 response.status(200).json(rows);
                             }
                         }
@@ -496,7 +463,6 @@ const fs = require('fs');
         
             });
         } else{
-        	release();
             response.status(200).json(rows);
         }
     }
