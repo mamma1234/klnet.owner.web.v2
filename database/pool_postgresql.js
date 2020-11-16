@@ -14,8 +14,8 @@ const pool = new Pool({
     connectionString:  "postgresql://owner:!ghkwn_20@172.19.1.22:5432/owner",
     max: 20,
     min: 4,
-    idleTimeoutMillis: 10000,
-    connectionTimeoutMillis: 10000
+    idleTimeoutMillis: 30000
+    // connectionTimeoutMillis: 10000
 });
 
 

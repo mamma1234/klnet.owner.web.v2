@@ -753,6 +753,58 @@ router.get('/linkedin/callback', isLoggedPass, (req, res, next) => {
     })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 });
 
+
+router.get('/klnet/callback', isLoggedPass, (req, res, next) => {
+    
+    console.log("(auth.js) /klnet/callback:req.isAuthenticated():", req.isAuthenticated());
+    
+    passport.authenticate('klnet', (authError, user, info) => {
+        console.log("authError:",authError,",user:",user,",info:",info);
+        if(authError) {
+            console.error("authError", authError);
+            return next(authError);
+        }
+        if(info) {
+        	res.cookie("socialKey",{user:user});
+        	return res.redirect('/authpage?auth=register');
+        	//return res.redirect('http://localhost:3000/landing');
+
+        }
+        
+    
+        if(!user){
+            console.log("!user", user);
+            // req.flash('loginError', info.message);
+            return res.redirect('http://localhost:3000/login');
+
+            // res.status(200).json(info);
+            // return;
+        }
+        return req.login(user, (loginError) => {
+            console.log("user", user);
+            if(loginError) {
+                console.error("loginError", loginError);
+                return next(loginError);
+            }
+            //res.json({user:user});
+            //console.log("http://localhost:3000 redirect");
+            //console.log("|||:",res);
+            
+            const token = jwt.sign({userno:user.userno}, process.env.JWT_SECRET_KEY, { expiresIn : '1h', });
+            //토큰 저장
+            res.cookie("socialKey",{user:user, token:token});
+            pgSql.setSocialLoginInfo(user.provider,user.userid, token, user.accessToken);
+            //var ipaddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            var ipaddr = requestIp.getClientIp(req);
+            pgSql.setLoginHistory(user.userno,'I',req.useragent, ipaddr);
+            return res.redirect('/authpage?auth=social');
+            //return res.redirect('http://localhost:3000');
+            // res.status(200).json(user);
+            // return;
+        });
+    })(req, res, next)  //미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
+});
+
 // router.post('/login', isNotLoggedIn, (req, res, next) => {
 //     passport.authenticate('local', (authError, user, info) => {
 //         if(authError) {

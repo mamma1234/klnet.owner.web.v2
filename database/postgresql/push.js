@@ -14,7 +14,7 @@ const createPushUser = (request, response) => {
     let sql = "";
     //유저생성
     sql += " INSERT INTO own_push_user "
-    sql += " (user_no, device_id, fcm_token, device_os, push_use_yn, push_send_time_fm, push_send_time_to, device_model, last_recieve_date, insert_date) "
+    sql += " (user_no, device_id, fcm_token, device_os, push_use_yn, push_send_time_fm, push_send_time_to, device_model, last_receive_date, insert_date) "
     sql += " VALUES( '" + sUser.userno + "', "
     sql += " '"+ request.body.deviceId +"', "
     sql += " '"+ request.body.fcm_token +"', "
@@ -271,6 +271,43 @@ const pushServiceGubun = (request, response) => {
 
     });        
 }
+const pushUserSearch = (request, response) => {
+    let sql ="";
+        sql += " select b.user_no, b.user_name "
+        sql += " from own_push_user a, own_comp_user b "
+        sql += " where a.user_no = b.user_no and a.push_use_yn = 'Y' "
+        sql += " group by b.user_no "
+
+
+    console.log(sql);
+    pgsqlPool.connect(function(err,conn,release) {
+        if(err){
+            console.log("err" + err);
+            release();
+            response.status(400).send(err);
+        } else {
+            conn.query(sql, function(err,result){
+                // done();
+                if(err){
+                    console.log(err);
+                    release();
+                    response.status(400).send(err);
+                } else {
+                    if(result != null) {
+                    	release();
+                        response.status(200).json(result.rows);
+                    } else {
+                    	release();
+                        response.status(200).json([]);
+                    }
+                }
+            });
+
+        }
+
+    });      
+}
+
 
 
 module.exports = {
@@ -280,4 +317,5 @@ module.exports = {
     updatePushToken,
     pushUserSettingUpdate,
     pushServiceGubun,
+    pushUserSearch,
 }

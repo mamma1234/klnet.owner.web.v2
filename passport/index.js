@@ -4,6 +4,7 @@ const kakao = require('./kakaoStrategy');
 const naver = require('./naverStrategy');
 const facebook = require('./facebookStrategy');
 const google = require('./googleStrategy');
+const klnet = require('./klnetStrategy');
 // const { User } = require('../models');
  
 module.exports = (passport) => {
@@ -26,6 +27,7 @@ module.exports = (passport) => {
     naver(passport);
     facebook(passport);
     google(passport);
+    klnet(passport);
 
     
 };

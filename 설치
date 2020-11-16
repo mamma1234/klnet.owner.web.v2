@@ -68,6 +68,19 @@ sudo systemctl start firewalld.service
 systemctl status firewalld.service
 */
 
+/*
+docker network create server
+
+--network server
+
+- 외부 확인 
+-- 서버 확인
+http://172.25.1.89:5001/auth/getTestQuerySample
+-- 웹->서버 확인
+http://172.25.1.89/auth/getTestQuerySample
+-- url 확인
+https://www.plismplus.com/auth/getTestQuerySample
+*/
 
 
 

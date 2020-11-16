@@ -37,7 +37,7 @@ const getTestSimple = (request, response) => {
 }
 
 const getTestQuerySample = (request, response) => {
-    const sql = "SELECT * FROM customer order by id asc limit 100";
+    const sql = "SELECT * FROM OWN_COMP_USER limit 100";
     pgsqlPool.connect(function(err,conn,done) {
         if(err){
             console.log("err" + err);
@@ -49,9 +49,12 @@ const getTestQuerySample = (request, response) => {
             if(err){
                 console.log(err);
                 response.status(400).send(err);
+            }else{
+              // response.status(200).send(result.rows);
+              // console.log(result.rows);
+              console.log("query log:", err, result);
+              response.status(200).json(result.rows);
             }
-            // response.status(200).send(result.rows);
-            response.status(200).json(result.rows);
         });
 
         // conn.release();
