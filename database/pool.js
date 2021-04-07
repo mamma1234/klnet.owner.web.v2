@@ -1,8 +1,8 @@
 // const pgsqldb = require('pg');
 
-require('./pool_oracle.js');
-const oracledb = require('oracledb');
-const pgsqlPool = require('./pool_postgresql.js');
+// require('./pool_oracle.js');
+// const oracledb = require('oracledb');
+// const pgsqlPool = require('./pool_postgresql.js');
 
 //oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
@@ -16,5 +16,8 @@ const pgsqlPool = require('./pool_postgresql.js');
 
 //oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 
-module.exports.oraclePool = oracledb
-module.exports.pgsqlPool = pgsqlPool
+// module.exports.oraclePool = oracledb
+// module.exports.pgsqlPool = pgsqlPool
+
+module.exports.oraclePool = null
+module.exports.pgsqlPool = null

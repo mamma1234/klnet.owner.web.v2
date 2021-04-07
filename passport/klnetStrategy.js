@@ -13,7 +13,7 @@ module.exports = (passport) => {
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {
         try {
-            console.log('(klnetStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
+            console.log('(klnetStrategy.js) profile:', profile, ', accessToken:', accessToken, ', refreshToken:', refreshToken);
             
             process.nextTick(function () {
                 // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
@@ -60,7 +60,7 @@ module.exports = (passport) => {
              
             	const sql = {
             	        text: "SELECT * FROM OWN_COMP_USER  \n"+
-            	              " where trim(naver_id) = trim($1) \n"+
+            	              " where trim(user_no) = trim($1) \n"+
             	        	  "  limit 1 ",
             	        values: [profile._json.id],
             	        //rowMode: 'array',
@@ -76,30 +76,31 @@ module.exports = (passport) => {
             	            if(err){
             	                console.log(err);
             	            }
-            	           // console.log(">>>",result);
+            	        //    console.log(">>>",result);
             	           // console.log("ROW CNT:",result.rowCount);
             	            if(result.rowCount > 0) {
-            	            	sUser.userno = result.rows[0].user_no;
-      	                        sUser.provider = profile.provider;
-								sUser.email = profile._json.email; //mamma1234@naver.com
-								sUser.userid = '';  //30625476
-								sUser.username = profile._json.nickname;
-								sUser.displayName = profile.displayName; 
-								//sUser.accessToken = accessToken;
-								//sUser.refreshToken = refreshToken;
-        	                   // req.session.sUser = sUser;
+            	            	
+                                sUser.provider = 'klnet';
+                                sUser.userid = '';  //1261001956
+                                sUser.userno = result.rows[0].user_no;
+                                sUser.username = result.rows[0].user_name;
+                                sUser.displayName = result.rows[0].user_name;
+                                sUser.accessToken = accessToken;
+                                sUser.refreshToken = refreshToken;
+                                sUser.email = result.rows[0].user_email; //mamma1234@naver.com;
+
         	                    done(null, sUser); 
             	            } else {
-            	            	 sUser.provider = profile.provider;
-            	                 sUser.email = profile._json.email; //mamma1234@naver.com
-            	                 sUser.userid = profile._json.id;  //30625476
-            	                 sUser.username = profile._json.nickname;
-            	                 sUser.displayName = profile.displayName; 
-            	                 sUser.accessToken = accessToken;
-            	                 sUser.refreshToken = refreshToken;
-            	            	console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>가입되지 않은 회원입니다.');
-            	            	//req.session.sUser = sUser;
-            	                done(null, sUser, { message: '가입되지 않은 회원입니다.' });
+                                sUser.provider = 'klnet';
+                                sUser.userid = '';  //1261001956
+                                sUser.userno = '';
+                                sUser.username = '';
+                                sUser.displayName = '';
+                                sUser.accessToken = '';
+                                sUser.refreshToken = '';
+                                sUser.email = ''; //mamma1234@naver.com;
+                                console.log('가입되지 않은 회원입니다.');
+                                done(null, sUser, { message: '가입되지 않은 회원입니다.' });
             	            }
             	            
             	            

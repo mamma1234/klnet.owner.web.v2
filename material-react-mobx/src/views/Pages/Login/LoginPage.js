@@ -36,7 +36,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
 import { observer, inject } from 'mobx-react'; // 6.x
 //import { useCookies  } from 'react-cookie';
-import {userService} from 'views/Pages/Login/Service/Service.js';
+import {auth} from 'views/Pages/Login/Service/Service.js';
 
 dotenv.config();
 
@@ -83,40 +83,26 @@ const useStyles = makeStyles(styles);
 		setAlertOpen(true);
 	}
 
-  const submit = () => {
+  /*const submit = () => {
 
 	   if(email !== undefined && password !== undefined) {
-		   axios.post("/auth/login", {id : email, pw : password,})
+		   axios.post("http://localhost:5002/oauth/login", {id : email, pw : password,})
 		    .then(res => {
 		        if (res.data.message) {
 		        	alert(res.data.message);
-		        } else {
-		        	
+		        } else {	
 		        	if(res.data.token) {
-		        	/*	if(localStorage.getItem('plismplus')){
-		        			localStorage.removeItem('plismplus');
-		        		}
-		        		localStorage.setItem('plismplus',res.data.token);*/
-		        		userService.SetItem(res.data);
-                //userStore.setUser(res.data.user);
-                //userStore.setToken(res.data.token);
-                props.onClose(res.data.user);
-                
-
+		        		auth.setAuthHeader(res.data);
+		        		props.onClose(res.data.user);
 		        	}		        		
-		        	 //props.history.push("/");  //alert(res.data.userid + " 占싸깍옙占쏙옙 占쏙옙占쏙옙");
 		        }
-           // else window.location.href ="/";
-           //console.log("loginpage return value:",res);
-           //props.isAuthenticated(true);
-           
-          // props.goBack();
 		    })
 		    .catch(err => {
-            console.log(err);
-            if (err.response.data.error) {
-              alert(err.response.data.error);
-            }
+            //console.log(err);
+	            if (err.response.data.error) {
+	              alert(err.response.data.error);
+	            }
+	            auth.logOut();
 		    })
 	   } else {
 		   if(email === undefined) {
@@ -127,7 +113,7 @@ const useStyles = makeStyles(styles);
 		   
 	   }
     
-  };
+  };*/
   const clean = () => {
 	  //userStore.setUser('');
 	  //userStore.setToken('');
@@ -136,37 +122,50 @@ const useStyles = makeStyles(styles);
   const socialReady=() => {
 	  alertMessage('서비스 준비중입니다.','info');
   }
-  
+/*  
   const onKeyDownEnter = (event) => {
 	  if(event.key === 'Enter') {
 		  submit();
 		  return;
 	  }
-  }
+  }*/
   
   return (
     <div>
-              <CardHeader style={{textAlignLast:'center'}}>
-                <h4 className={classes.cardTitle} style={{fontWeight:'400'}}><font color="black" size="5">로그인</font></h4>
-              </CardHeader>
-              <CardBody style={{paddingLeft:'10px',paddingRight:'10px'}}>
+			<form action="http://localhost:5002/oauth/authorize" method="post">
+			{/* <form action="/api/prelogin" method="post"> */}
+				<input type='hidden' name='client_id' value='bWFtbWEgTTAwMDAwMA=='></input>
+				<input type='hidden' name='redirect_uri' value='http://localhost:5000/auth/local/callback'></input>
+				{/* <input type='hidden' name='redirect_uri' value='http://localhost:5000/auth/klnet/callback'></input> */}
+				<input type='hidden' name='response_type' value='code'></input>
+				<input type='hidden' name='state' value='12345'></input>
+              	<CardHeader style={{textAlignLast:'center'}}>
+                	<h4 className={classes.cardTitle} style={{fontWeight:'400'}}><font color="black" size="5">로그인</font></h4>
+              	</CardHeader>
+              	<CardBody style={{paddingLeft:'10px',paddingRight:'10px'}}>
               	<div style={{marginBottom:'10px'}}>
-              		<TextField id="email" label={<font size="2">아이디</font>} onChange={event => setEmail(event.target.value)} variant="outlined" size="small" fullWidth />
+              		<TextField id="id" name="id" label={<font size="2">아이디</font>} onChange={event => setEmail(event.target.value)} variant="outlined" size="small" fullWidth autoFocus="true"/>
                 </div>
                 <div style={{marginBottom:'5px'}}>
-                	<TextField id="password" label={<font size="2">비밀번호</font>} onChange={event => setPassword(event.target.value)} onKeyPress={onKeyDownEnter} variant="outlined" size="small" type="password" fullWidth />
+                	<TextField id="pw" name="pw" label={<font size="2">비밀번호</font>} onChange={event => setPassword(event.target.value)} //onKeyPress={onKeyDownEnter} 
+                	variant="outlined" size="small" type="password" fullWidth />
                 </div>
 				<div style={{textAlignLast:'start',marginBottom:'5px'}}>
 	                <Checkbox
 	                	checked={checked}
-	              		onChange={event => setChecked(event.target.checked)}
+						onChange={event => setChecked(event.target.checked)}
 	                	color="default"
 	                	style={{padding:'0px'}}
-	              />로그인 상태 유지
+					/>로그인 상태 유지
 				</div>
+				<CardFooter className={classes.justifyContentCenter} style={{marginLeft:'0px',marginRight:'0px',paddingTop:'5px'}}>
+                      <Button  color="info" size="lg"  type='submit' fullWidth>로그인하기</Button>
+				</CardFooter>				
+{/*
+
                 <CardFooter className={classes.justifyContentCenter} style={{marginLeft:'0px',marginRight:'0px',paddingTop:'5px'}}>
                       <Button  color="info" size="lg"  onClick={submit} fullWidth>로그인하기</Button>
-				</CardFooter>
+				</CardFooter>*/}
                 <CardFooter className={classes.justifyContentCenter} style={{marginLeft:'0px',marginRight:'0px',marginBottom:'10px',paddingTop:'0px'}}>
                 	<MaterialButton  size="small" style={{lineHeight:'initial',fontWeight:'blod',paddingLeft:'20px',paddingRight:'20px'}} >
                 		<Link to="/authpage/register" onClick={clean} style={{color:'black',textDecoration:'underline'}} >회원가입</Link>
@@ -223,6 +222,7 @@ const useStyles = makeStyles(styles);
 		      </Button>
               </GridItem>
               </CardBody>
+			  </form>			  
        	   <Snackbar open={alertOpen} autoHideDuration={2500} onClose={handleAlertClose}>
    		<Alert 
    			onClose={handleAlertClose}

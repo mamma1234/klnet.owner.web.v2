@@ -56,7 +56,8 @@
     "react-table": "6.10.0",
     "react-tagsinput": "3.19.0",
     "react-text-mask": "^5.4.3",
-    "react-toggle-button": "^2.2.0"
+    "react-toggle-button": "^2.2.0",
+    "swiper": "^6.4.15"
   },
   "scripts": {
     "start": "react-app-rewired start",

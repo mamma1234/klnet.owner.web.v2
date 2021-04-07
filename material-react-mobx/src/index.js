@@ -30,6 +30,7 @@ import Landing from "views/Pages/Landing/LandingPage.js";
 //import Policy from "views/Pages/PrivacyPolicy.js";
 import Certify from 'views/Pages/phone_certify.js';
 
+import NewHome from "views/Pages/Design/Home.js";
 
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 
@@ -62,6 +63,7 @@ ReactDOM.render(
         <Route path="/admin" component={AdminLayout} />
         <Route path="/svc" component={ServiceLayout} />
         <Route path="/landing" component={Landing} />
+        <Route path="/newhome" component={NewHome} />
         <Route path="/return_certify" component={Certify} />
         <Route component={NoMatch} />
       </Switch>

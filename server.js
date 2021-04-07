@@ -35,10 +35,10 @@ const useragent = require('express-useragent');
 //console.log("sUser:",sUser);
 
 
-const java = require('java');
+// const java = require('java');
 
-const jarFile = __dirname + path.sep +'lib'+path.sep+'OkCert3-java1.5-2.2.3.jar';
-java.classpath.push(jarFile);
+// const jarFile = __dirname + path.sep +'lib'+path.sep+'OkCert3-java1.5-2.2.3.jar';
+// java.classpath.push(jarFile);
 app.set('trust proxy',true);
 app.use(useragent.express());
 app.set('views', path.join(__dirname, 'views')); //템플리트 엔진을 사용 1
@@ -428,57 +428,57 @@ app.post("/api/elasticImoSearch",async (req,res,next)=> {
 	}
 });
 
-app.post("/auth/sertify", function (req,res) {
+// app.post("/auth/sertify", function (req,res) {
 	
-	const list = java.newInstanceSync("java.util.ArrayList"); 
-	//console.log(list.getClassSync().getNameSync());
-	java.newInstance("java.util.ArrayList", function(err, list) {
-	  list.addSync("item1");
-	  list.addSync("item2");
-	  console.log("Inside the callback");
-	  // console.log(list);
-	  // console.log(list[0]);
-	  console.log(list.toArraySync());
-	  console.log(list.getSync(0));
-	  console.log("Outside the callback");
-	});
-	list.addSync("product1");
-	list.addSync("product2");
-	console.log(list.getSync(0));
+// 	const list = java.newInstanceSync("java.util.ArrayList"); 
+// 	//console.log(list.getClassSync().getNameSync());
+// 	java.newInstance("java.util.ArrayList", function(err, list) {
+// 	  list.addSync("item1");
+// 	  list.addSync("item2");
+// 	  console.log("Inside the callback");
+// 	  // console.log(list);
+// 	  // console.log(list[0]);
+// 	  console.log(list.toArraySync());
+// 	  console.log(list.getSync(0));
+// 	  console.log("Outside the callback");
+// 	});
+// 	list.addSync("product1");
+// 	list.addSync("product2");
+// 	console.log(list.getSync(0));
 		
 	
-	const aTarget = "PROD" //테스트="TEST", 운영="PROD"
-	const aCP_CD = "P21730000000";	// 회원사코드
+// 	const aTarget = "PROD" //테스트="TEST", 운영="PROD"
+// 	const aCP_CD = "P21730000000";	// 회원사코드
 	
-	// const aLicense = "C:\\okcert3_license\\" + aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
-	const aLicense = __dirname + path.sep +"lib"+path.sep+ aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
-	//const aReqStr ='{"RETURN_URL":"http://localhost:3000/authpage/phonepopup", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
+// 	// const aLicense = "C:\\okcert3_license\\" + aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
+// 	const aLicense = __dirname + path.sep +"lib"+path.sep+ aCP_CD + "_IDS_01_" + aTarget + "_AES_license.dat";
+// 	//const aReqStr ='{"RETURN_URL":"http://localhost:3000/authpage/phonepopup", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
 
 
-	/*const okcert = java.newInstanceSync("kcb.module.v3.OkCert"); 
-	const case1 = okcert.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
-	console.log(okcert.getClassSync().getNameSync());
-	console.log('case1=', case1);*/
+// 	/*const okcert = java.newInstanceSync("kcb.module.v3.OkCert"); 
+// 	const case1 = okcert.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+// 	console.log(okcert.getClassSync().getNameSync());
+// 	console.log('case1=', case1);*/
 
 
-	const javaInstance = java.import('kcb.module.v3.OkCert')();
-	let aSvcName = "";
-	let case2;
-	let aReqStr;
+// 	const javaInstance = java.import('kcb.module.v3.OkCert')();
+// 	let aSvcName = "";
+// 	let case2;
+// 	let aReqStr;
 
-	if(req.body.mdltkn) {
-		aSvcName = "IDS_HS_POPUP_RESULT"; //서비스명 (고정값)
-		aReqStr ='{"MDL_TKN":'+req.body.mdltkn+'}';
-		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
-	} else {
-		aSvcName = "IDS_HS_POPUP_START"; //서비스명 (고정값)
-		aReqStr ='{"RETURN_URL":"https://www.plismplus.com/return_certify", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
-		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
-	}
-	//console.log('case2=', case2);
+// 	if(req.body.mdltkn) {
+// 		aSvcName = "IDS_HS_POPUP_RESULT"; //서비스명 (고정값)
+// 		aReqStr ='{"MDL_TKN":'+req.body.mdltkn+'}';
+// 		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+// 	} else {
+// 		aSvcName = "IDS_HS_POPUP_START"; //서비스명 (고정값)
+// 		aReqStr ='{"RETURN_URL":"https://www.plismplus.com/return_certify", "SITE_NAME":"plismplus", "SITE_URL":"www.plismplus.com", "RQST_CAUS_CD":"00"}';
+// 		case2 = javaInstance.callOkCertSync(aTarget, aCP_CD, aSvcName, aLicense, aReqStr);
+// 	}
+// 	//console.log('case2=', case2);
 
-	return res.send(case2);	
-});
+// 	return res.send(case2);	
+// });
 
 //에러 처리 미들웨어: error라는 템플릿 파일을 렌더링한다. 404에러가 발생하면 404처리 미들웨어에서 넣어준 값을 사용한다.
 app.use((req, res, next) => {

@@ -7,15 +7,35 @@ const pgsqlPool = require("../database/pool.js").pgsqlPool
 module.exports = (passport) => {
     // Client Secret	= s94tuPZ0Go  5VoB2_ZRwUMHKM0JPuUM
     passport.use(new NaverStrategy({
-        clientID: '5vSPppBEGLWEwMT8p9kZ', 
-        clientSecret: 's94tuPZ0Go',
+        // clientID: '5vSPppBEGLWEwMT8p9kZ', 
+        // clientSecret: 's94tuPZ0Go',
+        clientID: 'NWmVhSRrehwwXj3hCkaD', 
+        clientSecret: 'yDkiF7mrLb',
         callbackURL: '/auth/naver/callback',
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {
         try {
             console.log('(naverStrategy.js) profile:', profile, 'accessToken:', accessToken, 'refreshToken:', refreshToken);
-            
+
+
+
+          //sUser.accessToken = accessToken;
+          //sUser.refreshToken = refreshToken;
+         // req.session.sUser = sUser;
+
             process.nextTick(function () {
+
+            // const token = jwt.sign({userno:"M000005"}, JWT_SECRET_KEY, { expiresIn : '1h', });
+            sUser.provider = 'local';
+            sUser.userid = "test4";
+            sUser.userno = "M000005";
+            sUser.username = "판토스";
+            sUser.displayName = 'web';
+            sUser.email = "null";
+            sUser.usertype = 'O';
+            // sUser.token = token;
+            done(null, sUser);
+
                 // const exUser = await User.find({ where: { snsId: profile.id, provider: 'kakao' } });
 
                 //const userid = profile.id
@@ -57,7 +77,7 @@ module.exports = (passport) => {
 */                
                 
            	
-             
+             /*
             	const sql = {
             	        text: "SELECT * FROM OWN_COMP_USER  \n"+
             	              " where trim(naver_id) = trim($1) \n"+
@@ -105,7 +125,7 @@ module.exports = (passport) => {
             	            
             	        });
             	    });
-
+*/
                /* if(exUser) {
                     return done(null, exUser);
                 }

@@ -1,0 +1,230 @@
+@import 'custom/vars';
+
+@media (max-width: 1024px) {
+  * {
+    box-sizing: border-box;
+  }
+  .app {
+    position: relative;
+    min-width: 100%;
+    min-height: auto;
+    height: 100%;
+  }
+  .app-header {
+    $header: &;
+    position: absolute;
+    transition: height 0.3s ease-out;
+    &__inner {
+      @include moInner();
+      padding-bottom: 50px;
+      overflow: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    &__logo {
+      top: 20px;
+      left: 20px;
+      &--link {
+        background: url('../img/logo.png') no-repeat 50% 50%;
+        background-size: 100%;
+      }
+    }
+    &__utill {
+      $utill: &;
+      position: static;
+      display: none;
+      height: auto;
+      top: auto;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: 100%;
+      margin: 26px 0 0 0;
+      padding: 0;
+      border: none;
+      ul {
+        justify-content: flex-end;
+      }
+      &--item {
+        & ~ #{$utill}--item {
+        }
+      }
+      &--anchor {
+        &.is-anchor-login {
+        }
+      }
+    }
+    &.is-gnb-open {
+      height: 100%;
+      .btn-hamburger {
+        &__bar {
+          background: #000;
+          &:nth-child(2) {
+            transform: rotate(-45deg) translate(0, 0);
+            margin: 0;
+          }
+          &:nth-child(3) {
+            transform: rotate(45deg) translate(-1px, -2px);
+            margin: 0;
+          }
+          &:last-child {
+            display: none;
+          }
+        }
+      }
+      .gnb {
+        display: block;
+      }
+      #{$header}__utill {
+        display: block;
+      }
+    }
+  }
+  .gnb {
+    $gnb: &;
+    position: static;
+    display: none;
+    height: auto;
+    top: 0;
+    padding: 80px 0 0 0;
+    &__container {
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin: -20px 0 0 0;
+    }
+    &__item {
+      min-width: 50%;
+      max-width: 50%;
+      margin: 40px 0 0 0;
+      & ~ #{$gnb}__item {
+        margin: 40px 0 0 0;
+      }
+      &:hover {
+        #{$gnb}__anchor {
+          color: $black;
+        }
+        #{$gnb}__anchor:after {
+          display: none;
+        }
+      }
+    }
+    &__anchor {
+      padding: 0;
+      font-size: 16px;
+      font-weight: 500;
+      font-style: normal;
+    }
+    &__depth {
+      position: static;
+      top: 0;
+      left: 0;
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      width: auto;
+      height: auto;
+      padding: 0;
+      text-align: left;
+      font-family: 'NotoSansCJK';
+      transform: translate(0, 0);
+      &--item {
+        margin: 10px 0 0 0;
+        &:first-child {
+          margin: 18px 0 0 0;
+        }
+      }
+      &--anchor {
+        color: #8e8e8e;
+      }
+    }
+  }
+  .btn-hamburger {
+    $hamburger: '.btn-hamburger';
+    z-index: 1001;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 68px;
+    height: 80px;
+    padding: 22px;
+    border: none;
+    background: none;
+    outline: none;
+    &__bar {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: $black;
+      transition: all 0.5s ease-out;
+      & ~ #{$hamburger}__bar {
+        margin: 6px 0 0 0;
+      }
+    }
+  }
+  .app-container {
+    position: relative;
+  }
+  .app-footer {
+    padding: 0 0 24px 0;
+    &__inner {
+      @include moInner();
+      padding: 0;
+    }
+    &__top {
+      display: block;
+      padding: 40px 20px 37px 20px;
+    }
+    .company {
+      $company: &;
+      &__name {
+        margin: 0;
+      }
+      &__info {
+        &--item {
+          display:block;
+        }
+      }
+    }
+    .site-map {
+      $sitemap: &;
+      display: none;
+    }
+    &__bottom {
+      display: block;
+      margin: 27px 0 0 0;
+      padding: 25px 0 0 0;
+    }
+    &__copy {
+      &--subject {
+        display: none;
+      }
+      &--text {
+        margin:0 20px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.33px;
+        color: #8e8e8e;
+      }
+    }
+    &__call {
+      position: absolute;
+      top: 217px;
+      left: 20px;
+    }
+  }
+
+  // ui
+  .is-desktop {
+    display: none;
+  }
+  .is-mobile {
+    display: block;
+  }
+  .is-desktop-wrapline {
+    display: none;
+  }
+  .is-mobile-wrapline {
+    display: block !important;
+  }
+}
