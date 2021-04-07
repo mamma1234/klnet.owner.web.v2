@@ -31,7 +31,7 @@
     "nouislider": "14.0.2",
     "perfect-scrollbar": "1.4.0",
     "prop-types": "15.7.2",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "query-string": "^6.12.1",
     "react": "16.9.0",
     "react-app-rewired": "^2.1.5",
